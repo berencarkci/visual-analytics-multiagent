@@ -1,6 +1,6 @@
 # Veri Setleri
 
-Üç açık veri seti, üç farklı analitik alanı temsil eder. Tam sürümler bu klasörde, 500 satırlık örnekler `samples/` altındadır. Benchmark soruları (B1) bu setler üzerine yazılır; Beko bağlamı **soru setinde** kurulacak.
+Üç açık veri seti, üç farklı analitik alanı temsil eder. Tam sürümler bu klasörde, 500 satırlık örnekler `samples/` altındadır. Benchmark soruları (B1) bu setler üzerine yazılır.
 
 | Dosya | Tema | Boyut | Orijinal kaynak |
 |---|---|---|---|
@@ -11,13 +11,11 @@
 
 ## İndirme kaynağı ve lisans notu
 
-Dosyalar geliştirme kolaylığı için GitHub üzerindeki kamuya açık mirror'lardan alındı:
+Dosyalar geliştirme kaggle'dan alındı:
 
-- Superstore: `github.com/leonism/sample-superstore`
-- Mall Customers: `github.com/kennedykwangari/Mall-Customer-Segmentation-Data`
-- Appliances Energy: `github.com/LuisM78/Appliances-energy-prediction-data`
-
-**Yapılacak (rapor öncesi):** Orijinal kaynak sayfalarından lisansları doğrula ve buraya işle — Superstore Tableau'nun serbest örnek verisidir; Appliances Energy UCI'da yayımlanmıştır (UCI setleri genelde CC BY 4.0); Mall Customers Kaggle'da eğitim amaçlı yaygın kullanılan bir settir. Raporda orijinal kaynaklara atıf ver, mirror'lara değil.
+- Superstore: `https://www.kaggle.com/datasets/rohitsahoo/sales-forecasting?resource=download`
+- Mall Customers: `https://www.kaggle.com/datasets/shwetabh123/mall-customers`
+- Appliances Energy: `https://www.kaggle.com/datasets/gaganmaahi224/appliances-energy-consumption`
 
 ## Uygulanan temizlik adımları
 
