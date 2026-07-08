@@ -12,7 +12,7 @@ peft>=0.12
 trl>=0.9
 datasets>=2.19
 accelerate>=0.30
-bitsandbytes>=0.43   # QLoRA (yalnızca GPU ortamında)
+# bitsandbytes>=0.43   # QLoRA (yalnızca GPU ortamında)
 
 # Orkestrasyon
 # smolagents
