@@ -1,0 +1,1367 @@
+{
+  "version": "v1",
+  "n_questions": 60,
+  "questions": [
+    {
+      "id": "retail_001",
+      "dataset": "retail_sales_superstore",
+      "question": "How did monthly total sales change over time?",
+      "type": "trend",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "line"
+        ],
+        "x_axis": "order_date",
+        "y_axis": "sales",
+        "transform": {
+          "groupby": "month(order_date)",
+          "agg": "sum",
+          "filter": null,
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "retail_002",
+      "dataset": "retail_sales_superstore",
+      "question": "Show the quarterly total profit trend across the full time range.",
+      "type": "trend",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "line"
+        ],
+        "x_axis": "order_date",
+        "y_axis": "profit",
+        "transform": {
+          "groupby": "quarter(order_date)",
+          "agg": "sum",
+          "filter": null,
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "retail_003",
+      "dataset": "retail_sales_superstore",
+      "question": "How have furniture sales developed?",
+      "type": "trend",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "line"
+        ],
+        "x_axis": "order_date",
+        "y_axis": "sales",
+        "transform": {
+          "groupby": "month(order_date)",
+          "agg": "sum",
+          "filter": "category == 'Furniture'",
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "retail_004",
+      "dataset": "retail_sales_superstore",
+      "question": "Plot the monthly number of orders over time.",
+      "type": "trend",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "line"
+        ],
+        "x_axis": "order_date",
+        "y_axis": "order_id",
+        "transform": {
+          "groupby": "month(order_date)",
+          "agg": "count_distinct",
+          "filter": null,
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "retail_005",
+      "dataset": "retail_sales_superstore",
+      "question": "Compare total sales across product categories.",
+      "type": "comparison",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "category",
+        "y_axis": "sales",
+        "transform": {
+          "groupby": "category",
+          "agg": "sum",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "retail_006",
+      "dataset": "retail_sales_superstore",
+      "question": "Which sub-category generates the highest total profit?",
+      "type": "comparison",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "sub_category",
+        "y_axis": "profit",
+        "transform": {
+          "groupby": "sub_category",
+          "agg": "sum",
+          "filter": null,
+          "sort": "value_desc",
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "retail_007",
+      "dataset": "retail_sales_superstore",
+      "question": "Compare the average discount across customer segments.",
+      "type": "comparison",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "segment",
+        "y_axis": "discount",
+        "transform": {
+          "groupby": "segment",
+          "agg": "mean",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "retail_008",
+      "dataset": "retail_sales_superstore",
+      "question": "How do the regions perform in terms of profit?",
+      "type": "comparison",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "region",
+        "y_axis": "profit",
+        "transform": {
+          "groupby": "region",
+          "agg": "sum",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "retail_009",
+      "dataset": "retail_sales_superstore",
+      "question": "Compare total quantity sold by ship mode.",
+      "type": "comparison",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "ship_mode",
+        "y_axis": "quantity",
+        "transform": {
+          "groupby": "ship_mode",
+          "agg": "sum",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "retail_010",
+      "dataset": "retail_sales_superstore",
+      "question": "What share of total sales does each region contribute?",
+      "type": "composition",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "pie",
+          "bar"
+        ],
+        "x_axis": "region",
+        "y_axis": "sales",
+        "transform": {
+          "groupby": "region",
+          "agg": "sum",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "retail_011",
+      "dataset": "retail_sales_superstore",
+      "question": "Show the composition of total profit by customer segment.",
+      "type": "composition",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "segment",
+        "y_axis": "profit",
+        "transform": {
+          "groupby": "segment",
+          "agg": "sum",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "retail_012",
+      "dataset": "retail_sales_superstore",
+      "question": "What does the category mix look like in terms of order counts?",
+      "type": "composition",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "pie",
+          "bar"
+        ],
+        "x_axis": "category",
+        "y_axis": "order_id",
+        "transform": {
+          "groupby": "category",
+          "agg": "count_distinct",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "retail_013",
+      "dataset": "retail_sales_superstore",
+      "question": "Is there a relationship between discount and profit at the order-line level?",
+      "type": "relationship",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "box",
+          "scatter"
+        ],
+        "x_axis": "discount",
+        "y_axis": "profit",
+        "transform": {
+          "groupby": "discount",
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "retail_014",
+      "dataset": "retail_sales_superstore",
+      "question": "How does quantity relate to sales amount across order lines?",
+      "type": "relationship",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "scatter"
+        ],
+        "x_axis": "quantity",
+        "y_axis": "sales",
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "retail_015",
+      "dataset": "retail_sales_superstore",
+      "question": "Do bigger discounts hurt profitability?",
+      "type": "relationship",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "box",
+          "scatter"
+        ],
+        "x_axis": "discount",
+        "y_axis": "profit",
+        "transform": {
+          "groupby": "discount",
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "retail_016",
+      "dataset": "retail_sales_superstore",
+      "question": "What is the distribution of order-line profit values?",
+      "type": "distribution",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "histogram",
+          "box"
+        ],
+        "x_axis": "profit",
+        "y_axis": null,
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "retail_017",
+      "dataset": "retail_sales_superstore",
+      "question": "How are sales amounts spread out?",
+      "type": "distribution",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "histogram",
+          "box"
+        ],
+        "x_axis": "sales",
+        "y_axis": null,
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "retail_018",
+      "dataset": "retail_sales_superstore",
+      "question": "Compare monthly total sales of the Technology category in 2018.",
+      "type": "filter_aggregation",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "line",
+          "bar"
+        ],
+        "x_axis": "order_date",
+        "y_axis": "sales",
+        "transform": {
+          "groupby": "month(order_date)",
+          "agg": "sum",
+          "filter": "category == 'Technology' and year(order_date) == 2018",
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "retail_019",
+      "dataset": "retail_sales_superstore",
+      "question": "Show total profit by sub-category for the West region only.",
+      "type": "filter_aggregation",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "sub_category",
+        "y_axis": "profit",
+        "transform": {
+          "groupby": "sub_category",
+          "agg": "sum",
+          "filter": "region == 'West'",
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "retail_020",
+      "dataset": "retail_sales_superstore",
+      "question": "Which are the top 5 states by total sales?",
+      "type": "filter_aggregation",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "state",
+        "y_axis": "sales",
+        "transform": {
+          "groupby": "state",
+          "agg": "sum",
+          "filter": null,
+          "sort": "value_desc",
+          "limit": 5
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "retail_021",
+      "dataset": "retail_sales_superstore",
+      "question": "How did sales for corporate customers evolve recently?",
+      "type": "filter_aggregation",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "line"
+        ],
+        "x_axis": "order_date",
+        "y_axis": "sales",
+        "transform": {
+          "groupby": "month(order_date)",
+          "agg": "sum",
+          "filter": "segment == 'Corporate' and period == last_12_months",
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "retail_022",
+      "dataset": "retail_sales_superstore",
+      "question": "Identify months with unusually low total sales.",
+      "type": "anomaly",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "line",
+          "box"
+        ],
+        "x_axis": "order_date",
+        "y_axis": "sales",
+        "transform": {
+          "groupby": "month(order_date)",
+          "agg": "sum",
+          "filter": null,
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "mall_001",
+      "dataset": "customer_analytics_mall",
+      "question": "Compare the average spending score between genders.",
+      "type": "comparison",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "gender",
+        "y_axis": "spending_score",
+        "transform": {
+          "groupby": "gender",
+          "agg": "mean",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "mall_002",
+      "dataset": "customer_analytics_mall",
+      "question": "Compare the average annual income across genders.",
+      "type": "comparison",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "gender",
+        "y_axis": "annual_income_k_usd",
+        "transform": {
+          "groupby": "gender",
+          "agg": "mean",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "mall_003",
+      "dataset": "customer_analytics_mall",
+      "question": "Do younger and older customers differ in how much they spend?",
+      "type": "comparison",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "age",
+        "y_axis": "spending_score",
+        "transform": {
+          "groupby": "bins(age)",
+          "agg": "mean",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "mall_004",
+      "dataset": "customer_analytics_mall",
+      "question": "What is the share of customers by gender?",
+      "type": "composition",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "pie",
+          "bar"
+        ],
+        "x_axis": "gender",
+        "y_axis": "customer_id",
+        "transform": {
+          "groupby": "gender",
+          "agg": "count_distinct",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "mall_005",
+      "dataset": "customer_analytics_mall",
+      "question": "What does the customer base look like in terms of age groups?",
+      "type": "composition",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "age",
+        "y_axis": "customer_id",
+        "transform": {
+          "groupby": "bins(age)",
+          "agg": "count_distinct",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "mall_006",
+      "dataset": "customer_analytics_mall",
+      "question": "Is annual income associated with spending score?",
+      "type": "relationship",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "scatter"
+        ],
+        "x_axis": "annual_income_k_usd",
+        "y_axis": "spending_score",
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "mall_007",
+      "dataset": "customer_analytics_mall",
+      "question": "How does age relate to annual income?",
+      "type": "relationship",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "scatter"
+        ],
+        "x_axis": "age",
+        "y_axis": "annual_income_k_usd",
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "mall_008",
+      "dataset": "customer_analytics_mall",
+      "question": "Is customer age associated with spending score?",
+      "type": "relationship",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "scatter"
+        ],
+        "x_axis": "age",
+        "y_axis": "spending_score",
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "mall_009",
+      "dataset": "customer_analytics_mall",
+      "question": "Do wealthier customers actually spend more here?",
+      "type": "relationship",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "scatter"
+        ],
+        "x_axis": "annual_income_k_usd",
+        "y_axis": "spending_score",
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "mall_010",
+      "dataset": "customer_analytics_mall",
+      "question": "Show the relationship between age and spending score for female customers only.",
+      "type": "relationship",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "scatter"
+        ],
+        "x_axis": "age",
+        "y_axis": "spending_score",
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": "gender == 'Female'",
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "mall_011",
+      "dataset": "customer_analytics_mall",
+      "question": "What is the distribution of customer ages?",
+      "type": "distribution",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "histogram",
+          "box"
+        ],
+        "x_axis": "age",
+        "y_axis": null,
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "mall_012",
+      "dataset": "customer_analytics_mall",
+      "question": "Show the distribution of annual income.",
+      "type": "distribution",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "histogram",
+          "box"
+        ],
+        "x_axis": "annual_income_k_usd",
+        "y_axis": null,
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "mall_013",
+      "dataset": "customer_analytics_mall",
+      "question": "What is the distribution of spending scores?",
+      "type": "distribution",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "histogram",
+          "box"
+        ],
+        "x_axis": "spending_score",
+        "y_axis": null,
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "mall_014",
+      "dataset": "customer_analytics_mall",
+      "question": "Are spending scores clustered or spread out?",
+      "type": "distribution",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "histogram",
+          "box"
+        ],
+        "x_axis": "spending_score",
+        "y_axis": null,
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "mall_015",
+      "dataset": "customer_analytics_mall",
+      "question": "What is the average spending score of customers older than 50, by gender?",
+      "type": "filter_aggregation",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "gender",
+        "y_axis": "spending_score",
+        "transform": {
+          "groupby": "gender",
+          "agg": "mean",
+          "filter": "age > 50",
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "mall_016",
+      "dataset": "customer_analytics_mall",
+      "question": "Compare the number of high-income customers (annual income above 80k) by gender.",
+      "type": "filter_aggregation",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "gender",
+        "y_axis": "customer_id",
+        "transform": {
+          "groupby": "gender",
+          "agg": "count_distinct",
+          "filter": "annual_income_k_usd > 80",
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "energy_001",
+      "dataset": "energy_consumption_hourly",
+      "question": "How did daily total appliance energy consumption change over the recorded period?",
+      "type": "trend",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "line"
+        ],
+        "x_axis": "date",
+        "y_axis": "appliances",
+        "transform": {
+          "groupby": "day(date)",
+          "agg": "sum",
+          "filter": null,
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "energy_002",
+      "dataset": "energy_consumption_hourly",
+      "question": "Show the weekly average outdoor temperature trend.",
+      "type": "trend",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "line"
+        ],
+        "x_axis": "date",
+        "y_axis": "t_out",
+        "transform": {
+          "groupby": "week(date)",
+          "agg": "mean",
+          "filter": null,
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "energy_003",
+      "dataset": "energy_consumption_hourly",
+      "question": "How does energy use develop over a typical day?",
+      "type": "trend",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "line",
+          "bar"
+        ],
+        "x_axis": "date",
+        "y_axis": "appliances",
+        "transform": {
+          "groupby": "hour_of_day(date)",
+          "agg": "mean",
+          "filter": null,
+          "sort": "hour_asc",
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "energy_004",
+      "dataset": "energy_consumption_hourly",
+      "question": "Plot the monthly average appliance consumption.",
+      "type": "trend",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "line"
+        ],
+        "x_axis": "date",
+        "y_axis": "appliances",
+        "transform": {
+          "groupby": "month(date)",
+          "agg": "mean",
+          "filter": null,
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "energy_005",
+      "dataset": "energy_consumption_hourly",
+      "question": "Is the house using less lighting energy as the months go on?",
+      "type": "trend",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "line"
+        ],
+        "x_axis": "date",
+        "y_axis": "lights",
+        "transform": {
+          "groupby": "month(date)",
+          "agg": "mean",
+          "filter": null,
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "energy_006",
+      "dataset": "energy_consumption_hourly",
+      "question": "Compare the average appliance consumption across days of the week.",
+      "type": "comparison",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "date",
+        "y_axis": "appliances",
+        "transform": {
+          "groupby": "day_of_week(date)",
+          "agg": "mean",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "energy_007",
+      "dataset": "energy_consumption_hourly",
+      "question": "Are weekends different from weekdays in energy use?",
+      "type": "comparison",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "date",
+        "y_axis": "appliances",
+        "transform": {
+          "groupby": "weekend_flag(date)",
+          "agg": "mean",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "energy_008",
+      "dataset": "energy_consumption_hourly",
+      "question": "Is outdoor temperature associated with appliance energy consumption?",
+      "type": "relationship",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "scatter"
+        ],
+        "x_axis": "t_out",
+        "y_axis": "appliances",
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "energy_009",
+      "dataset": "energy_consumption_hourly",
+      "question": "How does outdoor humidity relate to appliance consumption?",
+      "type": "relationship",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "scatter"
+        ],
+        "x_axis": "rh_out",
+        "y_axis": "appliances",
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "energy_010",
+      "dataset": "energy_consumption_hourly",
+      "question": "Show the relationship between windspeed and appliance energy consumption.",
+      "type": "relationship",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "scatter"
+        ],
+        "x_axis": "windspeed",
+        "y_axis": "appliances",
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "energy_011",
+      "dataset": "energy_consumption_hourly",
+      "question": "What is the distribution of hourly appliance energy consumption?",
+      "type": "distribution",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "histogram",
+          "box"
+        ],
+        "x_axis": "appliances",
+        "y_axis": null,
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "energy_012",
+      "dataset": "energy_consumption_hourly",
+      "question": "Show the distribution of outdoor temperature readings.",
+      "type": "distribution",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "histogram",
+          "box"
+        ],
+        "x_axis": "t_out",
+        "y_axis": null,
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "energy_013",
+      "dataset": "energy_consumption_hourly",
+      "question": "How variable is the lighting energy use?",
+      "type": "distribution",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "histogram",
+          "box"
+        ],
+        "x_axis": "lights",
+        "y_axis": null,
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "energy_014",
+      "dataset": "energy_consumption_hourly",
+      "question": "What is the average appliance consumption by hour of day during January?",
+      "type": "filter_aggregation",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "line",
+          "bar"
+        ],
+        "x_axis": "date",
+        "y_axis": "appliances",
+        "transform": {
+          "groupby": "hour_of_day(date)",
+          "agg": "mean",
+          "filter": "month(date) == 1",
+          "sort": "hour_asc",
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "energy_015",
+      "dataset": "energy_consumption_hourly",
+      "question": "Compare the average appliance consumption on days when outdoor temperature was below 5 degrees versus other days.",
+      "type": "filter_aggregation",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "bar"
+        ],
+        "x_axis": "t_out",
+        "y_axis": "appliances",
+        "transform": {
+          "groupby": "threshold_flag(t_out < 5)",
+          "agg": "mean",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "energy_016",
+      "dataset": "energy_consumption_hourly",
+      "question": "How much energy do appliances use at night?",
+      "type": "filter_aggregation",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "line",
+          "bar"
+        ],
+        "x_axis": "date",
+        "y_axis": "appliances",
+        "transform": {
+          "groupby": "hour_of_day(date)",
+          "agg": "mean",
+          "filter": "hour(date) in night_hours(0-6)",
+          "sort": null,
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "energy_017",
+      "dataset": "energy_consumption_hourly",
+      "question": "Identify days with unusually high total appliance consumption.",
+      "type": "anomaly",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "line",
+          "box"
+        ],
+        "x_axis": "date",
+        "y_axis": "appliances",
+        "transform": {
+          "groupby": "day(date)",
+          "agg": "sum",
+          "filter": null,
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "energy_018",
+      "dataset": "energy_consumption_hourly",
+      "question": "Find hours where appliance consumption spiked well above typical levels.",
+      "type": "anomaly",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "line",
+          "box"
+        ],
+        "x_axis": "date",
+        "y_axis": "appliances",
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "energy_019",
+      "dataset": "energy_consumption_hourly",
+      "question": "Were there any strange periods in the energy data?",
+      "type": "anomaly",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "line",
+          "box"
+        ],
+        "x_axis": "date",
+        "y_axis": "appliances",
+        "transform": {
+          "groupby": "day(date)",
+          "agg": "sum",
+          "filter": null,
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "energy_020",
+      "dataset": "energy_consumption_hourly",
+      "question": "Detect unusually low outdoor temperature readings across the period.",
+      "type": "anomaly",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "line",
+          "box"
+        ],
+        "x_axis": "date",
+        "y_axis": "t_out",
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "test"
+    },
+    {
+      "id": "energy_021",
+      "dataset": "energy_consumption_hourly",
+      "question": "Identify days where lighting energy consumption was abnormally high.",
+      "type": "anomaly",
+      "specificity": "guided",
+      "ground_truth": {
+        "chart_family": [
+          "line",
+          "box"
+        ],
+        "x_axis": "date",
+        "y_axis": "lights",
+        "transform": {
+          "groupby": "day(date)",
+          "agg": "sum",
+          "filter": null,
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "dev"
+    },
+    {
+      "id": "energy_022",
+      "dataset": "energy_consumption_hourly",
+      "question": "Does anything stand out in how the pressure readings behave over time?",
+      "type": "anomaly",
+      "specificity": "vague",
+      "ground_truth": {
+        "chart_family": [
+          "line",
+          "box"
+        ],
+        "x_axis": "date",
+        "y_axis": "press_mm_hg",
+        "transform": {
+          "groupby": null,
+          "agg": null,
+          "filter": null,
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "split": "dev"
+    }
+  ],
+  "conventions": {
+    "x_axis": "Always the SOURCE column. When transform.groupby is set, the plotted axis is the groupby result (e.g. x_axis='date' + groupby='day_of_week(date)' plots weekdays).",
+    "chart_family": "Ordered list of acceptable chart types; first element is the preferred answer.",
+    "derived_expressions": "Function-like notation: month(col), quarter(col), week(col), day(col), hour_of_day(col), day_of_week(col), weekend_flag(col), bins(col), threshold_flag(expr).",
+    "agg_values": [
+      "sum",
+      "mean",
+      "count",
+      "count_distinct"
+    ]
+  },
+  "split_config": {
+    "test_ratio": 0.3,
+    "seed": 42,
+    "method": "stratified(type x dataset)"
+  }
+}
