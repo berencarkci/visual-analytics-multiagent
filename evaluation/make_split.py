@@ -1,8 +1,7 @@
 """Stratified dev/test split for the benchmark.
 
-Assigns each benchmark question to 'dev' or 'test' with a seeded,
-stratified split (by question type x dataset), then rewrites benchmark.json.
-Run once, commit the result, and do not touch the test split afterwards.
+Assigns each benchmark question to 'dev' or 'test' with a seeded, stratified split (by question type x dataset), then rewrites benchmark.json.
+Run once, commit the result, and dont touch the test split afterwards.
 """
 
 from __future__ import annotations
@@ -38,7 +37,7 @@ def assign_splits(questions: list[dict], test_ratio: float, seed: int) -> list[d
 
 # Report helper:
 def split_report(questions: list[dict]) -> str:
-    """Small text report: totals and per-type test counts, for a quick sanity check"""
+    """Small text report: totals and per type test counts, for a quick sanity check"""
     n_test = sum(1 for q in questions if q["split"] == "test")
     n_dev = len(questions) - n_test
 
@@ -62,7 +61,7 @@ if __name__ == "__main__":
     if already:
         raise SystemExit(
             f"{len(already)} questions already have a split. "
-            "The test split is frozen; refusing to overwrite. "
+            "The test split is frozen, refusing to overwrite. "
             "Delete the split fields manually only if you know what you are doing."
         )
 
@@ -73,5 +72,5 @@ if __name__ == "__main__":
         json.dumps(bench, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     print(split_report(bench["questions"]))
-    print("benchmark.json updated — commit this file to freeze the split.")
+    print("benchmark.json updated - commit this file to freeze the split.")
 #########################
