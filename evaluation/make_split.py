@@ -68,9 +68,7 @@ if __name__ == "__main__":
     bench["questions"] = assign_splits(bench["questions"], TEST_RATIO, SEED)
     bench["split_config"] = {"test_ratio": TEST_RATIO, "seed": SEED, "method": "stratified(type x dataset)"}
 
-    BENCHMARK_PATH.write_text(
-        json.dumps(bench, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    BENCHMARK_PATH.write_text(json.dumps(bench, ensure_ascii=False, indent=2), encoding="utf-8")
     print(split_report(bench["questions"]))
     print("benchmark.json updated - commit this file to freeze the split.")
 #########################
