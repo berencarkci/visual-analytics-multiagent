@@ -1,6 +1,6 @@
 """Data ingestion and profiling for the Visual Analytics Assistant.
 
-Loads CSV/Excel files, extracts a typed schema, profiles the data, and produces a compact schema summary suitable for LLM prompts.
+Loads CSV, Excel and JSON files, extracts a typed schema, profiles the data, and produces a compact schema summary suitable for LLM prompts.
 """
 
 from __future__ import annotations
@@ -12,11 +12,28 @@ from pathlib import Path
 import pandas as pd
 
 # Loading the file:
-SUPPORTED_EXTENSIONS = {".csv", ".xlsx", ".xls"}
+SUPPORTED_EXTENSIONS = {".csv", ".xlsx", ".xls", ".json", ".jsonl"}
 
-
+def _load_json_table(path: Path) -> pd.DataFrame:
+    """
+    Load a JSON or JSONL file into a flat DataFrame
+    """
+    if path.suffix.lower() == ".jsonl":
+        return pd.read_json(path, lines=True)
+    try:
+        df = pd.read_json(path)
+        # read_json leaves nested objects as dicts inside cells -> needs normalize
+        if any(df[c].map(lambda v: isinstance(v, dict)).any() for c in df.columns):
+            raise ValueError("nested records")
+        return df
+    except ValueError:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            data = [data]
+        return pd.json_normalize(data)
+    
 def load_table(path: str | Path, sheet_name: int | str = 0) -> pd.DataFrame:
-    """Load CSV & Excel files into DataFrame with basic normalizations"""
+    """Load CSV, Excel & JSON files into DataFrame with basic normalizations"""
     path = Path(path)
     if path.suffix.lower() not in SUPPORTED_EXTENSIONS:
         raise ValueError(
@@ -24,6 +41,8 @@ def load_table(path: str | Path, sheet_name: int | str = 0) -> pd.DataFrame:
         )
     if path.suffix.lower() == ".csv":
         df = pd.read_csv(path, encoding_errors="replace")
+    elif path.suffix.lower() in (".json", ".jsonl"):
+        df = _load_json_table(path)
     else:
         df = pd.read_excel(path, sheet_name=sheet_name)
 
@@ -161,7 +180,7 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) < 2:
-        print("Usage: python data_ingestion.py <file.csv|file.xlsx>")
+        print("Usage: python data_ingestion.py <file.csv|file.xlsx|file.json>")
         raise SystemExit(1)
 
     frame = load_table(sys.argv[1])
