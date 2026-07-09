@@ -13,6 +13,8 @@ checkpoints/
 *.gguf
 wandb/
 mlruns/
+docs/project_journal.md
+docs/training.md
 
 # Ortam / IDE
 .env
