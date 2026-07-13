@@ -15,22 +15,55 @@ import pandas as pd
 SUPPORTED_EXTENSIONS = {".csv", ".xlsx", ".xls", ".json", ".jsonl"}
 
 def _load_json_table(path: Path) -> pd.DataFrame:
-    """
-    Load a JSON or JSONL file into a flat DataFrame
-    """
+    """Load a JSON or JSONL file into a flat DataFrame"""
     if path.suffix.lower() == ".jsonl":
-        return pd.read_json(path, lines=True)
-    try:
-        df = pd.read_json(path)
-        # read_json leaves nested objects as dicts inside cells -> needs normalize
-        if any(df[c].map(lambda v: isinstance(v, dict)).any() for c in df.columns):
-            raise ValueError("nested records")
-        return df
-    except ValueError:
-        data = json.loads(path.read_text(encoding="utf-8"))
-        if isinstance(data, dict):
-            data = [data]
-        return pd.json_normalize(data)
+        df = pd.read_json(path, lines=True)
+    else:
+        try:
+            # Try Pandas default reader
+            df = pd.read_json(path)
+            
+            # If there is a nested dict or list we normalize it
+            has_nested = any(
+                df[c].map(lambda v: isinstance(v, (dict, list))).any() 
+                for c in df.columns
+            )
+            if has_nested:
+                raise ValueError("nested records")
+                
+        except (ValueError, TypeError, AttributeError):
+            # If failed parse manually
+            data = json.loads(path.read_text(encoding="utf-8"))
+            
+            if isinstance(data, dict):
+                if len(data) == 1:
+                    # If there is only one key, take what's inside
+                    only_value = next(iter(data.values()))
+                    if isinstance(only_value, list):
+                        data = only_value
+                else:
+                    # If there is multi key find the lists with dict inside
+                    list_candidates = [
+                        v for k, v in data.items() 
+                        if isinstance(v, list) and len(v) > 0 and isinstance(v[0], dict)
+                    ]
+                    # If we only find 1 then that's the data
+                    if len(list_candidates) == 1:
+                        data = list_candidates[0]
+
+            if isinstance(data, dict):
+                data = [data]
+                
+            df = pd.json_normalize(data)
+ 
+    # Stringify it so it's hashable
+    for col in df.columns:
+        if df[col].map(lambda v: isinstance(v, (list, dict))).any():
+            df[col] = df[col].map(
+                lambda v: json.dumps(v, ensure_ascii=False) if isinstance(v, (list, dict)) else v
+            )
+            
+    return df
     
 def load_table(path: str | Path, sheet_name: int | str = 0) -> pd.DataFrame:
     """Load CSV, Excel & JSON files into DataFrame with basic normalizations"""
@@ -61,12 +94,12 @@ class ColumnProfile:
     unique_count: int
     sample_values: list = field(default_factory=list)
 
-    # numeric-only
+    # numeric only
     min: float | None = None
     max: float | None = None
     mean: float | None = None
 
-    # datetime-only
+    # datetime only
     date_min: str | None = None
     date_max: str | None = None
 
@@ -89,7 +122,7 @@ _DATE_HINTS = ("date", "time", "tarih", "zaman", "month", "year", "ay", "yil", "
 
 
 def _semantic_dtype(series: pd.Series, col_name: str) -> tuple[str, pd.Series]:
-    """Infer a semantic type; return (dtype, possibly-converted series)"""
+    """Infer a semantic type, return (dtype, possibly converted series)"""
     if pd.api.types.is_bool_dtype(series):
         return "boolean", series
     if pd.api.types.is_datetime64_any_dtype(series):
