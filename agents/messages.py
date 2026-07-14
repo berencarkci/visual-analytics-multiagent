@@ -35,10 +35,13 @@ class WorkflowPlan(BaseModel):
 
 
 class TransformPlan(BaseModel):
-    """Data Analyst output: planned data preparation (skeleton)"""
+    """Data Analyst output: the plan and its execution result"""
     transform: Transform
     target_columns: list[str]
     notes: list[str] = Field(default_factory=list)
+    plan_source: Literal["llm", "llm_retry"] = "llm"
+    result_rows: int | None = None # rows after transform execution
+    summary_stats: dict = Field(default_factory=dict) # per insight_focus, feeds Insight Agent
 
 
 class ChartDecision(BaseModel):
@@ -53,6 +56,14 @@ class InsightResult(BaseModel):
     supporting_stats: dict = Field(default_factory=dict)
 
 
+class StepError(BaseModel):
+    """Structured failure any agent can return to the Supervisor"""
+    agent: str
+    error_type: Literal["missing_column", "type_mismatch", "empty_result", "invalid_llm_output", "execution_error"]
+    detail: str
+    recoverable: bool
+
+
 class EvalVerdict(BaseModel):
     """Evaluation Agent output (skeleton)"""
     passed: bool
@@ -61,7 +72,7 @@ class EvalVerdict(BaseModel):
 
 
 # Envelope:
-Payload = Union[IntentResult, WorkflowPlan, TransformPlan, ChartDecision, InsightResult, EvalVerdict]
+Payload = Union[IntentResult, WorkflowPlan, TransformPlan, ChartDecision, InsightResult, EvalVerdict, StepError]
 
 
 class AgentMessage(BaseModel):
