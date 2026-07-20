@@ -99,6 +99,7 @@ def ask(df: pd.DataFrame | None, schema_text: str, question: str, mode: str):
             msg = f"The model could not produce a valid recommendation (after retry). Error: {result.error}"
             return "", msg, "", result.raw_first or "", "", trace_data
         rec = result.recommendation
+        eval_note = ""
         retry_note = result.used_retry
     else:
         result = run_workflow(CLIENT, df, profile_table(df, "dataset"), question.strip())
@@ -107,6 +108,11 @@ def ask(df: pd.DataFrame | None, schema_text: str, question: str, mode: str):
             msg = f"The workflow stopped at {result.error.agent}: {result.error.error_type} — {result.error.detail}"
             return "", msg, "", "", "", trace_data
         rec = result.recommendation
+        eval_note = ""
+        if result.verdict and not result.verdict.passed:
+            eval_note = "\n\n*Evaluation flagged: " + "; ".join(result.verdict.issues) + "*"
+        elif result.verdict and result.verdict.warnings:
+            eval_note = "\n\n*Note: " + "; ".join(result.verdict.warnings) + "*"
 
     try:
         chart_html, notes = _render_html(df, rec)
@@ -115,6 +121,7 @@ def ask(df: pd.DataFrame | None, schema_text: str, question: str, mode: str):
         return "", msg, rec.model_dump_json(indent=2), "", "", trace_data
 
     answer_md = f"**Insight:** {rec.insight}\n\n**Why this chart:** {rec.reason}"
+    answer_md += eval_note
     if retry_note:
         answer_md += "\n\n*Note: the first model output was invalid, this answer came from the retry.*"
     notes_md = ("**Render notes:** " + "; ".join(notes)) if notes else ""
