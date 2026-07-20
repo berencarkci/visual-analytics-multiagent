@@ -1,4 +1,4 @@
-"""Structured inter-agent message schemas for the multi agent workflow.
+"""Structured inter agent message schemas for the multi agent workflow.
 
 Every hop between agents is a typed pydantic payload wrapped in an AgentMessage envelope. 
 No free form text travels between agents, each step's output is a validated contract. 
@@ -51,9 +51,10 @@ class ChartDecision(BaseModel):
 
 
 class InsightResult(BaseModel):
-    """Insight Agent output: statement + the computed stats backing it (skeleton)"""
+    """Insight Agent output: statement + the computed stats backing it"""
     insight: str
     supporting_stats: dict = Field(default_factory=dict)
+    source: Literal["llm", "template_fallback"] = "llm" # fallback count is itself a metric
 
 
 class StepError(BaseModel):

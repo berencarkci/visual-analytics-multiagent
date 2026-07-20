@@ -1,6 +1,6 @@
 """Data Analyst agent: column mapping, safe transform execution, real stats.
 
-Plans the data preparation with a small LLM call (validated against the actual schema, one retry with error feedback), executes it through the shared transform engine, then computes REAL summary statistics according to the workflow's insight_focus. 
+Plans the data preparation with a small LLM call (validated against the actual schema, one retry with error feedback), executes it through the shared transform engine, then computes real summary statistics according to the workflow's insight_focus. 
 Those numbers are what the Insight Agent will ground its statements in the structural fix for the prompt only baseline's unsupported insight weakness.
 """
 
@@ -36,13 +36,13 @@ Rules:
 - Use ONLY column names that exist in the schema.
 - Do NOT choose a chart type. Do NOT write insights. Data preparation only.
 - Relationship questions between two raw numeric columns need no groupby/agg.
-- Distribution questions on a numeric column need no groupby/agg."""
+- Distribution questions on a numeric column need no groupby/agg.
+- Share/composition questions about ONE specific category (e.g. "share of X"): do NOT filter to that category. Group by the category column over the WHOLE data; the share is computed from all groups."""
 
 
 def _build_plan_messages(schema_text: str, question: str, intent: str) -> list[dict]:
     user = f"{schema_text}\n\nQuestion intent: {intent}\nQuestion: {question}"
-    return [{"role": "system", "content": _PLAN_SYSTEM},
-            {"role": "user", "content": user}]
+    return [{"role": "system", "content": _PLAN_SYSTEM}, {"role": "user", "content": user}]
 #################################
 
 
@@ -104,12 +104,19 @@ def _compute_stats(focus: str, raw_df: pd.DataFrame, transformed: pd.DataFrame, 
             if len(cols) == 2:
                 sub = raw_df[cols].apply(pd.to_numeric, errors="coerce").dropna()
                 r = float(sub[cols[0]].corr(sub[cols[1]]))
-                strength = ("strong" if abs(r) >= 0.6 else "moderate" if abs(r) >= 0.3 else "weak")
-                s |= {"pearson_r": round(r, 3), "n": int(len(sub)), "direction": "positive" if r > 0 else "negative", "strength": strength, "columns": cols}
+                strength = ("strong" if abs(r) >= 0.6 else
+                            "moderate" if abs(r) >= 0.3 else 
+                            "weak")
+                s |= {"pearson_r": round(r, 3), "n": int(len(sub)),
+                      "direction": "positive" if r > 0 else "negative",
+                      "strength": strength, "columns": cols}
         elif focus == "distribution_stats":
             col = y_col if (y_col and y_col in transformed.columns) else x_col
             ser = pd.to_numeric(transformed[col], errors="coerce").dropna()
-            s |= {"column": col, "mean": round(float(ser.mean()), 3), "median": round(float(ser.median()), 3), "std": round(float(ser.std()), 3), "min": round(float(ser.min()), 3), "max": round(float(ser.max()), 3), "q1": round(float(ser.quantile(0.25)), 3), "q3": round(float(ser.quantile(0.75)), 3)}
+            s |= {"column": col, "mean": round(float(ser.mean()), 3),
+                  "median": round(float(ser.median()), 3), "std": round(float(ser.std()), 3),
+                  "min": round(float(ser.min()), 3), "max": round(float(ser.max()), 3),
+                  "q1": round(float(ser.quantile(0.25)), 3), "q3": round(float(ser.quantile(0.75)), 3)}
         elif focus == "outlier_detection" and y_col and y_col in transformed.columns:
             ser = transformed.set_index(x_col)[y_col].dropna()
             q1, q3 = float(ser.quantile(0.25)), float(ser.quantile(0.75))
@@ -117,7 +124,9 @@ def _compute_stats(focus: str, raw_df: pd.DataFrame, transformed: pd.DataFrame, 
             hi, lo = q3 + 1.5 * iqr, q1 - 1.5 * iqr
             outliers = ser[(ser > hi) | (ser < lo)]
             top = outliers.abs().sort_values(ascending=False).head(3)
-            s |= {"iqr_low": round(lo, 3), "iqr_high": round(hi, 3), "n_outliers": int(len(outliers)), "top_outliers": {str(k): round(float(ser[k]), 3) for k in top.index}}
+            s |= {"iqr_low": round(lo, 3), "iqr_high": round(hi, 3),
+                  "n_outliers": int(len(outliers)),
+                  "top_outliers": {str(k): round(float(ser[k]), 3) for k in top.index}}
     except Exception as e:  # stats must never kill the pipeline
         s["stats_error"] = str(e)
     return s

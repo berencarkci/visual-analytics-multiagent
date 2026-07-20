@@ -1,7 +1,7 @@
 """Hugging Face Space app for the Visual Analytics Assistant.
 
-Gradio interface: the Ask Your Data tab runs the single agent baseline end to end (dataset -> schema -> question -> validated recommendation -> chart). 
-The other tabs are placeholders that later blocks will fill.
+Gradio interface: the Ask Your Data tab runs either the single agent baseline or the multi agent workflow (mode selector) end to end. 
+The Agent Trace tab shows the step by step execution of the most recent multi agent question.
 
 APP_MODE environment variable selects the model client:
     live (default) -> HFClient, real local model
@@ -24,6 +24,7 @@ from baseline import recommend
 from chart_render import render_chart
 from data_ingestion import load_table, profile_table, schema_summary
 from model_client import HFClient, MockClient
+from orchestrator import run_workflow, trace_view
 
 # Sample datasets shipped with the repo:
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -51,6 +52,8 @@ def make_client():
 
 
 CLIENT = make_client()
+
+_NO_TRACE = {"info": "Single agent mode does not produce a trace, switch to Multi agent."}
 #################################
 
 
@@ -71,36 +74,52 @@ def load_selected(sample_name: str, uploaded_file) -> tuple[pd.DataFrame | None,
         return None, f"Could not load the file: {e}", None
 
 
-def ask(df: pd.DataFrame | None, schema_text: str, question: str):
-    """Question -> model -> validated recommendation -> chart + texts"""
+def _render_html(df: pd.DataFrame, rec) -> str:
+    """Figure -> self contained iframe (scripts run inside an iframe, no CDN dependency)"""
+    fig, notes = render_chart(df, rec)
+    fig_h = int(fig.layout.height or 430)
+    raw = fig.to_html(full_html=True, include_plotlyjs=True, default_height=fig_h)
+    html = ('<iframe srcdoc="' + html_lib.escape(raw)
+            + f'" style="width:100%;height:{fig_h + 35}px;border:none;"></iframe>')
+    return html, notes
+
+
+def ask(df: pd.DataFrame | None, schema_text: str, question: str, mode: str):
+    """Question -> selected pipeline -> chart + texts + trace"""
     if df is None:
-        return "", "Please load a dataset first.", "", "", ""
+        return "", "Please load a dataset first.", "", "", "", None
     if not question.strip():
-        return "", "Please type a question.", "", "", ""
+        return "", "Please type a question.", "", "", "", None
 
-    result = recommend(CLIENT, schema_text, question.strip())
+    retry_note = False
+    if mode == "Single-agent":
+        result = recommend(CLIENT, schema_text, question.strip())
+        trace_data = _NO_TRACE
+        if not result.valid:
+            msg = f"The model could not produce a valid recommendation (after retry). Error: {result.error}"
+            return "", msg, "", result.raw_first or "", "", trace_data
+        rec = result.recommendation
+        retry_note = result.used_retry
+    else:
+        result = run_workflow(CLIENT, df, profile_table(df, "dataset"), question.strip())
+        trace_data = trace_view(result.trace)
+        if not result.valid:
+            msg = f"The workflow stopped at {result.error.agent}: {result.error.error_type} — {result.error.detail}"
+            return "", msg, "", "", "", trace_data
+        rec = result.recommendation
 
-    if not result.valid:
-        msg = f"The model could not produce a valid recommendation (after retry). Error: {result.error}"
-        return "", msg, "", result.raw_first or "", ""
-
-    rec = result.recommendation
     try:
-        fig, notes = render_chart(df, rec)
-        # gr.HTML injects via innerHTML, which never executes <script> tags, so we ship the chart as a self contained iframe (scripts DO run inside an iframe, and inlining plotly.js removes any CDN/network dependency)
-        fig_h = int(fig.layout.height or 430)
-        raw = fig.to_html(full_html=True, include_plotlyjs=True, default_height=fig_h)
-        chart_html = ('<iframe srcdoc="' + html_lib.escape(raw) + f'" style="width:100%;height:{fig_h + 35}px;border:none;"></iframe>')
+        chart_html, notes = _render_html(df, rec)
     except Exception as e:
-        msg = (f"The recommendation was schema valid but could not be rendered on this dataset: {e}")
-        return "", msg, rec.model_dump_json(indent=2), "", ""
+        msg = f"The recommendation was schema valid but could not be rendered on this dataset: {e}"
+        return "", msg, rec.model_dump_json(indent=2), "", "", trace_data
 
     answer_md = f"**Insight:** {rec.insight}\n\n**Why this chart:** {rec.reason}"
-    if result.used_retry:
+    if retry_note:
         answer_md += "\n\n*Note: the first model output was invalid, this answer came from the retry.*"
     notes_md = ("**Render notes:** " + "; ".join(notes)) if notes else ""
 
-    return chart_html, answer_md, rec.model_dump_json(indent=2), "", notes_md
+    return chart_html, answer_md, rec.model_dump_json(indent=2), "", notes_md, trace_data
 #################################
 
 
@@ -108,7 +127,8 @@ def ask(df: pd.DataFrame | None, schema_text: str, question: str):
 with gr.Blocks(title="Visual Analytics Assistant") as demo:
     gr.Markdown(
         "# Multi Agent Visual Analytics Assistant with Preference Optimization\n"
-        "Upload tabular data, ask a question in natural language, get an appropriate chart and a grounded insight. *Single agent baseline version (Multi agent workflow, model comparison and benchmark results are coming in later stages).*"
+        "Upload tabular data, ask a question in natural language, get an appropriate chart and a grounded insight. "
+        "*Single-agent = one model call. Multi-agent = supervisor, data analyst, visualization and insight agents with real computed statistics.*"
     )
 
     with gr.Tab("Ask Your Data"):
@@ -129,7 +149,9 @@ with gr.Blocks(title="Visual Analytics Assistant") as demo:
                     label="Your question",
                     placeholder="e.g. Compare total sales across product categories.",
                 )
+                mode_radio = gr.Radio(["Single agent", "Multi agent"], value="Single agent", label="Mode")
                 ask_btn = gr.Button("Ask", variant="primary")
+
                 gr.Markdown("**Recommended chart**")
                 chart_out = gr.HTML()
                 answer_out = gr.Markdown()
@@ -140,12 +162,16 @@ with gr.Blocks(title="Visual Analytics Assistant") as demo:
                     raw_out = gr.Textbox(lines=6, interactive=False)
 
         df_state = gr.State(value=None)
+        trace_state = gr.State(value=None)
 
         load_btn.click(load_selected, [sample_dd, upload], [df_state, schema_box, preview])
-        ask_btn.click(ask, [df_state, schema_box, question_box], [chart_out, answer_out, json_out, raw_out, notes_out])
+        ask_btn.click(ask, [df_state, schema_box, question_box, mode_radio], [chart_out, answer_out, json_out, raw_out, notes_out, trace_state])
 
     with gr.Tab("Agent Trace"):
-        gr.Markdown("*Coming in later:* step by step execution summary of the multi agent workflow, plan, selected columns, aggregation, chart decision, evaluation result.")
+        gr.Markdown("Step by step execution of the most recent multi agent question: plan, selected columns, aggregation, chart decision, guardrails, insight source. No raw chain of thought, only structured payloads.")
+        trace_out = gr.JSON(label="Workflow trace")
+        refresh_btn = gr.Button("Show latest trace")
+        refresh_btn.click(lambda t: t or {"info": "Run a multi-agent question first."}, [trace_state], [trace_out])
 
     with gr.Tab("Model Comparison"):
         gr.Markdown("*Coming in later:* prompt only vs SFT vs DPO outputs side by side or the same unseen question, plus single agent vs multi agent comparison.")
@@ -160,7 +186,8 @@ with gr.Blocks(title="Visual Analytics Assistant") as demo:
         gr.Markdown(
             "**Datasets:** three public tabular datasets (retail sales, customer analytics, energy consumption), provenance and cleaning steps are documented in the repository.\n\n"
             "**Model:** Qwen2.5-3B-Instruct with a frozen few shot prompt (prompt only baseline). SFT and DPO variants will be added and compared on a frozen held out benchmark split.\n\n"
-            "**Note on latency:** this Space runs the model on free CPU hardware, responses can take several minutes. Local runs on GPU/MPS answer in seconds."
+            "**Modes:** Single agent = one model call produces the full answer. Multi agent = supervisor, data analyst, visualization and insight agents; insights are grounded in computed statistics and verified mechanically.\n\n"
+            "**Note on latency:** multi-agent mode makes 4 model calls per question, so it is slower than single-agent — the trade-off it buys is verified, statistics-backed insights."
         )
 
 if __name__ == "__main__":

@@ -1,0 +1,1351 @@
+[
+  {
+    "id": "retail_001",
+    "question": "How did monthly total sales change over time?",
+    "dataset": "retail_sales_superstore",
+    "ok": true,
+    "recommendation": {
+      "chart_type": "line",
+      "x_axis": "order_date",
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "month(order_date)",
+        "agg": "sum",
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "reason": "A line chart is best for showing trends over a continuous interval or time period.",
+      "insight": "Monthly total sales increased from an average of 14,236.895 in 2015 to 83,829.319 in 2018, showing a growth rate of 488.8%."
+    },
+    "insight": "Monthly total sales increased from an average of 14,236.895 in 2015 to 83,829.319 in 2018, showing a growth rate of 488.8%.",
+    "trace": [
+      {
+        "agent": "supervisor",
+        "step": 1,
+        "timestamp": "2026-07-17T10:08:49.113104+00:00",
+        "payload_type": "IntentResult",
+        "payload": {
+          "intent": "trend",
+          "source": "llm",
+          "matched_keywords": []
+        }
+      },
+      {
+        "agent": "supervisor",
+        "step": 2,
+        "timestamp": "2026-07-17T10:08:49.115882+00:00",
+        "payload_type": "WorkflowPlan",
+        "payload": {
+          "intent": "trend",
+          "steps": [
+            "data_analysis",
+            "visualization",
+            "insight",
+            "evaluation"
+          ],
+          "insight_focus": "trend_stats"
+        }
+      },
+      {
+        "agent": "data_analyst",
+        "step": 3,
+        "timestamp": "2026-07-17T10:08:57.762025+00:00",
+        "payload_type": "TransformPlan",
+        "payload": {
+          "transform": {
+            "groupby": "month(order_date)",
+            "agg": "sum",
+            "filter": null,
+            "sort": null,
+            "limit": null
+          },
+          "target_columns": [
+            "order_date",
+            "sales"
+          ],
+          "notes": [],
+          "plan_source": "llm",
+          "result_rows": 48,
+          "summary_stats": {
+            "focus": "trend_stats",
+            "n_rows_input": 9994,
+            "n_rows_result": 48,
+            "first_x": "2015-01-01 00:00:00",
+            "first_value": 14236.895,
+            "last_x": "2018-12-01 00:00:00",
+            "last_value": 83829.319,
+            "change_pct": 488.8,
+            "peak_x": "2018-11-01 00:00:00",
+            "peak_value": 118447.825,
+            "trough_x": "2015-02-01 00:00:00",
+            "trough_value": 4519.892
+          }
+        }
+      },
+      {
+        "agent": "visualization",
+        "step": 4,
+        "timestamp": "2026-07-17T10:09:01.003924+00:00",
+        "payload_type": "ChartDecision",
+        "payload": {
+          "recommendation": {
+            "chart_type": "line",
+            "x_axis": "order_date",
+            "y_axis": "sales",
+            "transform": {
+              "groupby": "month(order_date)",
+              "agg": "sum",
+              "filter": null,
+              "sort": null,
+              "limit": null
+            },
+            "reason": "A line chart is best for showing trends over a continuous interval or time period.",
+            "insight": ""
+          },
+          "guardrails_applied": []
+        }
+      },
+      {
+        "agent": "insight",
+        "step": 5,
+        "timestamp": "2026-07-17T10:09:09.085898+00:00",
+        "payload_type": "InsightResult",
+        "payload": {
+          "insight": "Monthly total sales increased from an average of 14,236.895 in 2015 to 83,829.319 in 2018, showing a growth rate of 488.8%.",
+          "supporting_stats": {
+            "focus": "trend_stats",
+            "n_rows_input": 9994,
+            "n_rows_result": 48,
+            "first_x": "2015-01-01 00:00:00",
+            "first_value": 14236.895,
+            "last_x": "2018-12-01 00:00:00",
+            "last_value": 83829.319,
+            "change_pct": 488.8,
+            "peak_x": "2018-11-01 00:00:00",
+            "peak_value": 118447.825,
+            "trough_x": "2015-02-01 00:00:00",
+            "trough_value": 4519.892
+          },
+          "source": "llm"
+        }
+      }
+    ],
+    "error": null
+  },
+  {
+    "id": "retail_005",
+    "question": "Compare total sales across product categories.",
+    "dataset": "retail_sales_superstore",
+    "ok": true,
+    "recommendation": {
+      "chart_type": "bar",
+      "x_axis": "category",
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "category",
+        "agg": "sum",
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "reason": "Bar chart is suitable for comparing quantities across different categories.",
+      "insight": "Technology has the highest total sales at 836154.033 compared to Office Supplies with 719047.032."
+    },
+    "insight": "Technology has the highest total sales at 836154.033 compared to Office Supplies with 719047.032.",
+    "trace": [
+      {
+        "agent": "supervisor",
+        "step": 1,
+        "timestamp": "2026-07-17T10:09:10.329000+00:00",
+        "payload_type": "IntentResult",
+        "payload": {
+          "intent": "comparison",
+          "source": "llm",
+          "matched_keywords": []
+        }
+      },
+      {
+        "agent": "supervisor",
+        "step": 2,
+        "timestamp": "2026-07-17T10:09:10.329345+00:00",
+        "payload_type": "WorkflowPlan",
+        "payload": {
+          "intent": "comparison",
+          "steps": [
+            "data_analysis",
+            "visualization",
+            "insight",
+            "evaluation"
+          ],
+          "insight_focus": "group_stats"
+        }
+      },
+      {
+        "agent": "data_analyst",
+        "step": 3,
+        "timestamp": "2026-07-17T10:09:18.639793+00:00",
+        "payload_type": "TransformPlan",
+        "payload": {
+          "transform": {
+            "groupby": "category",
+            "agg": "sum",
+            "filter": null,
+            "sort": null,
+            "limit": null
+          },
+          "target_columns": [
+            "category",
+            "sales"
+          ],
+          "notes": [],
+          "plan_source": "llm",
+          "result_rows": 3,
+          "summary_stats": {
+            "focus": "group_stats",
+            "n_rows_input": 9994,
+            "n_rows_result": 3,
+            "groups": {
+              "Furniture": 741999.795,
+              "Office Supplies": 719047.032,
+              "Technology": 836154.033
+            },
+            "top_group": "Technology",
+            "top_value": 836154.033,
+            "bottom_group": "Office Supplies",
+            "bottom_value": 719047.032,
+            "total": 2297200.86
+          }
+        }
+      },
+      {
+        "agent": "visualization",
+        "step": 4,
+        "timestamp": "2026-07-17T10:09:21.377004+00:00",
+        "payload_type": "ChartDecision",
+        "payload": {
+          "recommendation": {
+            "chart_type": "bar",
+            "x_axis": "category",
+            "y_axis": "sales",
+            "transform": {
+              "groupby": "category",
+              "agg": "sum",
+              "filter": null,
+              "sort": null,
+              "limit": null
+            },
+            "reason": "Bar chart is suitable for comparing quantities across different categories.",
+            "insight": ""
+          },
+          "guardrails_applied": []
+        }
+      },
+      {
+        "agent": "insight",
+        "step": 5,
+        "timestamp": "2026-07-17T10:09:26.536308+00:00",
+        "payload_type": "InsightResult",
+        "payload": {
+          "insight": "Technology has the highest total sales at 836154.033 compared to Office Supplies with 719047.032.",
+          "supporting_stats": {
+            "focus": "group_stats",
+            "n_rows_input": 9994,
+            "n_rows_result": 3,
+            "groups": {
+              "Furniture": 741999.795,
+              "Office Supplies": 719047.032,
+              "Technology": 836154.033
+            },
+            "top_group": "Technology",
+            "top_value": 836154.033,
+            "bottom_group": "Office Supplies",
+            "bottom_value": 719047.032,
+            "total": 2297200.86
+          },
+          "source": "llm"
+        }
+      }
+    ],
+    "error": null
+  },
+  {
+    "id": "retail_010",
+    "question": "What share of total sales does each region contribute?",
+    "dataset": "retail_sales_superstore",
+    "ok": true,
+    "recommendation": {
+      "chart_type": "pie",
+      "x_axis": "region",
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "region",
+        "agg": "sum",
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "reason": "Pie chart is suitable for showing the composition of parts that make up a whole, which aligns with the question asking about the share of total sales contributed by each region.",
+      "insight": "The West contributes 31.6% of total sales, while the South contributes 17.1%."
+    },
+    "insight": "The West contributes 31.6% of total sales, while the South contributes 17.1%.",
+    "trace": [
+      {
+        "agent": "supervisor",
+        "step": 1,
+        "timestamp": "2026-07-17T10:09:27.724824+00:00",
+        "payload_type": "IntentResult",
+        "payload": {
+          "intent": "composition",
+          "source": "llm",
+          "matched_keywords": []
+        }
+      },
+      {
+        "agent": "supervisor",
+        "step": 2,
+        "timestamp": "2026-07-17T10:09:27.725208+00:00",
+        "payload_type": "WorkflowPlan",
+        "payload": {
+          "intent": "composition",
+          "steps": [
+            "data_analysis",
+            "visualization",
+            "insight",
+            "evaluation"
+          ],
+          "insight_focus": "share_stats"
+        }
+      },
+      {
+        "agent": "data_analyst",
+        "step": 3,
+        "timestamp": "2026-07-17T10:09:36.107303+00:00",
+        "payload_type": "TransformPlan",
+        "payload": {
+          "transform": {
+            "groupby": "region",
+            "agg": "sum",
+            "filter": null,
+            "sort": null,
+            "limit": null
+          },
+          "target_columns": [
+            "region",
+            "sales"
+          ],
+          "notes": [],
+          "plan_source": "llm",
+          "result_rows": 4,
+          "summary_stats": {
+            "focus": "share_stats",
+            "n_rows_input": 9994,
+            "n_rows_result": 4,
+            "groups": {
+              "Central": 501239.891,
+              "East": 678781.24,
+              "South": 391721.905,
+              "West": 725457.824
+            },
+            "top_group": "West",
+            "top_value": 725457.824,
+            "bottom_group": "South",
+            "bottom_value": 391721.905,
+            "total": 2297200.86,
+            "shares_pct": {
+              "Central": 21.8,
+              "East": 29.5,
+              "South": 17.1,
+              "West": 31.6
+            }
+          }
+        }
+      },
+      {
+        "agent": "visualization",
+        "step": 4,
+        "timestamp": "2026-07-17T10:09:41.099060+00:00",
+        "payload_type": "ChartDecision",
+        "payload": {
+          "recommendation": {
+            "chart_type": "pie",
+            "x_axis": "region",
+            "y_axis": "sales",
+            "transform": {
+              "groupby": "region",
+              "agg": "sum",
+              "filter": null,
+              "sort": null,
+              "limit": null
+            },
+            "reason": "Pie chart is suitable for showing the composition of parts that make up a whole, which aligns with the question asking about the share of total sales contributed by each region.",
+            "insight": ""
+          },
+          "guardrails_applied": []
+        }
+      },
+      {
+        "agent": "insight",
+        "step": 5,
+        "timestamp": "2026-07-17T10:09:45.554689+00:00",
+        "payload_type": "InsightResult",
+        "payload": {
+          "insight": "The West contributes 31.6% of total sales, while the South contributes 17.1%.",
+          "supporting_stats": {
+            "focus": "share_stats",
+            "n_rows_input": 9994,
+            "n_rows_result": 4,
+            "groups": {
+              "Central": 501239.891,
+              "East": 678781.24,
+              "South": 391721.905,
+              "West": 725457.824
+            },
+            "top_group": "West",
+            "top_value": 725457.824,
+            "bottom_group": "South",
+            "bottom_value": 391721.905,
+            "total": 2297200.86,
+            "shares_pct": {
+              "Central": 21.8,
+              "East": 29.5,
+              "South": 17.1,
+              "West": 31.6
+            }
+          },
+          "source": "llm"
+        }
+      }
+    ],
+    "error": null
+  },
+  {
+    "id": "retail_013",
+    "question": "Is there a relationship between discount and profit at the order-line level?",
+    "dataset": "retail_sales_superstore",
+    "ok": true,
+    "recommendation": {
+      "chart_type": "scatter",
+      "x_axis": "order_id",
+      "y_axis": "discount",
+      "transform": {
+        "groupby": null,
+        "agg": null,
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "reason": "Scatter plot is suitable for visualizing the relationship between two continuous variables, such as discount and profit, at the order-line level.",
+      "insight": "There is a weak negative correlation between discount and profit at the order-line level."
+    },
+    "insight": "There is a weak negative correlation between discount and profit at the order-line level.",
+    "trace": [
+      {
+        "agent": "supervisor",
+        "step": 1,
+        "timestamp": "2026-07-17T10:09:46.819895+00:00",
+        "payload_type": "IntentResult",
+        "payload": {
+          "intent": "relationship",
+          "source": "llm",
+          "matched_keywords": []
+        }
+      },
+      {
+        "agent": "supervisor",
+        "step": 2,
+        "timestamp": "2026-07-17T10:09:46.820238+00:00",
+        "payload_type": "WorkflowPlan",
+        "payload": {
+          "intent": "relationship",
+          "steps": [
+            "data_analysis",
+            "visualization",
+            "insight",
+            "evaluation"
+          ],
+          "insight_focus": "correlation"
+        }
+      },
+      {
+        "agent": "data_analyst",
+        "step": 3,
+        "timestamp": "2026-07-17T10:09:55.599594+00:00",
+        "payload_type": "TransformPlan",
+        "payload": {
+          "transform": {
+            "groupby": null,
+            "agg": null,
+            "filter": null,
+            "sort": null,
+            "limit": null
+          },
+          "target_columns": [
+            "order_id",
+            "discount",
+            "profit"
+          ],
+          "notes": [],
+          "plan_source": "llm",
+          "result_rows": 9994,
+          "summary_stats": {
+            "focus": "correlation",
+            "n_rows_input": 9994,
+            "n_rows_result": 9994,
+            "pearson_r": NaN,
+            "n": 0,
+            "direction": "negative",
+            "strength": "weak",
+            "columns": [
+              "order_id",
+              "discount"
+            ]
+          }
+        }
+      },
+      {
+        "agent": "visualization",
+        "step": 4,
+        "timestamp": "2026-07-17T10:10:00.066496+00:00",
+        "payload_type": "ChartDecision",
+        "payload": {
+          "recommendation": {
+            "chart_type": "scatter",
+            "x_axis": "order_id",
+            "y_axis": "discount",
+            "transform": {
+              "groupby": null,
+              "agg": null,
+              "filter": null,
+              "sort": null,
+              "limit": null
+            },
+            "reason": "Scatter plot is suitable for visualizing the relationship between two continuous variables, such as discount and profit, at the order-line level.",
+            "insight": ""
+          },
+          "guardrails_applied": []
+        }
+      },
+      {
+        "agent": "insight",
+        "step": 5,
+        "timestamp": "2026-07-17T10:10:02.941738+00:00",
+        "payload_type": "InsightResult",
+        "payload": {
+          "insight": "There is a weak negative correlation between discount and profit at the order-line level.",
+          "supporting_stats": {
+            "focus": "correlation",
+            "n_rows_input": 9994,
+            "n_rows_result": 9994,
+            "pearson_r": NaN,
+            "n": 0,
+            "direction": "negative",
+            "strength": "weak",
+            "columns": [
+              "order_id",
+              "discount"
+            ]
+          },
+          "source": "llm"
+        }
+      }
+    ],
+    "error": null
+  },
+  {
+    "id": "mall_006",
+    "question": "Is annual income associated with spending score?",
+    "dataset": "customer_analytics_mall",
+    "ok": true,
+    "recommendation": {
+      "chart_type": "scatter",
+      "x_axis": "annual_income_k_usd",
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": null,
+        "agg": null,
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "reason": "A scatter plot will help visualize the relationship between annual income and spending score.",
+      "insight": "There is a weak positive association between annual income (in thousands of US dollars) and spending score."
+    },
+    "insight": "There is a weak positive association between annual income (in thousands of US dollars) and spending score.",
+    "trace": [
+      {
+        "agent": "supervisor",
+        "step": 1,
+        "timestamp": "2026-07-17T10:10:04.168948+00:00",
+        "payload_type": "IntentResult",
+        "payload": {
+          "intent": "relationship",
+          "source": "llm",
+          "matched_keywords": []
+        }
+      },
+      {
+        "agent": "supervisor",
+        "step": 2,
+        "timestamp": "2026-07-17T10:10:04.169251+00:00",
+        "payload_type": "WorkflowPlan",
+        "payload": {
+          "intent": "relationship",
+          "steps": [
+            "data_analysis",
+            "visualization",
+            "insight",
+            "evaluation"
+          ],
+          "insight_focus": "correlation"
+        }
+      },
+      {
+        "agent": "data_analyst",
+        "step": 3,
+        "timestamp": "2026-07-17T10:10:11.563442+00:00",
+        "payload_type": "TransformPlan",
+        "payload": {
+          "transform": {
+            "groupby": null,
+            "agg": null,
+            "filter": null,
+            "sort": null,
+            "limit": null
+          },
+          "target_columns": [
+            "annual_income_k_usd",
+            "spending_score"
+          ],
+          "notes": [],
+          "plan_source": "llm",
+          "result_rows": 200,
+          "summary_stats": {
+            "focus": "correlation",
+            "n_rows_input": 200,
+            "n_rows_result": 200,
+            "pearson_r": 0.01,
+            "n": 200,
+            "direction": "positive",
+            "strength": "weak",
+            "columns": [
+              "annual_income_k_usd",
+              "spending_score"
+            ]
+          }
+        }
+      },
+      {
+        "agent": "visualization",
+        "step": 4,
+        "timestamp": "2026-07-17T10:10:14.961177+00:00",
+        "payload_type": "ChartDecision",
+        "payload": {
+          "recommendation": {
+            "chart_type": "scatter",
+            "x_axis": "annual_income_k_usd",
+            "y_axis": "spending_score",
+            "transform": {
+              "groupby": null,
+              "agg": null,
+              "filter": null,
+              "sort": null,
+              "limit": null
+            },
+            "reason": "A scatter plot will help visualize the relationship between annual income and spending score.",
+            "insight": ""
+          },
+          "guardrails_applied": []
+        }
+      },
+      {
+        "agent": "insight",
+        "step": 5,
+        "timestamp": "2026-07-17T10:10:18.293993+00:00",
+        "payload_type": "InsightResult",
+        "payload": {
+          "insight": "There is a weak positive association between annual income (in thousands of US dollars) and spending score.",
+          "supporting_stats": {
+            "focus": "correlation",
+            "n_rows_input": 200,
+            "n_rows_result": 200,
+            "pearson_r": 0.01,
+            "n": 200,
+            "direction": "positive",
+            "strength": "weak",
+            "columns": [
+              "annual_income_k_usd",
+              "spending_score"
+            ]
+          },
+          "source": "llm"
+        }
+      }
+    ],
+    "error": null
+  },
+  {
+    "id": "mall_011",
+    "question": "What is the distribution of customer ages?",
+    "dataset": "customer_analytics_mall",
+    "ok": true,
+    "recommendation": {
+      "chart_type": "histogram",
+      "x_axis": "age",
+      "y_axis": null,
+      "transform": {
+        "groupby": null,
+        "agg": null,
+        "filter": null,
+        "sort": "date_asc",
+        "limit": null
+      },
+      "reason": "Histograms are suitable for showing the distribution of a single variable like age.",
+      "insight": "The age distribution has a median of 36.0 years and a mean of 38.85 years, indicating that half of the customers are between 28.75 and 49.0 years old."
+    },
+    "insight": "The age distribution has a median of 36.0 years and a mean of 38.85 years, indicating that half of the customers are between 28.75 and 49.0 years old.",
+    "trace": [
+      {
+        "agent": "supervisor",
+        "step": 1,
+        "timestamp": "2026-07-17T10:10:19.436898+00:00",
+        "payload_type": "IntentResult",
+        "payload": {
+          "intent": "distribution",
+          "source": "llm",
+          "matched_keywords": []
+        }
+      },
+      {
+        "agent": "supervisor",
+        "step": 2,
+        "timestamp": "2026-07-17T10:10:19.437229+00:00",
+        "payload_type": "WorkflowPlan",
+        "payload": {
+          "intent": "distribution",
+          "steps": [
+            "data_analysis",
+            "visualization",
+            "insight",
+            "evaluation"
+          ],
+          "insight_focus": "distribution_stats"
+        }
+      },
+      {
+        "agent": "data_analyst",
+        "step": 3,
+        "timestamp": "2026-07-17T10:10:25.749359+00:00",
+        "payload_type": "TransformPlan",
+        "payload": {
+          "transform": {
+            "groupby": null,
+            "agg": null,
+            "filter": null,
+            "sort": "date_asc",
+            "limit": null
+          },
+          "target_columns": [
+            "age"
+          ],
+          "notes": [],
+          "plan_source": "llm",
+          "result_rows": 200,
+          "summary_stats": {
+            "focus": "distribution_stats",
+            "n_rows_input": 200,
+            "n_rows_result": 200,
+            "column": "age",
+            "mean": 38.85,
+            "median": 36.0,
+            "std": 13.969,
+            "min": 18.0,
+            "max": 70.0,
+            "q1": 28.75,
+            "q3": 49.0
+          }
+        }
+      },
+      {
+        "agent": "visualization",
+        "step": 4,
+        "timestamp": "2026-07-17T10:10:29.001962+00:00",
+        "payload_type": "ChartDecision",
+        "payload": {
+          "recommendation": {
+            "chart_type": "histogram",
+            "x_axis": "age",
+            "y_axis": null,
+            "transform": {
+              "groupby": null,
+              "agg": null,
+              "filter": null,
+              "sort": "date_asc",
+              "limit": null
+            },
+            "reason": "Histograms are suitable for showing the distribution of a single variable like age.",
+            "insight": ""
+          },
+          "guardrails_applied": []
+        }
+      },
+      {
+        "agent": "insight",
+        "step": 5,
+        "timestamp": "2026-07-17T10:10:35.206253+00:00",
+        "payload_type": "InsightResult",
+        "payload": {
+          "insight": "The age distribution has a median of 36.0 years and a mean of 38.85 years, indicating that half of the customers are between 28.75 and 49.0 years old.",
+          "supporting_stats": {
+            "focus": "distribution_stats",
+            "n_rows_input": 200,
+            "n_rows_result": 200,
+            "column": "age",
+            "mean": 38.85,
+            "median": 36.0,
+            "std": 13.969,
+            "min": 18.0,
+            "max": 70.0,
+            "q1": 28.75,
+            "q3": 49.0
+          },
+          "source": "llm"
+        }
+      }
+    ],
+    "error": null
+  },
+  {
+    "id": "energy_006",
+    "question": "Compare the average appliance consumption across days of the week.",
+    "dataset": "energy_consumption_hourly",
+    "ok": true,
+    "recommendation": {
+      "chart_type": "bar",
+      "x_axis": "appliances",
+      "y_axis": null,
+      "transform": {
+        "groupby": "day(date)",
+        "agg": "mean",
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "reason": "Bar chart is suitable for comparing quantities across different categories, such as days of the week.",
+      "insight": "Appliance consumption varied significantly, with the highest on 2016-04-04 at 188.542 and the lowest on 2016-01-28 at 37.5."
+    },
+    "insight": "Appliance consumption varied significantly, with the highest on 2016-04-04 at 188.542 and the lowest on 2016-01-28 at 37.5.",
+    "trace": [
+      {
+        "agent": "supervisor",
+        "step": 1,
+        "timestamp": "2026-07-17T10:10:36.404713+00:00",
+        "payload_type": "IntentResult",
+        "payload": {
+          "intent": "comparison",
+          "source": "llm",
+          "matched_keywords": []
+        }
+      },
+      {
+        "agent": "supervisor",
+        "step": 2,
+        "timestamp": "2026-07-17T10:10:36.405067+00:00",
+        "payload_type": "WorkflowPlan",
+        "payload": {
+          "intent": "comparison",
+          "steps": [
+            "data_analysis",
+            "visualization",
+            "insight",
+            "evaluation"
+          ],
+          "insight_focus": "group_stats"
+        }
+      },
+      {
+        "agent": "data_analyst",
+        "step": 3,
+        "timestamp": "2026-07-17T10:10:46.043571+00:00",
+        "payload_type": "TransformPlan",
+        "payload": {
+          "transform": {
+            "groupby": "day(date)",
+            "agg": "mean",
+            "filter": null,
+            "sort": null,
+            "limit": null
+          },
+          "target_columns": [
+            "appliances"
+          ],
+          "notes": [],
+          "plan_source": "llm",
+          "result_rows": 138,
+          "summary_stats": {
+            "focus": "group_stats",
+            "n_rows_input": 3290,
+            "n_rows_result": 138,
+            "groups": {
+              "2016-01-11 00:00:00": 136.667,
+              "2016-01-12 00:00:00": 85.695,
+              "2016-01-13 00:00:00": 97.014,
+              "2016-01-14 00:00:00": 151.389,
+              "2016-01-15 00:00:00": 125.347,
+              "2016-01-16 00:00:00": 125.278,
+              "2016-01-17 00:00:00": 142.708,
+              "2016-01-18 00:00:00": 93.958,
+              "2016-01-19 00:00:00": 83.264,
+              "2016-01-20 00:00:00": 114.445,
+              "2016-01-21 00:00:00": 92.639,
+              "2016-01-22 00:00:00": 45.694,
+              "2016-01-23 00:00:00": 93.056,
+              "2016-01-24 00:00:00": 150.278,
+              "2016-01-25 00:00:00": 65.764,
+              "2016-01-26 00:00:00": 71.319,
+              "2016-01-27 00:00:00": 45.625,
+              "2016-01-28 00:00:00": 37.5,
+              "2016-01-29 00:00:00": 48.056,
+              "2016-01-30 00:00:00": 130.486,
+              "2016-01-31 00:00:00": 129.444,
+              "2016-02-01 00:00:00": 155.903,
+              "2016-02-02 00:00:00": 77.917,
+              "2016-02-03 00:00:00": 132.917,
+              "2016-02-04 00:00:00": 100.347,
+              "2016-02-05 00:00:00": 62.57,
+              "2016-02-06 00:00:00": 83.195,
+              "2016-02-07 00:00:00": 79.375,
+              "2016-02-08 00:00:00": 147.361,
+              "2016-02-09 00:00:00": 125.764,
+              "2016-02-10 00:00:00": 96.389,
+              "2016-02-11 00:00:00": 106.25,
+              "2016-02-12 00:00:00": 117.847,
+              "2016-02-13 00:00:00": 96.111,
+              "2016-02-14 00:00:00": 102.43,
+              "2016-02-15 00:00:00": 117.708,
+              "2016-02-16 00:00:00": 93.195,
+              "2016-02-17 00:00:00": 66.806,
+              "2016-02-18 00:00:00": 83.75,
+              "2016-02-19 00:00:00": 119.097,
+              "2016-02-20 00:00:00": 100.764,
+              "2016-02-21 00:00:00": 88.611,
+              "2016-02-22 00:00:00": 93.403,
+              "2016-02-23 00:00:00": 88.681,
+              "2016-02-24 00:00:00": 77.986,
+              "2016-02-25 00:00:00": 125.069,
+              "2016-02-26 00:00:00": 94.097,
+              "2016-02-27 00:00:00": 83.264,
+              "2016-02-28 00:00:00": 53.472,
+              "2016-02-29 00:00:00": 157.153,
+              "2016-03-01 00:00:00": 72.361,
+              "2016-03-02 00:00:00": 92.778,
+              "2016-03-03 00:00:00": 82.014,
+              "2016-03-04 00:00:00": 95.347,
+              "2016-03-05 00:00:00": 91.389,
+              "2016-03-06 00:00:00": 89.722,
+              "2016-03-07 00:00:00": 142.639,
+              "2016-03-08 00:00:00": 74.792,
+              "2016-03-09 00:00:00": 86.806,
+              "2016-03-10 00:00:00": 92.917,
+              "2016-03-11 00:00:00": 71.042,
+              "2016-03-12 00:00:00": 98.611,
+              "2016-03-13 00:00:00": 67.917,
+              "2016-03-14 00:00:00": 164.028,
+              "2016-03-15 00:00:00": 97.292,
+              "2016-03-16 00:00:00": 158.403,
+              "2016-03-17 00:00:00": 86.875,
+              "2016-03-18 00:00:00": 62.639,
+              "2016-03-19 00:00:00": 113.68,
+              "2016-03-20 00:00:00": 112.153,
+              "2016-03-21 00:00:00": 77.778,
+              "2016-03-22 00:00:00": 71.111,
+              "2016-03-23 00:00:00": 85.069,
+              "2016-03-24 00:00:00": 70.139,
+              "2016-03-25 00:00:00": 180.417,
+              "2016-03-26 00:00:00": 108.958,
+              "2016-03-27 00:00:00": 73.056,
+              "2016-03-28 00:00:00": 127.292,
+              "2016-03-29 00:00:00": 91.458,
+              "2016-03-30 00:00:00": 87.708,
+              "2016-03-31 00:00:00": 79.167,
+              "2016-04-01 00:00:00": 59.583,
+              "2016-04-02 00:00:00": 50.695,
+              "2016-04-03 00:00:00": 71.806,
+              "2016-04-04 00:00:00": 188.542,
+              "2016-04-05 00:00:00": 154.861,
+              "2016-04-06 00:00:00": 87.569,
+              "2016-04-07 00:00:00": 68.82,
+              "2016-04-08 00:00:00": 134.444,
+              "2016-04-09 00:00:00": 105.208,
+              "2016-04-10 00:00:00": 74.167,
+              "2016-04-11 00:00:00": 77.847,
+              "2016-04-12 00:00:00": 110.417,
+              "2016-04-13 00:00:00": 94.236,
+              "2016-04-14 00:00:00": 85.764,
+              "2016-04-15 00:00:00": 131.389,
+              "2016-04-16 00:00:00": 134.167,
+              "2016-04-17 00:00:00": 105.903,
+              "2016-04-18 00:00:00": 71.806,
+              "2016-04-19 00:00:00": 72.43,
+              "2016-04-20 00:00:00": 80.625,
+              "2016-04-21 00:00:00": 76.875,
+              "2016-04-22 00:00:00": 170.625,
+              "2016-04-23 00:00:00": 105.0,
+              "2016-04-24 00:00:00": 81.805,
+              "2016-04-25 00:00:00": 75.139,
+              "2016-04-26 00:00:00": 74.028,
+              "2016-04-27 00:00:00": 75.069,
+              "2016-04-28 00:00:00": 95.903,
+              "2016-04-29 00:00:00": 111.528,
+              "2016-04-30 00:00:00": 140.417,
+              "2016-05-01 00:00:00": 97.847,
+              "2016-05-02 00:00:00": 85.625,
+              "2016-05-03 00:00:00": 69.722,
+              "2016-05-04 00:00:00": 78.958,
+              "2016-05-05 00:00:00": 84.028,
+              "2016-05-06 00:00:00": 100.764,
+              "2016-05-07 00:00:00": 97.153,
+              "2016-05-08 00:00:00": 68.542,
+              "2016-05-09 00:00:00": 85.069,
+              "2016-05-10 00:00:00": 65.972,
+              "2016-05-11 00:00:00": 74.097,
+              "2016-05-12 00:00:00": 72.222,
+              "2016-05-13 00:00:00": 168.611,
+              "2016-05-14 00:00:00": 99.583,
+              "2016-05-15 00:00:00": 104.028,
+              "2016-05-16 00:00:00": 100.139,
+              "2016-05-17 00:00:00": 66.042,
+              "2016-05-18 00:00:00": 82.222,
+              "2016-05-19 00:00:00": 70.0,
+              "2016-05-20 00:00:00": 64.722,
+              "2016-05-21 00:00:00": 161.667,
+              "2016-05-22 00:00:00": 110.139,
+              "2016-05-23 00:00:00": 83.056,
+              "2016-05-24 00:00:00": 96.181,
+              "2016-05-25 00:00:00": 83.889,
+              "2016-05-26 00:00:00": 147.014,
+              "2016-05-27 00:00:00": 149.211
+            },
+            "top_group": "2016-04-04 00:00:00",
+            "top_value": 188.542,
+            "bottom_group": "2016-01-28 00:00:00",
+            "bottom_value": 37.5,
+            "total": 13531.781
+          }
+        }
+      },
+      {
+        "agent": "visualization",
+        "step": 4,
+        "timestamp": "2026-07-17T10:10:49.494789+00:00",
+        "payload_type": "ChartDecision",
+        "payload": {
+          "recommendation": {
+            "chart_type": "bar",
+            "x_axis": "appliances",
+            "y_axis": null,
+            "transform": {
+              "groupby": "day(date)",
+              "agg": "mean",
+              "filter": null,
+              "sort": null,
+              "limit": null
+            },
+            "reason": "Bar chart is suitable for comparing quantities across different categories, such as days of the week.",
+            "insight": ""
+          },
+          "guardrails_applied": []
+        }
+      },
+      {
+        "agent": "insight",
+        "step": 5,
+        "timestamp": "2026-07-17T10:11:30.007215+00:00",
+        "payload_type": "InsightResult",
+        "payload": {
+          "insight": "Appliance consumption varied significantly, with the highest on 2016-04-04 at 188.542 and the lowest on 2016-01-28 at 37.5.",
+          "supporting_stats": {
+            "focus": "group_stats",
+            "n_rows_input": 3290,
+            "n_rows_result": 138,
+            "groups": {
+              "2016-01-11 00:00:00": 136.667,
+              "2016-01-12 00:00:00": 85.695,
+              "2016-01-13 00:00:00": 97.014,
+              "2016-01-14 00:00:00": 151.389,
+              "2016-01-15 00:00:00": 125.347,
+              "2016-01-16 00:00:00": 125.278,
+              "2016-01-17 00:00:00": 142.708,
+              "2016-01-18 00:00:00": 93.958,
+              "2016-01-19 00:00:00": 83.264,
+              "2016-01-20 00:00:00": 114.445,
+              "2016-01-21 00:00:00": 92.639,
+              "2016-01-22 00:00:00": 45.694,
+              "2016-01-23 00:00:00": 93.056,
+              "2016-01-24 00:00:00": 150.278,
+              "2016-01-25 00:00:00": 65.764,
+              "2016-01-26 00:00:00": 71.319,
+              "2016-01-27 00:00:00": 45.625,
+              "2016-01-28 00:00:00": 37.5,
+              "2016-01-29 00:00:00": 48.056,
+              "2016-01-30 00:00:00": 130.486,
+              "2016-01-31 00:00:00": 129.444,
+              "2016-02-01 00:00:00": 155.903,
+              "2016-02-02 00:00:00": 77.917,
+              "2016-02-03 00:00:00": 132.917,
+              "2016-02-04 00:00:00": 100.347,
+              "2016-02-05 00:00:00": 62.57,
+              "2016-02-06 00:00:00": 83.195,
+              "2016-02-07 00:00:00": 79.375,
+              "2016-02-08 00:00:00": 147.361,
+              "2016-02-09 00:00:00": 125.764,
+              "2016-02-10 00:00:00": 96.389,
+              "2016-02-11 00:00:00": 106.25,
+              "2016-02-12 00:00:00": 117.847,
+              "2016-02-13 00:00:00": 96.111,
+              "2016-02-14 00:00:00": 102.43,
+              "2016-02-15 00:00:00": 117.708,
+              "2016-02-16 00:00:00": 93.195,
+              "2016-02-17 00:00:00": 66.806,
+              "2016-02-18 00:00:00": 83.75,
+              "2016-02-19 00:00:00": 119.097,
+              "2016-02-20 00:00:00": 100.764,
+              "2016-02-21 00:00:00": 88.611,
+              "2016-02-22 00:00:00": 93.403,
+              "2016-02-23 00:00:00": 88.681,
+              "2016-02-24 00:00:00": 77.986,
+              "2016-02-25 00:00:00": 125.069,
+              "2016-02-26 00:00:00": 94.097,
+              "2016-02-27 00:00:00": 83.264,
+              "2016-02-28 00:00:00": 53.472,
+              "2016-02-29 00:00:00": 157.153,
+              "2016-03-01 00:00:00": 72.361,
+              "2016-03-02 00:00:00": 92.778,
+              "2016-03-03 00:00:00": 82.014,
+              "2016-03-04 00:00:00": 95.347,
+              "2016-03-05 00:00:00": 91.389,
+              "2016-03-06 00:00:00": 89.722,
+              "2016-03-07 00:00:00": 142.639,
+              "2016-03-08 00:00:00": 74.792,
+              "2016-03-09 00:00:00": 86.806,
+              "2016-03-10 00:00:00": 92.917,
+              "2016-03-11 00:00:00": 71.042,
+              "2016-03-12 00:00:00": 98.611,
+              "2016-03-13 00:00:00": 67.917,
+              "2016-03-14 00:00:00": 164.028,
+              "2016-03-15 00:00:00": 97.292,
+              "2016-03-16 00:00:00": 158.403,
+              "2016-03-17 00:00:00": 86.875,
+              "2016-03-18 00:00:00": 62.639,
+              "2016-03-19 00:00:00": 113.68,
+              "2016-03-20 00:00:00": 112.153,
+              "2016-03-21 00:00:00": 77.778,
+              "2016-03-22 00:00:00": 71.111,
+              "2016-03-23 00:00:00": 85.069,
+              "2016-03-24 00:00:00": 70.139,
+              "2016-03-25 00:00:00": 180.417,
+              "2016-03-26 00:00:00": 108.958,
+              "2016-03-27 00:00:00": 73.056,
+              "2016-03-28 00:00:00": 127.292,
+              "2016-03-29 00:00:00": 91.458,
+              "2016-03-30 00:00:00": 87.708,
+              "2016-03-31 00:00:00": 79.167,
+              "2016-04-01 00:00:00": 59.583,
+              "2016-04-02 00:00:00": 50.695,
+              "2016-04-03 00:00:00": 71.806,
+              "2016-04-04 00:00:00": 188.542,
+              "2016-04-05 00:00:00": 154.861,
+              "2016-04-06 00:00:00": 87.569,
+              "2016-04-07 00:00:00": 68.82,
+              "2016-04-08 00:00:00": 134.444,
+              "2016-04-09 00:00:00": 105.208,
+              "2016-04-10 00:00:00": 74.167,
+              "2016-04-11 00:00:00": 77.847,
+              "2016-04-12 00:00:00": 110.417,
+              "2016-04-13 00:00:00": 94.236,
+              "2016-04-14 00:00:00": 85.764,
+              "2016-04-15 00:00:00": 131.389,
+              "2016-04-16 00:00:00": 134.167,
+              "2016-04-17 00:00:00": 105.903,
+              "2016-04-18 00:00:00": 71.806,
+              "2016-04-19 00:00:00": 72.43,
+              "2016-04-20 00:00:00": 80.625,
+              "2016-04-21 00:00:00": 76.875,
+              "2016-04-22 00:00:00": 170.625,
+              "2016-04-23 00:00:00": 105.0,
+              "2016-04-24 00:00:00": 81.805,
+              "2016-04-25 00:00:00": 75.139,
+              "2016-04-26 00:00:00": 74.028,
+              "2016-04-27 00:00:00": 75.069,
+              "2016-04-28 00:00:00": 95.903,
+              "2016-04-29 00:00:00": 111.528,
+              "2016-04-30 00:00:00": 140.417,
+              "2016-05-01 00:00:00": 97.847,
+              "2016-05-02 00:00:00": 85.625,
+              "2016-05-03 00:00:00": 69.722,
+              "2016-05-04 00:00:00": 78.958,
+              "2016-05-05 00:00:00": 84.028,
+              "2016-05-06 00:00:00": 100.764,
+              "2016-05-07 00:00:00": 97.153,
+              "2016-05-08 00:00:00": 68.542,
+              "2016-05-09 00:00:00": 85.069,
+              "2016-05-10 00:00:00": 65.972,
+              "2016-05-11 00:00:00": 74.097,
+              "2016-05-12 00:00:00": 72.222,
+              "2016-05-13 00:00:00": 168.611,
+              "2016-05-14 00:00:00": 99.583,
+              "2016-05-15 00:00:00": 104.028,
+              "2016-05-16 00:00:00": 100.139,
+              "2016-05-17 00:00:00": 66.042,
+              "2016-05-18 00:00:00": 82.222,
+              "2016-05-19 00:00:00": 70.0,
+              "2016-05-20 00:00:00": 64.722,
+              "2016-05-21 00:00:00": 161.667,
+              "2016-05-22 00:00:00": 110.139,
+              "2016-05-23 00:00:00": 83.056,
+              "2016-05-24 00:00:00": 96.181,
+              "2016-05-25 00:00:00": 83.889,
+              "2016-05-26 00:00:00": 147.014,
+              "2016-05-27 00:00:00": 149.211
+            },
+            "top_group": "2016-04-04 00:00:00",
+            "top_value": 188.542,
+            "bottom_group": "2016-01-28 00:00:00",
+            "bottom_value": 37.5,
+            "total": 13531.781
+          },
+          "source": "llm"
+        }
+      }
+    ],
+    "error": null
+  },
+  {
+    "id": "energy_017",
+    "question": "Identify days with unusually high total appliance consumption.",
+    "dataset": "energy_consumption_hourly",
+    "ok": true,
+    "recommendation": {
+      "chart_type": "box",
+      "x_axis": "date",
+      "y_axis": "appliances",
+      "transform": {
+        "groupby": null,
+        "agg": "count",
+        "filter": "appliances > 300",
+        "sort": null,
+        "limit": null
+      },
+      "reason": "Box plot highlights outliers in the data, making it easy to identify days with unusually high total appliance consumption.",
+      "insight": "On 2016-01-24 at 08:00:00, there was an outlier with a total appliance consumption of 608.333."
+    },
+    "insight": "On 2016-01-24 at 08:00:00, there was an outlier with a total appliance consumption of 608.333.",
+    "trace": [
+      {
+        "agent": "supervisor",
+        "step": 1,
+        "timestamp": "2026-07-17T10:11:31.434987+00:00",
+        "payload_type": "IntentResult",
+        "payload": {
+          "intent": "anomaly",
+          "source": "llm",
+          "matched_keywords": []
+        }
+      },
+      {
+        "agent": "supervisor",
+        "step": 2,
+        "timestamp": "2026-07-17T10:11:31.435802+00:00",
+        "payload_type": "WorkflowPlan",
+        "payload": {
+          "intent": "anomaly",
+          "steps": [
+            "data_analysis",
+            "visualization",
+            "insight",
+            "evaluation"
+          ],
+          "insight_focus": "outlier_detection"
+        }
+      },
+      {
+        "agent": "data_analyst",
+        "step": 3,
+        "timestamp": "2026-07-17T10:11:42.641249+00:00",
+        "payload_type": "TransformPlan",
+        "payload": {
+          "transform": {
+            "groupby": null,
+            "agg": "count",
+            "filter": "appliances > 300",
+            "sort": null,
+            "limit": null
+          },
+          "target_columns": [
+            "date",
+            "appliances"
+          ],
+          "notes": [],
+          "plan_source": "llm",
+          "result_rows": 131,
+          "summary_stats": {
+            "focus": "outlier_detection",
+            "n_rows_input": 3290,
+            "n_rows_result": 131,
+            "iqr_low": 182.082,
+            "iqr_high": 572.084,
+            "n_outliers": 1,
+            "top_outliers": {
+              "2016-01-24 08:00:00": 608.333
+            }
+          }
+        }
+      },
+      {
+        "agent": "visualization",
+        "step": 4,
+        "timestamp": "2026-07-17T10:11:46.468024+00:00",
+        "payload_type": "ChartDecision",
+        "payload": {
+          "recommendation": {
+            "chart_type": "box",
+            "x_axis": "date",
+            "y_axis": "appliances",
+            "transform": {
+              "groupby": null,
+              "agg": "count",
+              "filter": "appliances > 300",
+              "sort": null,
+              "limit": null
+            },
+            "reason": "Box plot highlights outliers in the data, making it easy to identify days with unusually high total appliance consumption.",
+            "insight": ""
+          },
+          "guardrails_applied": []
+        }
+      },
+      {
+        "agent": "insight",
+        "step": 5,
+        "timestamp": "2026-07-17T10:11:52.435734+00:00",
+        "payload_type": "InsightResult",
+        "payload": {
+          "insight": "On 2016-01-24 at 08:00:00, there was an outlier with a total appliance consumption of 608.333.",
+          "supporting_stats": {
+            "focus": "outlier_detection",
+            "n_rows_input": 3290,
+            "n_rows_result": 131,
+            "iqr_low": 182.082,
+            "iqr_high": 572.084,
+            "n_outliers": 1,
+            "top_outliers": {
+              "2016-01-24 08:00:00": 608.333
+            }
+          },
+          "source": "llm"
+        }
+      }
+    ],
+    "error": null
+  }
+]
