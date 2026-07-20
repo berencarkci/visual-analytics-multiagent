@@ -66,9 +66,13 @@ class StepError(BaseModel):
 
 
 class EvalVerdict(BaseModel):
-    """Evaluation Agent output (skeleton)"""
+    """Evaluation Agent output: rule based consistency review of the final answer"""
     passed: bool
-    issues: list[str] = Field(default_factory=list)
+    issues: list[str] = Field(default_factory=list) # hard failures (block)
+    warnings: list[str] = Field(default_factory=list) # soft concerns, delivered with the answer
+    checks: dict = Field(default_factory=dict) # per rule pass/fail map
+    retried_step: str | None = None # which agent was rerun, if any
+    retry_helped: bool | None = None # did the retry fix the failure
 #################################
 
 
