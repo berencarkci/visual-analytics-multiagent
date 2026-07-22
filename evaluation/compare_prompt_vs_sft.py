@@ -127,6 +127,16 @@ def print_table(results: list[dict]) -> None:
         print(line)
 #################################
 
+def free_client(client) -> None:
+    """Release the GPU weights a client holds, a T4 cannot host two 3B models at once"""
+    import gc
+
+    import torch
+    client._model = None
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+#################################
 
 # Main:
 def main() -> int:
@@ -150,11 +160,11 @@ def main() -> int:
     base_client = HFClient(model_name=args.base, temperature=0.0)
     sft_client = HFClient(model_name=args.base, adapter=args.adapter, temperature=0.0)
 
-    results = [
-        run_config("A base+long", base_client, questions, schemas, frames, mode="long"),
-        run_config("B sft+short", sft_client, questions, schemas, frames, mode="short"),
-        run_config("C sft+long", sft_client, questions, schemas, frames, mode="long"),
-    ]
+    results = [run_config("A base+long", base_client, questions, schemas, frames, mode="long")]
+    free_client(base_client) # base weights out before the adapter model comes in
+    results.append(run_config("B sft+short", sft_client, questions, schemas, frames, mode="short"))
+    results.append(run_config("C sft+long", sft_client, questions, schemas, frames, mode="long"))
+    
     print_table(results)
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
