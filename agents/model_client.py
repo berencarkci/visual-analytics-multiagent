@@ -26,10 +26,11 @@ class HFClient:
     Runs the 3B model locally and on Colab for the final benchmark runs.
     """
 
-    def __init__(self, model_name: str = "Qwen/Qwen2.5-3B-Instruct", temperature: float = 0.0, max_new_tokens: int = 300):
+    def __init__(self, model_name: str = "Qwen/Qwen2.5-1.5B-Instruct", temperature: float = 0.0, max_new_tokens: int = 300, adapter: str | None = None):
         self.model_name = model_name
         self.temperature = temperature
         self.max_new_tokens = max_new_tokens
+        self.adapter = adapter # LoRA adapter: local path or Hub id
         self._model = None
         self._tokenizer = None
         self.device = None
@@ -46,7 +47,11 @@ class HFClient:
             self.device, dtype = "cpu", torch.float32
 
         self._tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        self._model = AutoModelForCausalLM.from_pretrained(self.model_name, dtype=dtype).to(self.device)
+        self._model = AutoModelForCausalLM.from_pretrained(self.model_name, torch_dtype=dtype).to(self.device)
+        if self.adapter: # SFT/DPO checkpoint
+            from peft import PeftModel
+            self._model = PeftModel.from_pretrained(self._model, self.adapter)
+            self._model = self._model.merge_and_unload() # fold LoRA in: same speed as base
         self._model.eval()
 
     def generate(self, messages: list[dict]) -> str:
