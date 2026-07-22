@@ -22,7 +22,7 @@ from messages import AgentMessage, EvalVerdict, StepError
 from model_client import ModelClient
 from schemas import ChartRecommendation
 from supervisor import classify_intent, select_workflow
-from trace import TraceLogger
+from trace import TraceLogger, summarize
 from visualization import run_visualization
 
 # Workflow result container:
@@ -124,27 +124,13 @@ def run_workflow(client: ModelClient, df: pd.DataFrame, profile: TableProfile, q
 #################################
 
 
-# Trace presentation helper (Agent Trace tab, no chain of thought, only payloads):
-_SUMMARIES = {
-    "IntentResult": lambda p: f"intent = {p['intent']} (source: {p['source']})",
-    "WorkflowPlan": lambda p: f"insight focus = {p['insight_focus']}",
-    "TransformPlan": lambda p: (f"{p['result_rows']} rows after transform" + (f"; notes: {'; '.join(p['notes'])}" if p['notes'] else "")),
-    "ChartDecision": lambda p: (f"chart = {p['recommendation']['chart_type']}" + (f"; guardrails: {'; '.join(p['guardrails_applied'])}"
-                                    if p['guardrails_applied'] else "; no guardrail needed")),
-    "InsightResult": lambda p: f"source = {p['source']}",
-    "EvalVerdict": lambda p: (("PASSED" if p["passed"] else "FAILED") + (f"; issues: {'; '.join(p['issues'])}" if p["issues"] else "") + (f"; warnings: {'; '.join(p['warnings'])}" if p["warnings"] else "") + (f"; retried: {p['retried_step']}" if p.get("retried_step") else "")),
-    "StepError": lambda p: f"{p['error_type']}: {p['detail'][:80]}",
-}
-
-
 def trace_view(trace: list[dict]) -> list[dict]:
     """[{title, summary, detail_json}] ready for the Agent Trace tab"""
     rows = []
     for msg in trace:
-        fn = _SUMMARIES.get(msg["payload_type"], lambda p: "")
         rows.append({
             "title": f"Step {msg['step']} — {msg['agent']} ({msg['payload_type']})",
-            "summary": fn(msg["payload"]),
+            "summary": summarize(msg["payload_type"], msg["payload"]),
             "detail_json": msg["payload"],
         })
     return rows
