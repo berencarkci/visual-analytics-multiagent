@@ -17,33 +17,18 @@ from model_client import ModelClient
 from schemas import Transform, extract_json_block
 from transforms import ColumnNotFoundError, apply_transform
 from schemas import ChartRecommendation  # transform execution reuses its container
-
-# LLM planning prompt (data preparation only. no chart choice, no insight):
-_PLAN_SYSTEM = """You plan data preparation for an analytics question. Given a table schema and a question, return ONLY a JSON object:
-
-{
-  "target_columns": [source column names needed to answer the question],
-  "transform": {
-    "groupby": column or derived expression like "month(col)", "day(col)", "bins(col)", or null,
-    "agg": "sum" | "mean" | "count" | "count_distinct" | null,
-    "filter": pandas-query condition string, or null,
-    "sort": "date_asc" | "value_desc" | null,
-    "limit": integer or null
-  }
-}
-
-Rules:
-- Use ONLY column names that exist in the schema.
-- Do NOT choose a chart type. Do NOT write insights. Data preparation only.
-- Relationship questions between two raw numeric columns need no groupby/agg.
-- Distribution questions on a numeric column need no groupby/agg.
-- Share/composition questions about ONE specific category (e.g. "share of X"): do NOT filter to that category. Group by the category column over the WHOLE data; the share is computed from all groups."""
+from prompts import PLAN_SYSTEM
 
 
 def _build_plan_messages(schema_text: str, question: str, intent: str) -> list[dict]:
     user = f"{schema_text}\n\nQuestion intent: {intent}\nQuestion: {question}"
-    return [{"role": "system", "content": _PLAN_SYSTEM}, {"role": "user", "content": user}]
+    return [{"role": "system", "content": PLAN_SYSTEM}, {"role": "user", "content": user}]
 #################################
+
+# Field-slot reminder fed back on a format error: small models sometimes put a value in the wrong Transform slot (e.g. agg="date_asc", which belongs in sort).
+_FIELD_HINT = ('Field reminder: agg must be sum/mean/count/count_distinct; '
+               'sort must be date_asc/value_desc; date_asc/value_desc are NOT agg values; '
+               'groupby is a column or derived expression; filter is a pandas query string.')
 
 
 # Plan validation against the real schema:
@@ -54,12 +39,21 @@ def _validate_plan(raw: str, profile: TableProfile) -> tuple[TransformPlan | Non
         return None, "No json object found. Return only the json object."
     try:
         data = json.loads(block)
+        # sort only affects display order, so an invalid value is repaired and recorded (like a visualization guardrail) instead of failing the whole plan
+        dropped_sort = None
+        tf = data.get("transform") or {}
+        if tf.get("sort") not in (None, "date_asc", "value_desc"):
+            dropped_sort = tf["sort"]
+            tf["sort"] = None
+            data["transform"] = tf
         plan = TransformPlan(
             transform=Transform(**(data.get("transform") or {})),
             target_columns=list(data.get("target_columns") or []),
         )
+        if dropped_sort:
+            plan.notes.append(f"dropped invalid sort value {dropped_sort!r}")
     except Exception as e:
-        return None, f"Invalid plan format: {e}"
+        return None, f"Invalid plan format: {e}. {_FIELD_HINT}"
 
     valid_cols = {c.name for c in profile.columns}
     referenced = set(plan.target_columns)
@@ -169,7 +163,7 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
     if prepared.empty:
         return StepError(agent="data_analyst", error_type="empty_result", detail=f"Transform left 0 rows (filter: {plan.transform.filter})", recoverable=True), None
 
-    plan.notes = notes
+    plan.notes = plan.notes + notes     
     plan.result_rows = int(len(prepared))
     plan.summary_stats = _compute_stats(workflow.insight_focus, df, prepared, x_col, y_col, plan)
     return plan, prepared

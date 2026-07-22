@@ -22,7 +22,7 @@ class Transform(BaseModel):
     groupby: str | None = None
     agg: AggType | None = None
     filter: str | None = None
-    sort: str | None = None
+    sort: Literal["date_asc", "value_desc"] | None = None
     limit: int | None = None
 
 
