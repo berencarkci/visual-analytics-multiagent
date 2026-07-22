@@ -202,7 +202,7 @@ def main() -> int:
         save_total_limit=cfg["save_total_limit"],
         seed=cfg["seed"],
         fp16=True,                                  # T4: no bf16
-        max_length=cfg["max_seq_length"],
+        max_seq_length=cfg["max_seq_length"],
         dataset_text_field="text",
         packing=False,                              # required for completion-only loss
         report_to="none",
