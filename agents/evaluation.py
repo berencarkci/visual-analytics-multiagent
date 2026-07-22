@@ -90,6 +90,17 @@ def _check_composition(workflow: WorkflowPlan, plan: TransformPlan) -> str | Non
     return None
 #################################
 
+def _check_insight_informative(ins: InsightResult) -> str | None:
+    """Warn if the insight collapsed to the last-resort generic template
+
+    "The analysis produced N result rows" means no focus template matched and
+    the statement carries no real finding — a soft signal, not a hard failure.
+    """
+    text = ins.insight.lower()
+    if ins.source == "template_fallback" and "result row" in text:
+        return "insight fell back to the generic template (no finding computed)"
+    return None
+#################################
 
 # Agent entry point:
 def run_evaluation(workflow: WorkflowPlan, plan: TransformPlan, decision: ChartDecision, ins: InsightResult, df: pd.DataFrame) -> EvalVerdict:
@@ -116,6 +127,11 @@ def run_evaluation(workflow: WorkflowPlan, plan: TransformPlan, decision: ChartD
         issues.append(f"wording_consistency: {w_issue}")
     if w_warn:
         warnings.append(w_warn)
+
+    info_warn = _check_insight_informative(ins)
+    checks["insight_informative"] = info_warn is None
+    if info_warn:
+        warnings.append(info_warn)
 
     return EvalVerdict(passed=len(issues) == 0, issues=issues, warnings=warnings, checks=checks)
 #################################
