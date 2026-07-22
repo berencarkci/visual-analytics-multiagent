@@ -120,7 +120,13 @@ def ask(df: pd.DataFrame | None, schema_text: str, question: str, mode: str):
         msg = f"The recommendation was schema valid but could not be rendered on this dataset: {e}"
         return "", msg, rec.model_dump_json(indent=2), "", "", trace_data
 
-    answer_md = f"**Insight:** {rec.insight}\n\n**Why this chart:** {rec.reason}"
+    if mode == "Single-agent":
+        answer_md = ("*Insight withheld: in single agent mode the model never sees any computed "
+                     "statistics, so its insight is unverifiable and frequently invented. "
+                     "The raw model output is still shown in the JSON details below.*"
+                     f"\n\n**Why this chart:** {rec.reason}")
+    else:
+        answer_md = f"**Insight:** {rec.insight}\n\n**Why this chart:** {rec.reason}"
     answer_md += eval_note
     if retry_note:
         answer_md += "\n\n*Note: the first model output was invalid, this answer came from the retry.*"
