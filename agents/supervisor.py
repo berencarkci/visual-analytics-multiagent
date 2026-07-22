@@ -11,29 +11,13 @@ import re
 
 from messages import IntentLabel, IntentResult, WorkflowPlan
 from model_client import ModelClient
+from prompts import INTENT_SYSTEM
 
-# LLM intent prompt (small and cheap, single label JSON output):
-_INTENT_SYSTEM = """Classify a data analytics question into exactly one intent label.
-Return ONLY a JSON object: {"intent": "<label>"}
-
-Labels:
-- trend: change over time
-- comparison: compare a metric across categories
-- composition: part to whole share/mix
-- relationship: association between two numeric variables
-- distribution: how values of one variable are spread
-- filter_aggregation: aggregate over a filtered subset (e.g. one year, one region, top N)
-- anomaly: unusual values, outliers, spikes
-
-Examples:
-Q: "How did monthly sales change?" -> {"intent": "trend"}
-Q: "Which region has the highest profit?" -> {"intent": "comparison"}
-Q: "Were there any strange spikes in usage?" -> {"intent": "anomaly"}"""
 
 
 def _classify_with_llm(client: ModelClient, question: str) -> IntentResult | None:
     """One small LLM call, returns None on any invalid output (fallback takes over)"""
-    messages = [{"role": "system", "content": _INTENT_SYSTEM},
+    messages = [{"role": "system", "content": INTENT_SYSTEM},
                 {"role": "user", "content": f'Q: "{question}"'}]
     raw = client.generate(messages)
     match = re.search(r'\{[^{}]*\}', raw)

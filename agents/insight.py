@@ -13,19 +13,13 @@ import re
 
 from messages import InsightResult
 from model_client import ModelClient
+from prompts import INSIGHT_SYSTEM
 
-# LLM prompt (numbers only contract):
-_INSIGHT_SYSTEM = """You write ONE short data insight (1-2 sentences) answering the question, using ONLY the numbers and labels in the provided statistics. 
-
-Rules:
-- Every number you mention MUST appear in the statistics. Do not compute new numbers, do not round differently, do not invent values.
-- No speculation ("might", "suggests a potential"), no claims beyond the statistics.
-- Return ONLY a JSON object: {"insight": "<your sentence(s)>"}"""
 
 
 def _build_insight_messages(question: str, stats: dict) -> list[dict]:
     user = f"Question: {question}\nStatistics: {json.dumps(stats, ensure_ascii=False)}"
-    return [{"role": "system", "content": _INSIGHT_SYSTEM},
+    return [{"role": "system", "content": INSIGHT_SYSTEM},
             {"role": "user", "content": user}]
 #################################
 

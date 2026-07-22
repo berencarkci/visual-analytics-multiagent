@@ -13,6 +13,7 @@ import pandas as pd
 from messages import ChartDecision, StepError, TransformPlan, WorkflowPlan
 from model_client import ModelClient
 from schemas import ChartRecommendation, ChartType, extract_json_block
+from prompts import VIZ_SYSTEM
 
 # Intent -> allowed chart families (first=preferred, benchmark aligned):
 ALLOWED_CHARTS: dict[str, list[str]] = {
@@ -27,18 +28,10 @@ ALLOWED_CHARTS: dict[str, list[str]] = {
 #################################
 
 
-# Narrow LLM prompt (chart choice only, transform and insight belong to others):
-_VIZ_SYSTEM = """You choose the best chart for an analytics question. You are given the question, its intent, a short summary of the ALREADY PREPARED data, and the list of allowed chart types for this intent.
-
-Return ONLY a JSON object: {"chart_type": "<one of the allowed types>", "reason": "<one short sentence>"}
-
-Do NOT plan data transformations. Do NOT write insights. Chart choice only."""
-
-
 def _build_viz_messages(question: str, intent: str, data_summary: str, allowed: list[str]) -> list[dict]:
     user = (f"Question: {question}\nIntent: {intent}\n"
             f"Prepared data: {data_summary}\nAllowed chart types: {allowed}")
-    return [{"role": "system", "content": _VIZ_SYSTEM},
+    return [{"role": "system", "content": VIZ_SYSTEM},
             {"role": "user", "content": user}]
 #################################
 
