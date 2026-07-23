@@ -142,6 +142,10 @@ def write_run_report(cfg: dict, out_dir: Path, elapsed_s: float,
         "first_loss": losses[0]["loss"] if losses else None,
         "last_loss": losses[-1]["loss"] if losses else None,
         "eval_loss_per_epoch": [round(e["eval_loss"], 4) for e in evals],
+        "best_epoch": (1 + min(range(len(evals)), key=lambda i: evals[i]["eval_loss"])) if evals else None,
+        "best_eval_loss": round(min(e["eval_loss"] for e in evals), 4) if evals else None,
+        "load_best_model_at_end": bool(cfg.get("load_best_model_at_end", False)),
+    
     }
     (out_dir / "run_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     return report
@@ -201,6 +205,9 @@ def main() -> int:
         eval_strategy=cfg["eval_strategy"] if val_ds else "no",
         save_strategy=cfg["save_strategy"],
         save_total_limit=cfg["save_total_limit"],
+        load_best_model_at_end=cfg.get("load_best_model_at_end", False) and val_ds is not None,
+        metric_for_best_model=cfg.get("metric_for_best_model", "eval_loss"),
+        greater_is_better=cfg.get("greater_is_better", False),
         seed=cfg["seed"],
         fp16=True,                                  # T4: no bf16
         max_seq_length=cfg["max_seq_length"],
@@ -234,7 +241,9 @@ def main() -> int:
     print(f"\nadapter saved to {out_dir}")
     print(f"duration: {report['duration_minutes']} min on {report['gpu']}")
     print(f"loss: {report['first_loss']} -> {report['last_loss']}"
-          f" | eval per epoch: {report['eval_loss_per_epoch']}")
+          f" | eval per epoch: {report['eval_loss_per_epoch']}")    
+    if report["best_epoch"]:
+        print(f"saved adapter = epoch {report['best_epoch']} (eval_loss {report['best_eval_loss']})")
 
     if args.push or cfg.get("push_to_hub"):
         repo_id = cfg["hub_model_id"]

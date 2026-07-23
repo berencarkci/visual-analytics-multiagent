@@ -75,4 +75,15 @@ FAILURE_EXAMPLES = [
                               "sort": "date_asc", "limit": None},
                 "reason": "A trend is read over time, so the date column is the x-axis and the measured value is aggregated on y.",
                 "insight": "The chart shows how appliance consumption develops over time."}},
+
+    # filter must actually appear in the transform, not only in the insight
+    # (SFT sanity check: "monthly total sales of the Technology category in 2018" produced filter=None while the insight still claimed the restriction)
+    {"dataset": "retail",
+     "question": "Zoom into Technology in 2018 and chart its sales month by month.",
+     "target": {"chart_type": "line", "x_axis": "order_date", "y_axis": "sales",
+                "transform": {"groupby": "month(order_date)", "agg": "sum",
+                              "filter": "category == 'Technology' and year(order_date) == 2018",
+                              "sort": "date_asc", "limit": None},
+                "reason": "The category and the year are restrictions, so they belong in the filter; the monthly groupby then applies to the remaining rows.",
+                "insight": "The chart shows how monthly sales developed for Technology within 2018."}},
 ]

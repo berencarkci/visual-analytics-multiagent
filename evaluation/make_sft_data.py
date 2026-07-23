@@ -222,6 +222,33 @@ def build_template_examples() -> list[dict]:
                   f"Count the distinct customers per {pretty(cat)}."]:
             add("retail", q, t)
 
+    # filtered time series (filter + time groupby: the combination the model dropped filters on, every filter bank above is categorical + bar)
+    for cat_val, cat_col in [("Technology", "category"), ("Furniture", "category"), ("Consumer", "segment"), ("West", "region")]:
+        for metric in ["sales", "profit"]:
+            t = target("line", "order_date", metric, groupby="month(order_date)",
+                       agg="sum", sort="date_asc", filter=f"{cat_col} == '{cat_val}'",
+                       reason=f"A monthly line restricted to {cat_val} shows that slice's own course over time.",
+                       insight=f"The chart shows how monthly {pretty(metric)} developed for {cat_val}.")
+            for q in [f"Show the monthly {pretty(metric)} course for {cat_val} only.",
+                      f"Restricted to {cat_val}, how did monthly {pretty(metric)} move?"]:
+                add("retail", q, t)
+
+    # combined filters (two conditions at once)
+    for cat_val, year in [("Technology", 2018), ("Furniture", 2017), ("Office Supplies", 2016)]:
+        t = target("line", "order_date", "sales", groupby="month(order_date)", agg="sum",
+                   sort="date_asc", filter=f"category == '{cat_val}' and year(order_date) == {year}",
+                   reason="Both conditions belong in the filter; the groupby then splits the remaining rows by month.",
+                   insight=f"The chart shows the monthly sales course for {cat_val} within {year}.")
+        for q in [f"Monthly sales for {cat_val} within {year} only.",
+                  f"Narrow the data to {cat_val} in {year} and show the monthly sales course."]:
+            add("retail", q, t)
+    for reg, seg in [("West", "Consumer"), ("East", "Corporate")]:
+        t = target("bar", "category", "sales", groupby="category", agg="sum",
+                   sort="value_desc", filter=f"region == '{reg}' and segment == '{seg}'",
+                   reason="Both restrictions go into the filter, then the categories are compared inside that slice.",
+                   insight=f"The chart compares categories within the {seg} segment of the {reg} region.")
+        add("retail", f"Inside the {reg} region, {seg} segment only, rank the categories by sales.", t)
+
     # anomaly
     for ds, metric in [("energy", "appliances"), ("energy", "lights"), ("retail", "sales")]:
         d = DATASETS[ds]
