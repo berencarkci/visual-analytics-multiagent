@@ -76,7 +76,9 @@ def split_by_source(records: list[dict], val_ratio: float, seed: int) -> tuple[l
     rng = random.Random(seed)
     buckets: dict[str, list] = {}
     for r in records:
-        buckets.setdefault(r.get("meta", {}).get("source", "unknown"), []).append(r)
+        meta = r.get("meta", {})
+        key = f"{meta.get('format', 'single_call')}/{meta.get('source', 'unknown')}"
+        buckets.setdefault(key, []).append(r)
 
     train, val = [], []
     for source, items in sorted(buckets.items()):
