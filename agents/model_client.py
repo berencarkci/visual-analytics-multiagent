@@ -26,7 +26,7 @@ class HFClient:
     Runs the 3B model locally and on Colab for the final benchmark runs.
     """
 
-    def __init__(self, model_name: str = "Qwen/Qwen2.5-1.5B-Instruct", temperature: float = 0.0, max_new_tokens: int = 300, adapter: str | None = None):
+    def __init__(self, model_name: str = "Qwen/Qwen2.5-3B-Instruct", temperature: float = 0.0, max_new_tokens: int = 300, adapter: str | None = None):
         self.model_name = model_name
         self.temperature = temperature
         self.max_new_tokens = max_new_tokens

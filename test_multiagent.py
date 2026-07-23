@@ -57,9 +57,10 @@ def main() -> None:
     ap.add_argument("--question", default=None, help="ad-hoc question instead of benchmark ids")
     ap.add_argument("--dataset", default="retail_sales_superstore")
     ap.add_argument("--adapter", default=None, help="LoRA adapter: local path or Hub id")
+    ap.add_argument("--base", default="Qwen/Qwen2.5-3B-Instruct", help="base model id")
     args = ap.parse_args()
 
-    client = HFClient(adapter=args.adapter)
+    client = HFClient(model_name=args.base, adapter=args.adapter)
     frames, profiles = {}, {}
     results = []
 
