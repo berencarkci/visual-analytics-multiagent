@@ -1,60 +1,45 @@
 """SFT training data generator.
-
 Builds data/sft_train.jsonl from three sources:
   - template: questions derived from answer templates, so the target is correct by construction
   - handwritten:vague/free form questions with hand chosen targets
   - failure_targeted: correct answers to observed model failures, maintained by hand in evaluation/failure_examples.py
-
 Design rules baked in:
   - Targets embody the guardrails (pie only <=5 categories, box for discrete x relationships, histogram without groupby) instead of stating them as prose.
   - Insight fields are pointer style: they describe what the chart will show and never contain numbers the model cannot compute from the schema alone
   - Short system prompt, no few shots: format knowledge should move into the weights, the long frozen baseline prompt stays untouched for baseline measurement.
   - Every target is validated through the pydantic ChartRecommendation schema,and the whole question set passes the benchmark contamination check before the file is written.
 """
-
 from __future__ import annotations
-
 import json
 import random
 import sys
 from pathlib import Path
-
 sys.path.insert(0, "agents")
-
 from check_contamination import check_contamination
 from data_ingestion import load_table, profile_table, schema_summary
 from failure_examples import FAILURE_EXAMPLES
 from schemas import ChartRecommendation
 from prompts import SFT_SYSTEM
-
 random.seed(42)
-
-
 # Dataset registry (verified column names):
 DATASETS = {
     "retail": {"path": "data/retail_sales_superstore.csv", "date": "order_date", "metrics": ["sales", "profit", "quantity"], "small_cats": ["category", "region", "segment", "ship_mode"], "large_cats": ["sub_category", "state"]},
     "mall": {"path": "data/customer_analytics_mall.csv", "date": None, "metrics": ["age", "annual_income_k_usd", "spending_score"], "small_cats": ["gender"], "large_cats": []},
     "energy": {"path": "data/energy_consumption_hourly.csv", "date": "date", "metrics": ["appliances", "lights"], "small_cats": [], "large_cats": []}}
-
 _PRETTY = {"annual_income_k_usd": "annual income", "spending_score": "spending score", "sub_category": "sub-category", "ship_mode": "ship mode", "order_date": "order date", "appliances": "appliance consumption", "lights": "light consumption", "t1": "kitchen temperature", "t2": "living room temperature", "t3": "laundry room temperature", "rh_1": "kitchen humidity", "rh_2": "living room humidity"}
-
-
 def pretty(col: str) -> str:
     return _PRETTY.get(col, col.replace("_", " "))
-
-
 def target(chart, x, y, groupby=None, agg=None, filter=None, sort=None, limit=None, reason="", insight=""):
     return {"chart_type": chart, "x_axis": x, "y_axis": y, "transform": {"groupby": groupby, "agg": agg, "filter": filter, "sort": sort, "limit": limit}, "reason": reason, "insight": insight}
 #################################
-
-
 # Template banks
 def build_template_examples() -> list[dict]:
     ex: list[dict] = []
-
+    # The intent each bank below produces. Agent format training data needs it (the Data Analyst and Visualization prompts both take the intent), and it is known by construction here, the banks are the intent taxonomy.
+    bank = {"intent": "comparison"}
     def add(ds, q, t):
-        ex.append({"dataset": ds, "question": q, "target": t, "source": "template"})
-
+        ex.append({"dataset": ds, "question": q, "target": t, "source": "template", "intent": bank["intent"]})
+    bank["intent"] = "trend"
     # trend (business metrics, sum)
     for ds in ("retail", "energy"):
         d = DATASETS[ds]
@@ -68,7 +53,7 @@ def build_template_examples() -> list[dict]:
                           f"Show the {period} trend of {pretty(metric)}.",
                           f"Plot how {pretty(metric)} moved {period} through the data."]:
                     add(ds, q, t)
-
+    bank["intent"] = "trend"
     #trend (indoor climate, mean)
     for col in ["t1", "t2", "rh_1"]:
         t = target("line", "date", col, groupby="day(date)", agg="mean", sort="date_asc",
@@ -77,7 +62,7 @@ def build_template_examples() -> list[dict]:
         for q in [f"Trace how average {pretty(col)} developed day by day.",
                   f"Show the daily course of {pretty(col)}."]:
             add("energy", q, t)
-
+    bank["intent"] = "comparison"
     # comparison
     for metric in DATASETS["retail"]["metrics"]:
         for cat in DATASETS["retail"]["small_cats"]:
@@ -120,7 +105,7 @@ def build_template_examples() -> list[dict]:
                     reason="Hourly averages reveal the daily usage rhythm.",
                     insight=f"The chart shows which hours of the day average the highest {pretty(col)}.")
         add("energy", f"Map the daily rhythm of {pretty(col)} by hour.", t2)
-
+    bank["intent"] = "composition"
     # composition (pie only for <=5 categories; large cats -> bar)
     for metric in ["sales", "quantity"]:
         for cat in DATASETS["retail"]["small_cats"]:
@@ -136,7 +121,7 @@ def build_template_examples() -> list[dict]:
                        reason=f"With many {pretty(cat)} groups a pie is unreadable; sorted bars still show shares.",
                        insight=f"The chart shows each {pretty(cat)}'s contribution to total {pretty(metric)}.")
             add("retail", f"How is total {pretty(metric)} distributed across {pretty(cat)} groups?", t)
-
+    bank["intent"] = "relationship"
     # relationship (scatter for continuous pairs)
     pairs = [("mall", "age", "annual_income_k_usd"), ("mall", "age", "spending_score"),
              ("mall", "annual_income_k_usd", "spending_score"),
@@ -152,7 +137,7 @@ def build_template_examples() -> list[dict]:
                   f"How does {pretty(b)} vary with {pretty(a)}?",
                   f"Chart {pretty(a)} against {pretty(b)} and see if they track each other."]:
             add(ds, q, t)
-
+    bank["intent"] = "distribution"
     # distribution (histogram, no groupby)
     dist_cols = [("retail", "sales"), ("retail", "profit"),
                  ("mall", "age"), ("mall", "annual_income_k_usd"), ("mall", "spending_score"),
@@ -167,7 +152,7 @@ def build_template_examples() -> list[dict]:
                   f"Show a histogram of {pretty(col)}.",
                   f"What does the spread of {pretty(col)} look like?"]:
             add(ds, q, t)
-
+    bank["intent"] = "filter_aggregation"
     # filter_aggregation
     for n in (5, 10):
         for cat in ["state", "sub_category", "city"]:
@@ -195,7 +180,7 @@ def build_template_examples() -> list[dict]:
                    reason="Sorted, limited bars keep the filtered ranking readable.",
                    insight=f"The chart shows the strongest sub-categories by profit within the {reg} region.")
         add("retail", f"Within the {reg} region only, show the 10 strongest sub-categories by profit.", t)
-
+    bank["intent"] = "distribution"
     # grouped distributions (box: how a numeric spreads across groups)
     box_combos = [("retail", "segment", "sales"), ("retail", "region", "profit"), ("retail", "category", "profit"), ("mall", "gender", "spending_score"), ("mall", "gender", "age")]
     for ds, cat, num in box_combos:
@@ -205,7 +190,7 @@ def build_template_examples() -> list[dict]:
         for q in [f"How does the {pretty(num)} distribution differ across {pretty(cat)} groups?",
                   f"Compare the spread of {pretty(num)} per {pretty(cat)}."]:
             add(ds, q, t)
-
+    bank["intent"] = "comparison"
     # counting (count / count_distinct targets)
     for cat in DATASETS["retail"]["small_cats"] + DATASETS["retail"]["large_cats"]:
         t = target("bar", cat, "order_id", groupby=cat, agg="count", sort="value_desc",
@@ -221,7 +206,7 @@ def build_template_examples() -> list[dict]:
         for q in [f"How many unique customers does each {pretty(cat)} serve?",
                   f"Count the distinct customers per {pretty(cat)}."]:
             add("retail", q, t)
-
+    bank["intent"] = "filter_aggregation"
     # filtered time series (filter + time groupby: the combination the model dropped filters on, every filter bank above is categorical + bar)
     for cat_val, cat_col in [("Technology", "category"), ("Furniture", "category"), ("Consumer", "segment"), ("West", "region")]:
         for metric in ["sales", "profit"]:
@@ -232,7 +217,7 @@ def build_template_examples() -> list[dict]:
             for q in [f"Show the monthly {pretty(metric)} course for {cat_val} only.",
                       f"Restricted to {cat_val}, how did monthly {pretty(metric)} move?"]:
                 add("retail", q, t)
-
+    bank["intent"] = "filter_aggregation"
     # combined filters (two conditions at once)
     for cat_val, year in [("Technology", 2018), ("Furniture", 2017), ("Office Supplies", 2016)]:
         t = target("line", "order_date", "sales", groupby="month(order_date)", agg="sum",
@@ -248,7 +233,7 @@ def build_template_examples() -> list[dict]:
                    reason="Both restrictions go into the filter, then the categories are compared inside that slice.",
                    insight=f"The chart compares categories within the {seg} segment of the {reg} region.")
         add("retail", f"Inside the {reg} region, {seg} segment only, rank the categories by sales.", t)
-
+    bank["intent"] = "anomaly"
     # anomaly (a line over time; the groupby granularity follows the wording of the question, and bar is never an anomaly answer)
     _UNITS = [("days", "day", "daily"), ("weeks", "week", "weekly"), ("months", "month", "monthly")]
     for ds, metric in [("energy", "appliances"), ("energy", "lights"), ("retail", "sales"), ("retail", "profit")]:
@@ -262,11 +247,8 @@ def build_template_examples() -> list[dict]:
                       f"Identify the {plural} whose {pretty(metric)} ran abnormally high.",
                       f"Which {plural} had {pretty(metric)} totals that look out of line?"]:
                 add(ds, q, t)
-
     return ex
 #################################
-
-
 # Handwritten vague / free form examples:
 def build_handwritten_examples() -> list[dict]:
     H = [
@@ -373,16 +355,21 @@ def build_handwritten_examples() -> list[dict]:
         ("mall", "Tell me something I do not know about the shoppers.", H[5][2]),
         ("energy", "Any weird days in the usage data?", H[7][2]),
     ]
-    return [{"dataset": d, "question": q, "target": t, "source": "handwritten"}
-            for d, q, t in H]
+    # intent per handwritten example, in list order (vague questions still map onto the taxonomy, the agents need it even when the user did not say it)
+    intents = ["trend", "comparison", "comparison", "trend", "distribution",
+               "relationship", "comparison", "anomaly", "comparison", "trend",
+               "comparison", "distribution", "trend", "trend", "comparison",
+               "comparison", "relationship", "comparison", "distribution",
+               "comparison", "anomaly", "comparison", "comparison", "relationship",
+               "trend", "relationship", "anomaly"]
+    assert len(intents) == len(H), f"{len(intents)} intents for {len(H)} examples"
+    return [{"dataset": d, "question": q, "target": t, "source": "handwritten", "intent": intent}
+            for (d, q, t), intent in zip(H, intents)]
 #################################
-
-
 # Assembly:
 def main() -> int:
     examples = build_template_examples() + build_handwritten_examples()
     examples += [dict(e, source="failure_targeted") for e in FAILURE_EXAMPLES]
-
     # deduplicate identical questions
     seen, unique = set(), []
     for e in examples:
@@ -391,17 +378,14 @@ def main() -> int:
             seen.add(key)
             unique.append(e)
     examples = unique
-
     # schema texts once per dataset (same summaries the model sees at inference)
     schemas = {}
     for ds, cfg in DATASETS.items():
         df = load_table(cfg["path"])
         schemas[ds] = schema_summary(profile_table(df, ds))
-
     # validate every target through the real pydantic schema
     for e in examples:
         ChartRecommendation(**e["target"]) # raises on any schema drift
-
     # contamination check before writing
     hits = check_contamination([e["question"] for e in examples])
     if hits:
@@ -409,7 +393,6 @@ def main() -> int:
         for h in hits:
             print(f"  [{h['kind']} {h['score']}] {h['benchmark_id']}  <->  {h['sft_question'][:70]}")
         return 1
-
     random.shuffle(examples)
     out = Path("data/sft_train.jsonl")
     with open(out, "w", encoding="utf-8") as f:
@@ -418,9 +401,8 @@ def main() -> int:
                        {"role": "system", "content": SFT_SYSTEM},
                        {"role": "user", "content": f"{schemas[e['dataset']]}\n\nQuestion: {e['question']}"},
                        {"role": "assistant", "content": json.dumps(e["target"])}],
-                   "meta": {"source": e["source"], "dataset": e["dataset"]}}
+                   "meta": {"source": e["source"], "dataset": e["dataset"], "intent": e["intent"]}}
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-
     counts = {}
     for e in examples:
         counts[e["source"]] = counts.get(e["source"], 0) + 1
@@ -430,8 +412,6 @@ def main() -> int:
         print(f"  {src:16} {n:4}  ({100*n/total:.0f}%)")
     print("contamination check: clean")
     return 0
-
-
 if __name__ == "__main__":
     sys.exit(main())
 #################################
