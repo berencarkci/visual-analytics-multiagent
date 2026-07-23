@@ -44,21 +44,36 @@ DATA_FILES = {
     "energy_consumption_hourly": "data/energy_consumption_hourly.csv",
 }
 OUT_PATH = Path("evaluation/results/sft_vs_prompt.json")
-_NUMBER = re.compile(r"\d")
+_NUMBER_TOKEN = re.compile(r"\d+(?:[.,]\d+)?")
 #################################
 
+def _invented_numbers(insight: str, question: str, transform) -> list[str]:
+    """Numbers in the insight the model could not have known
 
-# Per-answer scoring (all mechanical, no LLM judge):
-def score_answer(rec, df: pd.DataFrame, qtype: str) -> dict:
+    A single-call model sees no data, so any figure it states is unsupported —
+    except figures the question itself supplied (a year, a top-N) or that it
+    placed in the transform (filter values, limit). Those are restrictions
+    echoed back, not computed results, and counting them as hallucinations
+    would punish exactly the filter behaviour we trained for.
+    """
+    known = set(_NUMBER_TOKEN.findall(question))
+    known |= set(_NUMBER_TOKEN.findall(str(transform.filter or "")))
+    if transform.limit:
+        known.add(str(transform.limit))
+    return [n for n in _NUMBER_TOKEN.findall(insight or "") if n not in known]
+#################################
+
+# Per answer scoring (all mechanical, no LLM judge):
+def score_answer(rec, df: pd.DataFrame, qtype: str, question: str) -> dict:
     """Four checks on one validated recommendation"""
     cols = set(df.columns)
     used = [c for c in (rec.x_axis, rec.y_axis) if c]
+    invented = _invented_numbers(rec.insight, question, rec.transform)
     return {
         "columns_exist": all(c in cols or re.match(r"^\w+\(.+\)$", c) for c in used),
         "chart_fits_type": rec.chart_type in ALLOWED_CHARTS.get(qtype, ()),
-        # Decision A check: a single-call model cannot compute numbers, so any
-        # digit in the insight is an unsupported claim by construction.
-        "insight_has_numbers": bool(_NUMBER.search(rec.insight or "")),
+        "insight_invented_numbers": bool(invented),
+        "invented": invented,                      # kept for inspection
         "has_transform": rec.transform.groupby is not None or rec.transform.agg is not None,
     }
 
@@ -80,7 +95,7 @@ def run_config(name: str, client: HFClient, questions: list[dict],
 
         row = {"id": q["id"], "type": q["type"], "valid": valid, "used_retry": used_retry}
         if rec:
-            row.update(score_answer(rec, frames[q["dataset"]], q["type"]))
+            row.update(score_answer(rec, frames[q["dataset"]], q["type"], q["question"]))
             row["chart_type"] = rec.chart_type
         rows.append(row)
 
@@ -97,7 +112,7 @@ def run_config(name: str, client: HFClient, questions: list[dict],
         "columns_exist_pct": rate("columns_exist", ok),
         "chart_fits_type_pct": rate("chart_fits_type", ok),
         "has_transform_pct": rate("has_transform", ok),
-        "insight_has_numbers_pct": rate("insight_has_numbers", ok),
+        "insight_invented_numbers_pct": rate("insight_invented_numbers", ok),
         "seconds_per_question": round((time.time() - t0) / n, 1),
         "rows": rows,
     }
@@ -111,7 +126,7 @@ METRICS = [
     ("columns_exist_pct", "columns exist", "higher"),
     ("chart_fits_type_pct", "chart fits type", "higher"),
     ("has_transform_pct", "has transform", "higher"),
-    ("insight_has_numbers_pct", "insight has numbers", "lower"),
+    ("insight_invented_numbers_pct", "invented numbers", "lower"),
     ("seconds_per_question", "sec / question", "lower"),
 ]
 
@@ -164,7 +179,7 @@ def main() -> int:
     free_client(base_client) # base weights out before the adapter model comes in
     results.append(run_config("B sft+short", sft_client, questions, schemas, frames, mode="short"))
     results.append(run_config("C sft+long", sft_client, questions, schemas, frames, mode="long"))
-    
+
     print_table(results)
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)

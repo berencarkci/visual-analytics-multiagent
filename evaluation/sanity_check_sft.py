@@ -86,7 +86,8 @@ def main() -> int:
             n_valid += 1
             t = rec.transform
             print(f"    -> {rec.chart_type:9} x={rec.x_axis} y={rec.y_axis} "
-                  f"| groupby={t.groupby} agg={t.agg} sort={t.sort} limit={t.limit}")
+                  f"| groupby={t.groupby} agg={t.agg} filter={t.filter} "
+                  f"sort={t.sort} limit={t.limit}")
             print(f"    insight: {rec.insight}")
         else:
             print(f"    -> INVALID: {err}")
