@@ -1,0 +1,25 @@
+{
+  "base_model": "Qwen/Qwen2.5-3B-Instruct",
+  "gpu": "Tesla T4",
+  "platform": "Linux-6.12.90+-x86_64-with-glibc2.35",
+  "torch": "2.10.0+cu128",
+  "examples_train": 343,
+  "examples_val": 38,
+  "epochs": 4,
+  "effective_batch": 8,
+  "learning_rate": 0.0002,
+  "lora_r": 16,
+  "seed": 42,
+  "duration_minutes": 39.2,
+  "first_loss": 0.9048,
+  "last_loss": 0.0021,
+  "eval_loss_per_epoch": [
+    0.0803,
+    0.0552,
+    0.0497,
+    0.0508
+  ],
+  "best_epoch": 3,
+  "best_eval_loss": 0.0497,
+  "load_best_model_at_end": true
+}
