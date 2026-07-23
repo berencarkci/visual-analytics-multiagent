@@ -47,33 +47,50 @@ OUT_PATH = Path("evaluation/results/sft_vs_prompt.json")
 _NUMBER_TOKEN = re.compile(r"\d+(?:[.,]\d+)?")
 #################################
 
-def _invented_numbers(insight: str, question: str, transform) -> list[str]:
+def _invented_numbers(insight: str, question: str, schema_text: str, transform) -> list[str]:
     """Numbers in the insight the model could not have known
 
-    A single-call model sees no data, so any figure it states is unsupported —
-    except figures the question itself supplied (a year, a top-N) or that it
-    placed in the transform (filter values, limit). Those are restrictions
-    echoed back, not computed results, and counting them as hallucinations
-    would punish exactly the filter behaviour we trained for.
+    A single-call model sees no data, so a figure it states is unsupported —
+    unless it was already in front of it: the question (a year, a top-N), the
+    schema summary (column ranges, row counts) or the filter it wrote itself.
+    Echoing a range the prompt supplied is not a hallucination, and counting it
+    as one inflates the baseline's error rate.
+
+    Comparison is numeric with a small tolerance, because models round: an
+    insight saying 28.3 against a schema range of 28.333 is the same number.
     """
-    known = set(_NUMBER_TOKEN.findall(question))
-    known |= set(_NUMBER_TOKEN.findall(str(transform.filter or "")))
-    if transform.limit:
-        known.add(str(transform.limit))
-    return [n for n in _NUMBER_TOKEN.findall(insight or "") if n not in known]
-#################################
+    known_text = " ".join([question, schema_text, str(transform.filter or ""),
+                           str(transform.limit or "")])
+    known = set()
+    for tok in _NUMBER_TOKEN.findall(known_text):
+        try:
+            known.add(float(tok.replace(",", "")))
+        except ValueError:
+            pass
+
+    out = []
+    for tok in _NUMBER_TOKEN.findall(insight or ""):
+        try:
+            val = float(tok.replace(",", ""))
+        except ValueError:
+            continue
+        if any(abs(val - k) <= max(0.05, abs(k) * 0.005) for k in known):
+            continue
+        out.append(tok)
+    return out
 
 # Per answer scoring (all mechanical, no LLM judge):
-def score_answer(rec, df: pd.DataFrame, qtype: str, question: str) -> dict:
+def score_answer(rec, df: pd.DataFrame, qtype: str, question: str, schema_text: str) -> dict:
     """Four checks on one validated recommendation"""
     cols = set(df.columns)
     used = [c for c in (rec.x_axis, rec.y_axis) if c]
-    invented = _invented_numbers(rec.insight, question, rec.transform)
+    invented = _invented_numbers(rec.insight, question, schema_text, rec.transform)
     return {
         "columns_exist": all(c in cols or re.match(r"^\w+\(.+\)$", c) for c in used),
         "chart_fits_type": rec.chart_type in ALLOWED_CHARTS.get(qtype, ()),
         "insight_invented_numbers": bool(invented),
-        "invented": invented,                      # kept for inspection
+        "invented": invented,
+        "insight": rec.insight,          # kept so results can be re-scored offline
         "has_transform": rec.transform.groupby is not None or rec.transform.agg is not None,
     }
 
@@ -95,7 +112,7 @@ def run_config(name: str, client: HFClient, questions: list[dict],
 
         row = {"id": q["id"], "type": q["type"], "valid": valid, "used_retry": used_retry}
         if rec:
-            row.update(score_answer(rec, frames[q["dataset"]], q["type"], q["question"]))
+            row.update(score_answer(rec, frames[q["dataset"]], q["type"], q["question"], schema_text))
             row["chart_type"] = rec.chart_type
         rows.append(row)
 
