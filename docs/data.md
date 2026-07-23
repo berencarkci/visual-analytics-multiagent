@@ -13,12 +13,12 @@
 
 | Kaynak | Adet | Açıklama |
 |---|---|---|
-| template | 290 | Soru, cevap şablonundan türetildi, hedef kurgu gereği doğru |
-| handwritten | 27 | Muğlak/serbest ifadeli sorular, elle seçilmiş hedefler |
-| failure_targeted | 6 | Gözlemlenen model hatalarının doğru cevapları (`failure_examples.py`, elle genişletilebilir) |
+| template | 344 | Soru, cevap şablonundan türetildi — hedef kurgu gereği doğru |
+| handwritten | 27 | Muğlak / serbest ifadeli sorular, elle seçilmiş hedefler |
+| failure_targeted | 9 | Gözlemlenen model hatalarının doğru cevapları (`failure_examples.py`, elle genişletilebilir) |
 
-Grafik tipi dağılımı: bar 142, line 66, histogram 44, scatter 33, pie 25, box 13.
-Veri seti dağılımı: retail 199, energy 82, mall 42.
+Grafik tipi dağılımı: bar 144, line 121, histogram 44, scatter 33, pie 25, box 13.
+Veri seti dağılımı: retail 240, energy 98, mall 42.
 
 ## Tasarım kuralları
 
@@ -49,6 +49,22 @@ karşılaştırır, hiçbir insan okumaz, hiçbir model eğitilmez, mühür bozu
 Yeni bir model hatası gözlemlendiğinde: `evaluation/failure_examples.py`'ye
 kayıt ekle → `python evaluation/make_sft_data.py` koş → kesişim kontrolü
 otomatik tekrar çalışır → temizse dosya yeniden yazılır.
+
+## Gözlemden veriye: iki tur
+
+Set iki kez, canlı koşum bulgularıyla genişletildi:
+
+1. **Filtre kaybı.** SFT sonrası dev koşumunda "Technology kategorisinin 2018'deki
+   aylık satışları" sorusu `filter=None` ile geldi, ama insight kısıtı yine de
+   iddia ediyordu. Kök neden: setteki tüm filtre örnekleri kategorik groupby'lı
+   bar grafiğiydi, filtre + zaman groupby kombinasyonu hiç yoktu. Filtreli zaman
+   serisi ve iki koşullu filtre bankaları eklendi (filtreli örnek 9 → 32).
+   Sonraki koşumda aynı soru doğru filtreyle geldi.
+2. **Anomali → bar.** İki anomali sorusu `bar` döndü, oysa bar anomali için
+   izinli listede bile yok. Kök neden: 349 örnekte yalnızca 6 anomali örneği
+   vardı ve hepsi tek granülerlikteydi. Banka gün/hafta/ay granülerliklerine ve
+   "Identify the ... whose X ran abnormally high" kalıbına genişletildi
+   (anomali örneği 6 → 43). Sonraki koşumda grafik-niyet uyumsuzluğu sıfırlandı.
 
 ## Veri kaynakları ve lisans
 
