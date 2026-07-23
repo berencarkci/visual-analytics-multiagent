@@ -249,15 +249,19 @@ def build_template_examples() -> list[dict]:
                    insight=f"The chart compares categories within the {seg} segment of the {reg} region.")
         add("retail", f"Inside the {reg} region, {seg} segment only, rank the categories by sales.", t)
 
-    # anomaly
-    for ds, metric in [("energy", "appliances"), ("energy", "lights"), ("retail", "sales")]:
+    # anomaly (a line over time; the groupby granularity follows the wording of the question, and bar is never an anomaly answer)
+    _UNITS = [("days", "day", "daily"), ("weeks", "week", "weekly"), ("months", "month", "monthly")]
+    for ds, metric in [("energy", "appliances"), ("energy", "lights"), ("retail", "sales"), ("retail", "profit")]:
         d = DATASETS[ds]
-        t = target("line", d["date"], metric, groupby=f"day({d['date']})", agg="sum", sort="date_asc",
-                   reason="A daily line makes unusually high or low days stand out.",
-                   insight=f"The chart makes days with unusual total {pretty(metric)} visible.")
-        for q in [f"Flag the days where total {pretty(metric)} spiked beyond the norm.",
-                  f"Hunt for abnormal days in daily {pretty(metric)}."]:
-            add(ds, q, t)
+        for plural, expr, adverb in _UNITS:
+            t = target("line", d["date"], metric, groupby=f"{expr}({d['date']})",
+                       agg="sum", sort="date_asc",
+                       reason=f"A {adverb} line puts every period on one axis, so the ones breaking from the pattern stand out.",
+                       insight=f"The chart makes {plural} with unusual total {pretty(metric)} visible.")
+            for q in [f"Flag the {plural} where total {pretty(metric)} spiked beyond the norm.",
+                      f"Identify the {plural} whose {pretty(metric)} ran abnormally high.",
+                      f"Which {plural} had {pretty(metric)} totals that look out of line?"]:
+                add(ds, q, t)
 
     return ex
 #################################

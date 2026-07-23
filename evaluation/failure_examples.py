@@ -86,4 +86,23 @@ FAILURE_EXAMPLES = [
                               "sort": "date_asc", "limit": None},
                 "reason": "The category and the year are restrictions, so they belong in the filter; the monthly groupby then applies to the remaining rows.",
                 "insight": "The chart shows how monthly sales developed for Technology within 2018."}},
+
+    # anomaly questions are read on a time line, never as a bar comparison
+    # (SFT dev run: two "identify days where X was abnormally high" questions
+    #  came back as bar charts, which is not even in the allowed set for anomaly)
+    {"dataset": "energy",
+     "question": "Point me to the days when appliance energy use ran far above its usual level.",
+     "target": {"chart_type": "line", "x_axis": "date", "y_axis": "appliances",
+                "transform": {"groupby": "day(date)", "agg": "sum", "filter": None,
+                              "sort": "date_asc", "limit": None},
+                "reason": "Spotting unusual days needs every day on one time axis; bars compare categories, they do not expose a break from a pattern.",
+                "insight": "The chart makes days with unusual total appliance consumption visible."}},
+
+    {"dataset": "energy",
+     "question": "Show me where lighting use broke away from its normal daily pattern.",
+     "target": {"chart_type": "line", "x_axis": "date", "y_axis": "lights",
+                "transform": {"groupby": "day(date)", "agg": "sum", "filter": None,
+                              "sort": "date_asc", "limit": None},
+                "reason": "A daily line keeps the sequence intact, so days that break from the pattern are visible as spikes or dips.",
+                "insight": "The chart makes days with unusual total light consumption visible."}},
 ]
