@@ -56,9 +56,10 @@ def main() -> None:
     ap.add_argument("--ids", nargs="*", default=DEFAULT_IDS)
     ap.add_argument("--question", default=None, help="ad-hoc question instead of benchmark ids")
     ap.add_argument("--dataset", default="retail_sales_superstore")
+    ap.add_argument("--adapter", default=None, help="LoRA adapter: local path or Hub id")
     args = ap.parse_args()
 
-    client = HFClient()
+    client = HFClient(adapter=args.adapter)
     frames, profiles = {}, {}
     results = []
 
