@@ -9,6 +9,7 @@ The verifier is also the prototype of the groundedness metric.
 from __future__ import annotations
 
 import json
+import math
 import re
 
 from messages import InsightResult
@@ -55,8 +56,13 @@ def _numbers_in(obj) -> set[float]:
     if isinstance(obj, bool):
         return found
     if isinstance(obj, (int, float)):
+        # NaN and inf are skipped: a text cannot legitimately cite them, and they
+        # poison the comparison below (round(nan) raises). Correlation stats go
+        # NaN whenever a categorical column reaches Pearson, so this is reachable.
+        if not math.isfinite(float(obj)):
+            return found
         found.add(round(float(obj), 3))
-        found.add(round(abs(float(obj)), 3)) # sign phrasing tolerance
+        found.add(round(abs(float(obj)), 3))            # sign phrasing tolerance
     elif isinstance(obj, str):
         for m in _NUM_RE.findall(obj):
             try:
