@@ -20,8 +20,11 @@ from schemas import ChartRecommendation  # transform execution reuses its contai
 from prompts import PLAN_SYSTEM
 
 
-def _build_plan_messages(schema_text: str, question: str, intent: str) -> list[dict]:
+def _build_plan_messages(schema_text: str, question: str, intent: str,
+                         feedback: str | None = None) -> list[dict]:
     user = f"{schema_text}\n\nQuestion intent: {intent}\nQuestion: {question}"
+    if feedback:
+        user += f"\n\n{feedback}"
     return [{"role": "system", "content": PLAN_SYSTEM}, {"role": "user", "content": user}]
 #################################
 
@@ -128,12 +131,14 @@ def _compute_stats(focus: str, raw_df: pd.DataFrame, transformed: pd.DataFrame, 
 
 
 # Agent entry point:
-def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfile, schema_text: str, question: str, workflow: WorkflowPlan) -> tuple[TransformPlan | StepError, pd.DataFrame | None]:
+def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfile,schema_text: str, question: str, workflow: WorkflowPlan,
+                      feedback: str | None = None
+                      ) -> tuple[TransformPlan | StepError, pd.DataFrame | None]:
     """Plan (LLM, 1 retry) -> execute safely -> compute focus stats
 
     Returns (TransformPlan, prepared_df) on success or (StepError, None).
     """
-    messages = _build_plan_messages(schema_text, question, workflow.intent)
+    messages = _build_plan_messages(schema_text, question, workflow.intent, feedback)
     first = client.generate(messages)
     plan, err = _validate_plan(first, profile)
 

@@ -35,8 +35,11 @@ def _compact_stats(stats: dict) -> dict:
             out[f"{key}_omitted"] = len(values) - _MAX_GROUPS_SHOWN
     return out
 
-def _build_insight_messages(question: str, stats: dict) -> list[dict]:
+def _build_insight_messages(question: str, stats: dict,
+                            feedback: str | None = None) -> list[dict]:
     user = f"Question: {question}\nStatistics: {json.dumps(_compact_stats(stats), ensure_ascii=False)}"
+    if feedback:
+        user += f"\n\n{feedback}"
     return [{"role": "system", "content": INSIGHT_SYSTEM},
             {"role": "user", "content": user}]
 #################################
@@ -123,9 +126,10 @@ def _template_insight(question: str, stats: dict) -> str:
 
 
 # Agent entry point:
-def run_insight(client: ModelClient, question: str, stats: dict) -> InsightResult:
+def run_insight(client: ModelClient, question: str, stats: dict,
+                feedback: str | None = None) -> InsightResult:
     """LLM writes from the stats -> verifier checks -> template on any violation"""
-    messages = _build_insight_messages(question, stats)
+    messages = _build_insight_messages(question, stats, feedback)
     raw = client.generate(messages)
 
     text = None

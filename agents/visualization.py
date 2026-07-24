@@ -28,9 +28,12 @@ ALLOWED_CHARTS: dict[str, list[str]] = {
 #################################
 
 
-def _build_viz_messages(question: str, intent: str, data_summary: str, allowed: list[str]) -> list[dict]:
+def _build_viz_messages(question: str, intent: str, data_summary: str,
+                        allowed: list[str], feedback: str | None = None) -> list[dict]:
     user = (f"Question: {question}\nIntent: {intent}\n"
             f"Prepared data: {data_summary}\nAllowed chart types: {allowed}")
+    if feedback:
+        user += f"\n\n{feedback}"
     return [{"role": "system", "content": VIZ_SYSTEM},
             {"role": "user", "content": user}]
 #################################
@@ -81,7 +84,8 @@ def _apply_guardrails(chart: str, facts: dict, allowed: list[str]) -> tuple[str,
 
 
 # Agent entry point:
-def run_visualization(client: ModelClient, question: str, workflow: WorkflowPlan, plan: TransformPlan, raw_df: pd.DataFrame, prepared_df: pd.DataFrame) -> ChartDecision | StepError:
+def run_visualization(client: ModelClient, question: str, workflow: WorkflowPlan, plan: TransformPlan, raw_df: pd.DataFrame, prepared_df: pd.DataFrame,
+                      feedback: str | None = None) -> ChartDecision | StepError:
     """LLM picks from the allowed list then guardrails verify against the data
 
     Returns a ChartDecision whose recommendation is render ready (source column convention + the Data Analyst's transform). 
@@ -92,7 +96,7 @@ def run_visualization(client: ModelClient, question: str, workflow: WorkflowPlan
     summary = (f"{facts['n_rows']} rows; x={facts['x']} ({facts['n_categories']} categories), "
                f"y={facts['y']}; negatives={facts['has_negative']}")
 
-    messages = _build_viz_messages(question, workflow.intent, summary, allowed)
+    messages = _build_viz_messages(question, workflow.intent, summary, allowed, feedback)
     chart, reason, source = None, "", "llm"
     for attempt in range(2): # one retry on unparseable output
         raw = client.generate(messages)

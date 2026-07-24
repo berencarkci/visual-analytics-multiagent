@@ -24,6 +24,7 @@ from schemas import ChartRecommendation
 from supervisor import classify_intent, select_workflow
 from trace import TraceLogger, summarize
 from visualization import run_visualization
+from prompts import REVIEW_FEEDBACK
 
 # Workflow result container:
 @dataclass
@@ -80,8 +81,9 @@ def run_workflow(client: ModelClient, df: pd.DataFrame, profile: TableProfile, q
     log("supervisor", workflow)
 
     # 3-5) Data Analyst -> Visualization -> Insight, wrapped so a targeted retry blamed on the analyst can rerun the dependent steps too:
-    def run_analysis_chain():
-        plan, prepared = run_data_analysis(client, df, profile, schema_text, question, workflow)
+    def run_analysis_chain(feedback: str | None = None):
+        plan, prepared = run_data_analysis(client, df, profile, schema_text,
+                                           question, workflow, feedback)
         if isinstance(plan, StepError):
             return plan, None, None, None
         log("data_analyst", plan)
@@ -103,15 +105,20 @@ def run_workflow(client: ModelClient, df: pd.DataFrame, profile: TableProfile, q
     # Targeted single retry if the review failed:
     if not verdict.passed:
         blamed = _blame(verdict)
+        # The rejected attempt is fed back: a retry with an identical prompt is a
+        # no-op under greedy decoding, so the reviewer's reason is the only thing
+        # that can change the outcome.
+        feedback = REVIEW_FEEDBACK.format(issues="; ".join(verdict.issues))
         if blamed == "data_analyst":
-            plan2, prepared2, decision2, ins2 = run_analysis_chain()
+            plan2, prepared2, decision2, ins2 = run_analysis_chain(feedback)
             if not isinstance(plan2, StepError):
                 plan, prepared, decision, ins = plan2, prepared2, decision2, ins2
         elif blamed == "visualization":
-            decision = run_visualization(client, question, workflow, plan, df, prepared)
+            decision = run_visualization(client, question, workflow, plan, df,
+                                         prepared, feedback)
             log("visualization", decision)
         elif blamed == "insight":
-            ins = run_insight(client, question, plan.summary_stats)
+            ins = run_insight(client, question, plan.summary_stats, feedback)
             log("insight", ins)
 
         verdict = run_evaluation(workflow, plan, decision, ins, df)

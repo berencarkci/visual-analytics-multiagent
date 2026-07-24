@@ -190,3 +190,10 @@ SFT_SYSTEM = """You are a visual analytics assistant. Given a table schema and a
  
 Rules: use only columns from the schema; x_axis is always the source column (never a derived label); the insight must not state numbers you cannot compute from the schema."""
 #################################
+
+# Fed back into a retried agent's prompt after the Evaluation Agent rejects an
+# answer. Without it the retry re-sends a byte-identical prompt, and under
+# greedy decoding that is guaranteed to reproduce the same rejected output —
+# the retry costs a call and changes nothing.
+REVIEW_FEEDBACK = ("A previous attempt was rejected by the reviewer for this reason: {issues}\n"
+                   "Produce a corrected answer that specifically fixes it.")
