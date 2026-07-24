@@ -15,10 +15,28 @@ from messages import InsightResult
 from model_client import ModelClient
 from prompts import INSIGHT_SYSTEM
 
+# The Insight agent gets one sentence to write, so a group dictionary with 48
+# months or 138 days in it is not information, it is noise: the model cannot
+# use that many numbers and tends to echo the dump back as its "insight".
+# top_group / bottom_group / total already carry the answer. Trimming here (at
+# the prompt layer, not in the stats themselves) keeps the trace and the
+# groundedness check working on the full data.
+_MAX_GROUPS_SHOWN = 8
 
+
+def _compact_stats(stats: dict) -> dict:
+    """Trim oversized group dictionaries before they reach the model"""
+    out = dict(stats)
+    for key in ("groups", "shares_pct"):
+        values = out.get(key)
+        if isinstance(values, dict) and len(values) > _MAX_GROUPS_SHOWN:
+            largest = sorted(values.items(), key=lambda kv: kv[1], reverse=True)
+            out[key] = dict(largest[:_MAX_GROUPS_SHOWN])
+            out[f"{key}_omitted"] = len(values) - _MAX_GROUPS_SHOWN
+    return out
 
 def _build_insight_messages(question: str, stats: dict) -> list[dict]:
-    user = f"Question: {question}\nStatistics: {json.dumps(stats, ensure_ascii=False)}"
+    user = f"Question: {question}\nStatistics: {json.dumps(_compact_stats(stats), ensure_ascii=False)}"
     return [{"role": "system", "content": INSIGHT_SYSTEM},
             {"role": "user", "content": user}]
 #################################
