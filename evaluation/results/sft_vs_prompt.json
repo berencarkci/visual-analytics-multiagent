@@ -511,11 +511,11 @@
     {
       "config": "B sft+short",
       "n_questions": 38,
-      "schema_valid_pct": 97.4,
+      "schema_valid_pct": 100.0,
       "used_retry_pct": 0.0,
       "columns_exist_pct": 100.0,
       "chart_fits_type_pct": 100.0,
-      "has_transform_pct": 70.3,
+      "has_transform_pct": 68.4,
       "insight_invented_numbers_pct": 0.0,
       "seconds_per_question": 4.4,
       "rows": [
@@ -554,7 +554,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows the course of total furniture sales.",
+          "insight": "The chart shows the monthly course of total furniture sales and where it peaks.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -567,7 +567,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows which product categories generate the highest sales.",
+          "insight": "The chart shows which product categories contribute most of the total sales.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -580,7 +580,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows which customer segments tend to receive higher average discounts.",
+          "insight": "The chart shows which customer segment tends to receive higher average discounts.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -593,7 +593,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows which ship mode leads in total quantity sold.",
+          "insight": "The chart shows which ship mode serves as the biggest customer.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -621,7 +621,7 @@
           "invented": [],
           "insight": "The chart shows how order volume splits across category groups.",
           "has_transform": true,
-          "chart_type": "bar"
+          "chart_type": "pie"
         },
         {
           "id": "retail_013",
@@ -632,7 +632,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows whether discount and profit are related at the order level.",
+          "insight": "The chart shows whether discount and profit are related.",
           "has_transform": false,
           "chart_type": "scatter"
         },
@@ -671,7 +671,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows the monthly course of total sales for Technology within 2018.",
+          "insight": "The chart shows how monthly total sales developed for Technology within 2018.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -684,7 +684,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows how sub-categories contribute to total profit in the West region.",
+          "insight": "The chart shows how sub-categories contribute to total profit within the West region.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -723,7 +723,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows whether average spending score changes with age.",
+          "insight": "The chart shows whether average spending differs across age bands.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -736,9 +736,9 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows how customer counts split between gender groups.",
+          "insight": "The chart shows how total customer count splits across gender groups.",
           "has_transform": true,
-          "chart_type": "bar"
+          "chart_type": "pie"
         },
         {
           "id": "mall_006",
@@ -769,8 +769,15 @@
         {
           "id": "mall_010",
           "type": "relationship",
-          "valid": false,
-          "used_retry": false
+          "valid": true,
+          "used_retry": false,
+          "columns_exist": true,
+          "chart_fits_type": true,
+          "insight_invented_numbers": false,
+          "invented": [],
+          "insight": "The chart shows whether age and spending score are related for female customers alone.",
+          "has_transform": false,
+          "chart_type": "scatter"
         },
         {
           "id": "mall_011",
@@ -807,7 +814,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows how spending scores are spread across their range.",
+          "insight": "The chart shows how spending score values are spread across their range.",
           "has_transform": false,
           "chart_type": "histogram"
         },
@@ -820,7 +827,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows whether average spending score differs by gender for customers over 50.",
+          "insight": "The chart shows whether average spending score differs by gender across customers older than 50.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -846,7 +853,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows the weekly course of average outdoor temperature.",
+          "insight": "The chart shows the weekly course of average outdoor temperature and where it peaks.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -859,7 +866,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows the daily course of total energy consumption and where it peaks.",
+          "insight": "The chart shows which hours of the day consume the most on average.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -872,7 +879,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows which days of the week average higher appliance consumption.",
+          "insight": "The chart shows which days of the week tend to have higher average appliance consumption.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -911,7 +918,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows how hourly appliance consumption values are spread across their range.",
+          "insight": "The chart shows how hourly averages of appliance consumption are spread across the day.",
           "has_transform": true,
           "chart_type": "histogram"
         },
@@ -924,7 +931,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows how lighting energy consumption values are spread across their range.",
+          "insight": "The chart shows how lighting values are spread across their range.",
           "has_transform": false,
           "chart_type": "histogram"
         },
@@ -937,7 +944,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows whether average appliance consumption runs higher on cold days.",
+          "insight": "The chart shows whether days with low outdoor temperature tend to have higher appliance consumption.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -950,7 +957,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows how daily hours compare on average in consumption.",
+          "insight": "The chart shows which hours of the day consume the most on average.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -989,7 +996,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart makes days with unusual total light consumption visible.",
+          "insight": "The chart makes days with unusual total lighting consumption visible.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -1013,10 +1020,10 @@
       "n_questions": 38,
       "schema_valid_pct": 100.0,
       "used_retry_pct": 0.0,
-      "columns_exist_pct": 100.0,
-      "chart_fits_type_pct": 97.4,
-      "has_transform_pct": 68.4,
-      "insight_invented_numbers_pct": 5.3,
+      "columns_exist_pct": 97.4,
+      "chart_fits_type_pct": 100.0,
+      "has_transform_pct": 65.8,
+      "insight_invented_numbers_pct": 0.0,
       "seconds_per_question": 4.9,
       "rows": [
         {
@@ -1028,7 +1035,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Monthly totals span the full period, so a 12-month line shows the course.",
+          "insight": "Monthly totals start in 2015 and end in 2018, so the full course is readable.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -1041,7 +1048,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart covers the full available time range, so the quarterly course is readable.",
+          "insight": "The full time range shows how profit developed over time.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -1054,7 +1061,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Furniture sales spans the full period, so a monthly line shows how it develops.",
+          "insight": "The chart shows how monthly furniture sales developed.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -1067,7 +1074,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Total sales splits naturally into three categories, so bars compare them directly.",
+          "insight": "Total sales spans 0.444 to 22638.48, so all categories are visible on one chart.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -1080,7 +1087,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Customer segments have fewer than 5 categories, so a bar chart shows the averages directly.",
+          "insight": "Average discount differs across the three customer segments.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -1093,7 +1100,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Each ship mode sells a distinct product mix, so total quantity is meaningful.",
+          "insight": "Total quantity sold differs by ship mode.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -1104,11 +1111,9 @@
           "used_retry": false,
           "columns_exist": true,
           "chart_fits_type": true,
-          "insight_invented_numbers": true,
-          "invented": [
-            "100"
-          ],
-          "insight": "Region totals sum to 100%, so they are suitable as shares of a whole.",
+          "insight_invented_numbers": false,
+          "invented": [],
+          "insight": "With 4 regions and total sales spanning 0.444 to 22638.48, the pie shows each's share clearly.",
           "has_transform": true,
           "chart_type": "pie"
         },
@@ -1121,7 +1126,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The category hierarchy splits orders into 3 groups, so a single chart shows the split.",
+          "insight": "Each category makes up a small part of the whole; a pie would be unreadable with 3 categories.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -1134,8 +1139,8 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Discount and profit both take values between 0 and 1, so a scatter plot is appropriate.",
-          "has_transform": true,
+          "insight": "The relationship between discount and profit is the most direct way to answer whether they are related.",
+          "has_transform": false,
           "chart_type": "scatter"
         },
         {
@@ -1147,7 +1152,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Quantity and sales are both numeric, so a scatter plot shows how they move together.",
+          "insight": "Quantity and sales move together, so the full order dataset shows how they move together.",
           "has_transform": false,
           "chart_type": "scatter"
         },
@@ -1160,7 +1165,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Sales ranges from 0.44 to 22638.48, so the histogram shows how values are spread across that range.",
+          "insight": "The range of sales is 0.444 to 22638.48, so a histogram shows how values are spread across that range.",
           "has_transform": false,
           "chart_type": "histogram"
         },
@@ -1173,7 +1178,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Monthly totals compare naturally as a line over time.",
+          "insight": "Monthly totals for Technology show how the category developed in 2018.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -1186,7 +1191,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The filter restricts the rows to the West region before aggregation.",
+          "insight": "West accounts for a small portion of total sub-category totals.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -1199,7 +1204,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows how recent months compare to the corporate sales course.",
+          "insight": "The chart shows how total sales developed for corporate customers month by month.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -1212,7 +1217,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Average spending scores compare naturally across gender groups.",
+          "insight": "Average spending score differs by gender; the difference is significant given the range of scores.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -1225,7 +1230,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Age spans 18 to 70, so the spending score comparison is meaningful.",
+          "insight": "The age range is broad, so the two groups keep the full range of spending scores.",
           "has_transform": false,
           "chart_type": "box"
         },
@@ -1238,9 +1243,9 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Customer counts are sufficient to show the share of each group.",
+          "insight": "With only two groups, the pie shows both shares at once.",
           "has_transform": true,
-          "chart_type": "bar"
+          "chart_type": "pie"
         },
         {
           "id": "mall_006",
@@ -1251,7 +1256,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Annual income and spending score both range widely, so a scatter plot can reveal whether they move together.",
+          "insight": "Annual income and spending score both run from 15 to 137, so their association is visible on a scatter plot.",
           "has_transform": false,
           "chart_type": "scatter"
         },
@@ -1264,7 +1269,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Age and spending score both range widely, so a scatter plot can reveal whether they move together.",
+          "insight": "Age and spending score both fall within a broad range, so the association is visible on a scatter plot.",
           "has_transform": false,
           "chart_type": "scatter"
         },
@@ -1277,8 +1282,8 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The filter restricts the view to female customers, so the relationship is cleaner.",
-          "has_transform": true,
+          "insight": "The relationship between age and spending score holds for female customers alone.",
+          "has_transform": false,
           "chart_type": "scatter"
         },
         {
@@ -1290,7 +1295,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Customer ages range from 18 to 70, so a histogram shows their spread.",
+          "insight": "Age ranges from 18 to 70, so a histogram shows how many customers fall into each range.",
           "has_transform": false,
           "chart_type": "histogram"
         },
@@ -1303,7 +1308,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Annual income ranges from $15k to $137k, so the histogram shows how values are spread across that range.",
+          "insight": "The distribution of annual income spans 15 to 137 thousand US dollars.",
           "has_transform": false,
           "chart_type": "histogram"
         },
@@ -1316,7 +1321,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Spending scores range from 1 to 99, so a histogram bins them naturally.",
+          "insight": "The range of spending scores is 1.0 to 99.0, so a histogram shows how they are spread.",
           "has_transform": false,
           "chart_type": "histogram"
         },
@@ -1329,7 +1334,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The filtered age group is small enough to show meaningful averages.",
+          "insight": "Average spending score differs by gender among customers older than 50.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -1342,7 +1347,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Daily totals span the entire recorded period, so a daily line shows how they developed.",
+          "insight": "Daily totals span the whole recorded period, so a daily line is informative.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -1355,7 +1360,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The question asks specifically for a weekly average, so that aggregation is needed.",
+          "insight": "The series spans 2016-01-11 to 2016-05-27, so a weekly line is sensible.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -1368,7 +1373,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The hourly daily course repeats, so the chart is concise.",
+          "insight": "The hourly course averages the daily usage rhythm.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -1381,7 +1386,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Days of the week are comparable, so bars show which ones stand out.",
+          "insight": "Average appliance consumption per day of the week shows which days run warmer or cooler on average.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -1392,11 +1397,9 @@
           "used_retry": false,
           "columns_exist": true,
           "chart_fits_type": true,
-          "insight_invented_numbers": true,
-          "invented": [
-            "25"
-          ],
-          "insight": "Outdoor temperature and appliance consumption both range from -6 to 25 degrees, so their association is visible in a scatter plot.",
+          "insight_invented_numbers": false,
+          "invented": [],
+          "insight": "Outdoor temperature and appliance consumption both fall within a broad range.",
           "has_transform": false,
           "chart_type": "scatter"
         },
@@ -1409,7 +1412,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Outdoor humidity and appliance consumption both range from 0 to 100, so a scatter plot is appropriate.",
+          "insight": "Outdoor humidity and appliance consumption both fall within a reasonable range, so a scatter plot shows whether they move together.",
           "has_transform": false,
           "chart_type": "scatter"
         },
@@ -1418,12 +1421,12 @@
           "type": "distribution",
           "valid": true,
           "used_retry": false,
-          "columns_exist": true,
+          "columns_exist": false,
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Hourly appliance consumption ranges from 28.3 to 608.3 kWh, so a histogram bins the raw values.",
-          "has_transform": false,
+          "insight": "The resulting hour-by-hour profile shows the daily usage rhythm.",
+          "has_transform": true,
           "chart_type": "histogram"
         },
         {
@@ -1435,7 +1438,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The histogram shows how lighting consumption values are spread across their range.",
+          "insight": "The range of lighting consumption is 0.0 to 51.667.",
           "has_transform": false,
           "chart_type": "histogram"
         },
@@ -1445,12 +1448,12 @@
           "valid": true,
           "used_retry": false,
           "columns_exist": true,
-          "chart_fits_type": false,
+          "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The two groups compare naturally on the same timeline.",
+          "insight": "Days with outdoor temperature below 5 degrees are a distinct subgroup of the full date range.",
           "has_transform": true,
-          "chart_type": "box"
+          "chart_type": "bar"
         },
         {
           "id": "energy_016",
@@ -1461,7 +1464,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart shows which hours of the day appliances consume the most.",
+          "insight": "The chart shows which hours of the day consume the most on average.",
           "has_transform": true,
           "chart_type": "bar"
         },
@@ -1474,7 +1477,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Days with unusual total appliance consumption are visible as spikes on the daily consumption timeline.",
+          "insight": "Days with unusual total appliance consumption are visible as spikes or dips on the timeline.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -1487,7 +1490,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Days with unusual total appliance consumption stand out.",
+          "insight": "Any unusual days or weeks will stand out on their own or compared to the trend.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -1500,7 +1503,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "Days with unusual total lighting consumption are visible as spikes or dips on the timeline.",
+          "insight": "Days with unusual total lighting consumption are visible as spikes or dips.",
           "has_transform": true,
           "chart_type": "line"
         },
@@ -1513,7 +1516,7 @@
           "chart_fits_type": true,
           "insight_invented_numbers": false,
           "invented": [],
-          "insight": "The chart makes days with unusual pressure levels visible.",
+          "insight": "The chart makes unusually high or low pressure readings stand out on the timeline.",
           "has_transform": true,
           "chart_type": "line"
         }
