@@ -15,10 +15,17 @@ from prompts import INTENT_SYSTEM
 
 
 
+def _build_intent_messages(question: str) -> list[dict]:
+    """Extracted so training data generators can reproduce the exact prompt"""
+    return [
+        {"role": "system", "content": INTENT_SYSTEM},
+        {"role": "user", "content": f'Q: "{question}"'},
+    ]
+
+
 def _classify_with_llm(client: ModelClient, question: str) -> IntentResult | None:
-    """One small LLM call, returns None on any invalid output (fallback takes over)"""
-    messages = [{"role": "system", "content": INTENT_SYSTEM},
-                {"role": "user", "content": f'Q: "{question}"'}]
+    """One small LLM call; returns None on any invalid output (fallback takes over)"""
+    messages = _build_intent_messages(question)
     raw = client.generate(messages)
     match = re.search(r'\{[^{}]*\}', raw)
     if not match:

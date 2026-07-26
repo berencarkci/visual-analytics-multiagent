@@ -87,9 +87,12 @@ def verify_grounded(text: str, stats: dict) -> tuple[bool, list[str]]:
             val = round(float(m.replace(",", "")), 3)
         except ValueError:
             continue
-        # tolerate the same value at coarser rounding (e.g. 836154.033 -> 836154)
-        ok = any(abs(val - a) < 0.5 or (a != 0 and abs(val - round(a)) < 0.5)
-                 for a in allowed)
+        # Rounding tolerance, scaled to magnitude. A flat 0.5 window was wrong
+        # for correlation: r values live in [-1, 1], so r=-0.219 would have
+        # "matched" a stated r=-0.48 and the check silently passed. Large
+        # numbers still get the loose window, because models drop decimals
+        # there (836154.033 -> 836154).
+        ok = any(abs(val - a) <= (0.5 if abs(a) >= 1 else 0.005) for a in allowed)
         if not ok:
             problems.append(m)
     return len(problems) == 0, problems
