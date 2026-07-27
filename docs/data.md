@@ -1,39 +1,49 @@
-# Veri Kartı — SFT Eğitim Verisi (data/sft_train.jsonl)
+# Veri Kartı — Eğitim ve Tercih Verisi
 
 ## Özet
 
 | | |
 |---|---|
-| Örnek sayısı | 323 |
+| Tek çağrı örneği | 471 (`data/sft_train.jsonl`) |
+| Ajan formatlı örnek | 1884 (`data/sft_agents_train.jsonl`) |
+| Tercih çifti | 430 (`data/dpo/dpo_train.jsonl`) |
 | Format | chat-JSONL (system / user / assistant) + meta |
-| Üretici | `evaluation/make_sft_data.py` (seed=42, deterministik) |
+| Üretici | `evaluation/make_sft_data.py`, `make_agent_sft_data.py`, `make_dpo_pairs.py` (seed=42, deterministik) |
 | Kesişim kontrolü | `evaluation/check_contamination.py` — temiz (60 benchmark sorusuna karşı, birebir + bulanık @0.85) |
 
-## Kaynak karışımı
+## Kaynak karışımı (tek çağrı seti)
 
 | Kaynak | Adet | Açıklama |
 |---|---|---|
-| template | 344 | Soru, cevap şablonundan türetildi — hedef kurgu gereği doğru |
+| template | 434 | Soru, cevap şablonundan türetildi — hedef kurgu gereği doğru |
 | handwritten | 27 | Muğlak / serbest ifadeli sorular, elle seçilmiş hedefler |
-| failure_targeted | 9 | Gözlemlenen model hatalarının doğru cevapları (`failure_examples.py`, elle genişletilebilir) |
+| failure_targeted | 10 | Gözlemlenen model hatalarının doğru cevapları (`failure_examples.py`, elle genişletilebilir) |
 
-Grafik tipi dağılımı: bar 144, line 121, histogram 44, scatter 33, pie 25, box 13.
-Veri seti dağılımı: retail 240, energy 98, mall 42.
+Sıralama dağılımı: `value_desc` 137, `date_asc` 135, `value_asc` 36,
+`date_desc` 20, sıralamasız 143.
+Türetilmiş ölçü içeren örnek: 46 (`days_between` 24, `ratio` 20, `diff` 2).
 
 ## Tasarım kuralları
 
-1. **Insight'lar işaret eder, iddia etmez.** Hedef insight'lar hiçbir zaman şemadan
-   hesaplanamayacak bir sayı içermez ("The chart shows which category leads...").
-   Gerekçe: girdide veri yokken sayılı hedeflerle eğitmek, modele kendinden emin
-   sayı uydurmayı öğretirdi — baseline'ın tam da düzeltmeye çalıştığımız zaafı.
-2. **Guardrail'ler kural metni olarak değil, örnek olarak öğretilir.** Hedeflerde
+1. **Tek çağrı insight'ları işaret eder, iddia etmez.** Hedef insight'lar hiçbir
+   zaman şemadan hesaplanamayacak bir sayı içermez ("The chart shows which
+   category leads..."). Gerekçe: girdide veri yokken sayılı hedeflerle eğitmek,
+   modele kendinden emin sayı uydurmayı öğretirdi — baseline'ın tam da
+   düzeltmeye çalıştığımız zaafı.
+2. **Ajan formatlı Insight hedefleri sayı içerir.** Kural hiçbir zaman "sayı
+   kullanma" değildi, "göremediğin sayıyı söyleme"ydi. Insight ajanı hesaplanmış
+   istatistikleri gördüğü için sayı alıntılamak doğru davranıştır.
+3. **Guardrail'ler kural metni olarak değil, örnek olarak öğretilir.** Hedeflerde
    6+ kategorili pie yoktur, kesikli x ilişkiler box'a, histogramlar groupby'sız
    gider. Model kuralı okumaz, hep böyle yapılmış görür.
-3. **Kısa sistem prompt'u, few shot yok.** Format bilgisi ağırlıklara taşınmalı,
+4. **Kısa sistem prompt'u, few shot yok.** Format bilgisi ağırlıklara taşınmalı,
    baseline'ın 1260 token'lık dondurulmuş prompt'u ölçüm için el değmeden durur.
-   (SFT sonrası kısa vs uzun prompt farkı dev split'te ayrıca ölçülecek.)
-4. **Her hedef pydantic şemasından geçirilerek doğrulanır** (ChartRecommendation) —
+5. **Her hedef pydantic şemasından geçirilerek doğrulanır** (ChartRecommendation) —
    şema kayması üretim anında patlar, eğitime sızmaz.
+6. **Ajan formatlı örnekler ajanların kendi prompt kurucularından üretilir.**
+   `make_agent_sft_data.py`, `_build_plan_messages()` / `_build_viz_messages()` /
+   `_build_insight_messages()` fonksiyonlarını import eder. Eğitim girdisi ile
+   çıkarım girdisi birebir aynı kalır, prompt drift'i yapısal olarak imkânsızdır.
 
 ## Kesişim kontrolü süreci
 
@@ -48,11 +58,12 @@ karşılaştırır, hiçbir insan okumaz, hiçbir model eğitilmez, mühür bozu
 
 Yeni bir model hatası gözlemlendiğinde: `evaluation/failure_examples.py`'ye
 kayıt ekle → `python evaluation/make_sft_data.py` koş → kesişim kontrolü
-otomatik tekrar çalışır → temizse dosya yeniden yazılır.
+otomatik tekrar çalışır → temizse dosya yeniden yazılır → ajan formatlı set için
+`make_agent_sft_data.py` koşulur.
 
-## Gözlemden veriye: iki tur
+## Gözlemden veriye: üç tur
 
-Set iki kez, canlı koşum bulgularıyla genişletildi:
+Set üç kez, canlı koşum bulgularıyla genişletildi.
 
 1. **Filtre kaybı.** SFT sonrası dev koşumunda "Technology kategorisinin 2018'deki
    aylık satışları" sorusu `filter=None` ile geldi, ama insight kısıtı yine de
@@ -60,14 +71,63 @@ Set iki kez, canlı koşum bulgularıyla genişletildi:
    bar grafiğiydi, filtre + zaman groupby kombinasyonu hiç yoktu. Filtreli zaman
    serisi ve iki koşullu filtre bankaları eklendi (filtreli örnek 9 → 32).
    Sonraki koşumda aynı soru doğru filtreyle geldi.
+
 2. **Anomali → bar.** İki anomali sorusu `bar` döndü, oysa bar anomali için
    izinli listede bile yok. Kök neden: 349 örnekte yalnızca 6 anomali örneği
    vardı ve hepsi tek granülerlikteydi. Banka gün/hafta/ay granülerliklerine ve
    "Identify the ... whose X ran abnormally high" kalıbına genişletildi
    (anomali örneği 6 → 43). Sonraki koşumda grafik-niyet uyumsuzluğu sıfırlandı.
 
+3. **Şema genişletmesi.** Canlı etiketleme oturumları dört sınır gösterdi (bkz.
+   [backend.md](backend.md), Bölüm 6). Yeni mekanizmalar için bankalar eklendi:
+   artan/azalan sıralama ve türetilmiş ölçüler. **Prompt'a kural yazmak tek
+   başına yetmedi** — ilk denemede model yeni mekanizmaları hiç üretmedi, örnek
+   bankaları eklendikten sonra üretmeye başladı. Set 381 → 471 örneğe çıktı.
+
+Üç turun ortak dersi: yapısal bir davranışın öğrenilmesi için ~20+ örnek
+gerekiyor. `diff` ölçüsü 2 örnekle eğitildi ve yetenek testinde hiç
+kullanılmadı.
+
+## Tercih verisi (B4)
+
+DPO çiftleri `data/dpo/` altında. Üretim `evaluation/make_dpo_pairs.py`,
+puanlama `evaluation/rubric.py`. Dağılımlar ve gerekçeler için
+[training.md](training.md).
+
+Promptlar yine ajanların kendi prompt kurucularından üretilir. Prompt
+değiştiğinde çiftler geçersizleşir ve yeniden üretilir: şema genişletmesinden
+sonra 412 çift atılıp 430 çift baştan üretildi.
+
+Kesişim kontrolü DPO tarafında da çalışır — promptlarda benchmark sorusu
+bulunursa üretim durur.
+
+**Belirsiz çiftler eğitim dışı.** Rubriğin tek ham puanla ayırdığı çiftler
+(`pairs_*_unclear.jsonl`) eğitime girmez: zayıf sıralama gürültülü eğitim
+sinyali demek. Dosyalar repoda durur, karar geri alınabilir.
+
+## Etiketleme verisi (B4/T2)
+
+Space'in Preference Labeling sekmesi canlı tercih etiketi toplar
+(`labels/preference_labels.jsonl`, HF Dataset'e push edilebilir). Amaç
+doğrulama: rubriğin otomatik etiketlemesi insan yargısıyla ne kadar uyuşuyor.
+
+Hedef başlangıçta 150-300 çiftti. Rol "üretim"den "doğrulama"ya kaydığı ve tek
+etiketleyici bulunduğu için 40-60'a indirildi: bu aralık uyum oranını %10-15
+hata payıyla raporlamaya yetiyor ve ~45 dakika sürüyor.
+
+Etiketleme ajan çıktısı (JSON) üzerinden yapılır, grafik üzerinden değil — DPO
+çiftleri modelin ürettiği token dizisi olmak zorunda. İki önyargı kontrolü:
+adaylar karıştırılarak gösterilir (konum önyargısı), rubriğin kararı seçimden
+önce gizlenir (çıpalama önyargısı).
+
+Etiketleme oturumlarının asıl çıktısı uyum oranı değil, yedi bilinen sınırın
+keşfi oldu (bkz. [backend.md](backend.md), Bölüm 6). Mekanik ölçüm bunların
+hiçbirini yakalamamıştı.
+
+_Uyum oranı etiketleme tamamlanınca eklenecek._
+
 ## Veri kaynakları ve lisans
 
 Sorular üç genel veri setinin şemaları üzerinden üretildi (Superstore satış,
-Mall müşteri, UCI Appliances enerji, kaynak ve temizlik adımları data/README.md'de).
-Soru metinleri ve hedefler bu proje içinde üretilmiştir.
+Mall müşteri, UCI Appliances enerji; kaynak ve temizlik adımları
+`data/README.md`'de). Soru metinleri ve hedefler bu proje içinde üretilmiştir.

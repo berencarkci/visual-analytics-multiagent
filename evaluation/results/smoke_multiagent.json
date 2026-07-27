@@ -23,7 +23,7 @@
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-27T10:13:04.742434+00:00",
+        "timestamp": "2026-07-27T12:59:24.920865+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "trend",
@@ -34,7 +34,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-27T10:13:04.742769+00:00",
+        "timestamp": "2026-07-27T12:59:24.921175+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "trend",
@@ -50,7 +50,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-27T10:13:06.940506+00:00",
+        "timestamp": "2026-07-27T12:59:27.111854+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -86,7 +86,7 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-27T10:13:07.909462+00:00",
+        "timestamp": "2026-07-27T12:59:28.093137+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
@@ -109,7 +109,7 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-27T10:13:11.639077+00:00",
+        "timestamp": "2026-07-27T12:59:31.703454+00:00",
         "payload_type": "InsightResult",
         "payload": {
           "insight": "The series rose from 14236.895 at 2015-01-01 00:00:00 to 83829.319 at 2018-12-01 00:00:00, a change of 488.8%.",
@@ -133,7 +133,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-27T10:13:11.639728+00:00",
+        "timestamp": "2026-07-27T12:59:31.704123+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,
@@ -180,7 +180,7 @@
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-27T10:13:11.956179+00:00",
+        "timestamp": "2026-07-27T12:59:32.024927+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "comparison",
@@ -191,7 +191,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-27T10:13:11.956447+00:00",
+        "timestamp": "2026-07-27T12:59:32.025198+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "comparison",
@@ -207,7 +207,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-27T10:13:14.042356+00:00",
+        "timestamp": "2026-07-27T12:59:34.118724+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -244,7 +244,7 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-27T10:13:14.949934+00:00",
+        "timestamp": "2026-07-27T12:59:35.018668+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
@@ -267,7 +267,7 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-27T10:13:16.204306+00:00",
+        "timestamp": "2026-07-27T12:59:36.283301+00:00",
         "payload_type": "InsightResult",
         "payload": {
           "insight": "Across 3 groups, Technology tops the ranking at 836154.033.",
@@ -292,7 +292,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-27T10:13:16.204710+00:00",
+        "timestamp": "2026-07-27T12:59:36.283678+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,
@@ -339,7 +339,7 @@
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-27T10:13:16.525023+00:00",
+        "timestamp": "2026-07-27T12:59:36.603957+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "composition",
@@ -350,7 +350,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-27T10:13:16.525280+00:00",
+        "timestamp": "2026-07-27T12:59:36.604233+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "composition",
@@ -366,7 +366,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-27T10:13:18.644464+00:00",
+        "timestamp": "2026-07-27T12:59:38.676806+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -410,7 +410,7 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-27T10:13:19.726472+00:00",
+        "timestamp": "2026-07-27T12:59:39.730885+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
@@ -433,7 +433,7 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-27T10:13:20.872902+00:00",
+        "timestamp": "2026-07-27T12:59:40.838624+00:00",
         "payload_type": "InsightResult",
         "payload": {
           "insight": "The largest share goes to West at 31.6%, with South the smallest.",
@@ -465,7 +465,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-27T10:13:20.873302+00:00",
+        "timestamp": "2026-07-27T12:59:40.839000+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,
@@ -512,7 +512,7 @@
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-27T10:13:21.196812+00:00",
+        "timestamp": "2026-07-27T12:59:41.163029+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "relationship",
@@ -523,7 +523,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-27T10:13:21.197138+00:00",
+        "timestamp": "2026-07-27T12:59:41.163347+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "relationship",
@@ -539,7 +539,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-27T10:13:23.128212+00:00",
+        "timestamp": "2026-07-27T12:59:43.082700+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -574,7 +574,7 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-27T10:13:24.156353+00:00",
+        "timestamp": "2026-07-27T12:59:44.116070+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
@@ -599,7 +599,7 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-27T10:13:25.616656+00:00",
+        "timestamp": "2026-07-27T12:59:45.576110+00:00",
         "payload_type": "InsightResult",
         "payload": {
           "insight": "The relationship between discount and profit is weak and negative, with r=-0.219 over 9994 rows.",
@@ -622,7 +622,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-27T10:13:25.616967+00:00",
+        "timestamp": "2026-07-27T12:59:45.576511+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,
@@ -669,7 +669,7 @@
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-27T10:13:25.939922+00:00",
+        "timestamp": "2026-07-27T12:59:45.909439+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "relationship",
@@ -680,7 +680,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-27T10:13:25.940202+00:00",
+        "timestamp": "2026-07-27T12:59:45.909759+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "relationship",
@@ -696,7 +696,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-27T10:13:28.007265+00:00",
+        "timestamp": "2026-07-27T12:59:47.989764+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -731,7 +731,7 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-27T10:13:29.026920+00:00",
+        "timestamp": "2026-07-27T12:59:49.021091+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
@@ -754,7 +754,7 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-27T10:13:30.482459+00:00",
+        "timestamp": "2026-07-27T12:59:50.449884+00:00",
         "payload_type": "InsightResult",
         "payload": {
           "insight": "The relationship between annual income and spending score is weak and positive, with r=0.01 over 200 rows.",
@@ -777,7 +777,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-27T10:13:30.482836+00:00",
+        "timestamp": "2026-07-27T12:59:50.450246+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,
@@ -826,7 +826,7 @@
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-27T10:13:30.801235+00:00",
+        "timestamp": "2026-07-27T12:59:50.771508+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "distribution",
@@ -837,7 +837,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-27T10:13:30.801571+00:00",
+        "timestamp": "2026-07-27T12:59:50.771831+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "distribution",
@@ -853,7 +853,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-27T10:13:32.530985+00:00",
+        "timestamp": "2026-07-27T12:59:52.444091+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -887,7 +887,7 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-27T10:13:33.591851+00:00",
+        "timestamp": "2026-07-27T12:59:53.526636+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
@@ -910,7 +910,7 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-27T10:13:35.510606+00:00",
+        "timestamp": "2026-07-27T12:59:55.430657+00:00",
         "payload_type": "InsightResult",
         "payload": {
           "insight": "The distribution of customer ages has a median of 36.0 and a mean of 38.85, spanning 18.0 to 70.0.",
@@ -933,7 +933,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-27T10:13:35.510945+00:00",
+        "timestamp": "2026-07-27T12:59:55.430983+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,
@@ -980,7 +980,7 @@
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-27T10:13:35.868117+00:00",
+        "timestamp": "2026-07-27T12:59:55.791802+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "comparison",
@@ -991,7 +991,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-27T10:13:35.868399+00:00",
+        "timestamp": "2026-07-27T12:59:55.792083+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "comparison",
@@ -1007,7 +1007,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-27T10:13:38.075959+00:00",
+        "timestamp": "2026-07-27T12:59:58.011230+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -1048,7 +1048,7 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-27T10:13:38.974354+00:00",
+        "timestamp": "2026-07-27T12:59:58.904871+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
@@ -1071,7 +1071,7 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-27T10:13:40.137911+00:00",
+        "timestamp": "2026-07-27T13:00:00.043848+00:00",
         "payload_type": "InsightResult",
         "payload": {
           "insight": "Across 7 groups, Monday tops the ranking at 111.451.",
@@ -1100,7 +1100,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-27T10:13:40.138279+00:00",
+        "timestamp": "2026-07-27T13:00:00.044176+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,
@@ -1147,7 +1147,7 @@
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-27T10:13:40.500594+00:00",
+        "timestamp": "2026-07-27T13:00:00.416063+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "anomaly",
@@ -1158,7 +1158,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-27T10:13:40.500864+00:00",
+        "timestamp": "2026-07-27T13:00:00.416351+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "anomaly",
@@ -1174,7 +1174,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-27T10:13:42.774578+00:00",
+        "timestamp": "2026-07-27T13:00:02.666598+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -1209,7 +1209,7 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-27T10:13:44.170676+00:00",
+        "timestamp": "2026-07-27T13:00:04.122087+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
@@ -1232,7 +1232,7 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-27T10:13:47.121289+00:00",
+        "timestamp": "2026-07-27T13:00:07.057870+00:00",
         "payload_type": "InsightResult",
         "payload": {
           "insight": "The IQR bounds are 473.333 and 4016.664; 4 values break them, led by 2016-04-04 00:00:00 (4524.999).",
@@ -1255,7 +1255,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-27T10:13:47.121723+00:00",
+        "timestamp": "2026-07-27T13:00:07.058321+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,

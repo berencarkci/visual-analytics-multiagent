@@ -115,17 +115,38 @@ TransformPlan(transform: Transform, target_columns: list[str],
 ```
 
 `Transform` alanları: `groupby`, `agg` (`sum`/`mean`/`count`/`count_distinct`),
-`filter` (pandas query), `sort` (`date_asc`/`value_desc`), `limit`.
+`filter` (pandas query), `sort`
+(`date_asc`/`date_desc`/`value_asc`/`value_desc`), `limit`.
 
 `groupby` türetilmiş ifade alabilir: `month(col)`, `quarter(col)`, `week(col)`,
 `day(col)`, `year(col)`, `hour_of_day(col)`, `day_of_week(col)`,
 `weekend_flag(col)`, `bins(col)`.
 
+**Türetilmiş ölçüler.** `target_columns` ikinci girdisi (tek çağrı formatında
+`y_axis`) bir ifade olabilir: `days_between(a, b)`, `ratio(a, b)`, `diff(a, b)`.
+Sorunun istediği büyüklük bir kolon değilse — teslimat süresi, kâr marjı, birim
+fiyat — motor bunu önce gerçek bir kolona dönüştürür, sonra agregasyonu uygular.
+Şemaya yeni alan eklenmedi; `groupby`'daki `month(col)` deseninin aynısı y
+eksenine taşındı.
+
+Tanımsız bir ölçü (`velocity(a, b)`) sessizce düşmez, `ColumnNotFoundError`
+fırlatır. Sessiz kayıp gürültülü hatadan kötüdür: kullanıcı sorduğu şeyi aldığını
+sanır. `ratio`'da sıfıra bölme `NaN` üretir, sonsuz değil — sonsuz değerler
+groundedness doğrulamasını ve grafik ölçeklerini bozar.
+
 Sağlamlaştırmalar:
+
 - **Format hatasında alan hatırlatması** (`_FIELD_HINT`) retry prompt'una eklenir.
-  Küçük modeller değeri yanlış slota koyabiliyor (ör. `agg="date_asc"`).
+  Küçük modeller değeri yanlış slota koyabiliyor (ör. `agg="date_asc"`, ya da
+  türetilmiş ölçüyü `agg` alanına yazmak).
 - **Geçersiz sort reddedilmez, düşürülür** ve `notes`'a yazılır — plan tamamen
   kaybolmaktansa kısmen uygulanır.
+- **Geçerli sıralama değerleri şemadan türetilir** (`_VALID_SORTS`). Bu
+  ön-doğrulama ile şema bir kez ayrıştı ve model, şemanın izin verdiği bir değeri
+  kullandığı için cezalandırıldı; artık tek doğruluk kaynağı `Transform` şeması.
+- **Uydurma alanlar reddedilir.** Tüm pydantic modellerinde `extra="forbid"`.
+  Model plan uydurup ekleyebiliyordu (`extra_transforms`) ve pydantic sessizce
+  yutuyordu: planın bir kısmı kaybolurken kullanıcı tam cevap aldığını sanıyordu.
 - Tanınmayan türetilmiş ifade groupby'ı atlar, `notes`'a not düşer.
 
 `summary_stats`, `insight_focus`'a göre hesaplanır ve Insight ajanının tek bilgi
@@ -169,6 +190,13 @@ kontrol eder (yuvarlama ve işaret toleranslı). Bir sayı bulunamazsa cümle
 reddedilir ve deterministik şablona düşülür — **kullanıcıya doğrulanmamış sayı
 gitmez**. NaN/inf değerler karşılaştırmaya girmez; kategorik bir kolon Pearson'a
 ulaştığında istatistikler NaN olabiliyor.
+
+Tolerans büyüklüğe göre ölçeklenir: 1'den büyük değerlerde 0.5 (model ondalık
+düşürebiliyor, `836154.033` → `836154`), altında 0.005. Sabit 0.5'lik pencere
+korelasyon için yanlıştı — r değerleri [-1, 1] aralığında olduğu için model
+`r=-0.219` yerine `r=-0.48` dese bile eşleşme sayılıyordu, yani groundedness
+kontrolü korelasyonlarda hiç çalışmıyormuş. Bu hatayı rubrik kalibrasyonu
+yakaladı.
 
 `_compact_stats` prompt katmanında büyük grup sözlüklerini kırpar (en büyük 8
 grup + `{key}_omitted` sayacı). 48 aylık ya da 138 günlük bir sözlük 3B model
@@ -250,3 +278,45 @@ kendisi de ölçülebilir.
 - `MockClient` — testler için, model gerektirmez.
 
 Çıkarımda `temperature=0.0` (greedy): ölçümler tekrar üretilebilir olsun.
+
+## Bölüm 6 — Bilinen Sınırlar
+
+Aşağıdakiler canlı etiketleme oturumlarında ortaya çıktı. Mekanik ölçüm
+(benchmark, duman testi, dev taraması) hiçbirini yakalamamıştı, çünkü hepsi
+sistemin kendi kapsamı içinde yazılmış sorulardan oluşuyor; gerçek kullanıcı
+soruları kapsamın dışına çıkıyor.
+
+### Çözülenler
+
+| sınır | çözüm |
+|---|---|
+| Artan sıralama yoktu; "en çok zarar eden" soruları cevaplanamıyordu | `value_asc`, `date_desc` eklendi |
+| Filtre sözdizimi tanımsızdı, model SQL'e kayıyordu (`ship_mode = 'X' AND CAST(...)`) | pandas query kuralları prompt'a yazıldı |
+| Türetilmiş metrik hesaplanamıyordu (teslimat süresi, kâr marjı) | `days_between`, `ratio`, `diff` |
+| Uydurma alanlar sessizce yutuluyordu | `extra="forbid"` |
+
+Her biri prompt değişikliği gerektirdiği için eğitim verisi de yeniden üretildi
+ve model yeniden eğitildi (bkz. [training.md](training.md), v2).
+
+### Açık kalanlar
+
+**Çoklu metrik ve çoklu granülerlik.** "Satış *ve* kârın aylık seyrini
+karşılaştır" ya da "eyalet *ve* şehir bazında" gibi sorular tek `Transform`'a
+sığmıyor. Model bunu iki şekilde karşılıyor: `agg` alanına liste yazıyor
+(`["sum", "sum"]`, şema reddediyor) ya da uydurma alan ekliyor
+(`extra_transforms`, artık reddediliyor). Çözümü şemayı çoklu dönüşüme
+genişletmek; kapsam kararı olarak ertelendi.
+
+**Cevaplanamaz soru tespiti yok.** Veri setinde bulunmayan bir kavram sorulduğunda
+(`branch`, `customer type`) Data Analyst yine de bir plan üretmek zorunda
+hissediyor: ya en yakın kolona gidiyor ya uyduruyor. "Bu soru bu veriyle
+cevaplanamaz" diyen bir yol yok.
+
+**Çok satırlı ilişki analizi.** Sepet analizi ("birlikte satın alınan ürünler")
+aynı `order_id` içindeki ürün çiftlerini gerektiriyor; motor tek `groupby` + tek
+`agg` yapıyor, çift üretemiyor.
+
+**Etiketleme birimi ajan çıktısı, grafik değil.** Tercih etiketleri JSON üzerinden
+veriliyor, çünkü DPO çiftleri modelin ürettiği token dizisi olmak zorunda.
+Grafiğin görsel okunabilirliği (aynı veride bar mı box mu daha okunur)
+değerlendirmeye girmiyor.
