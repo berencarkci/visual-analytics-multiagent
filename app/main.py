@@ -49,7 +49,8 @@ _MOCK_ANSWER = (
 def make_client():
     if os.environ.get("APP_MODE", "live") == "mock":
         return MockClient([_MOCK_ANSWER])
-    return HFClient()
+    adapter = os.environ.get("VA_ADAPTER", "berencarkci/qwen2.5-3b-va-sft-v2")
+    return HFClient(adapter=adapter or None)
 
 
 CLIENT = make_client()
@@ -93,7 +94,7 @@ def ask(df: pd.DataFrame | None, schema_text: str, question: str, mode: str):
         return "", "Please type a question.", "", "", "", None
 
     retry_note = False
-    if mode == "Single-agent":
+    if mode.startswith("Single"):
         result = recommend(CLIENT, schema_text, question.strip())
         trace_data = _NO_TRACE
         if not result.valid:
