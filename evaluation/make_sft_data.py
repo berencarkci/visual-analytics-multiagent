@@ -233,6 +233,87 @@ def build_template_examples() -> list[dict]:
                    reason="Both restrictions go into the filter, then the categories are compared inside that slice.",
                    insight=f"The chart compares categories within the {seg} segment of the {reg} region.")
         add("retail", f"Inside the {reg} region, {seg} segment only, rank the categories by sales.", t)
+    bank["intent"] = "comparison"
+    # derived measures: the question asks for a quantity that is not a column,
+    # so y_axis carries the expression and the engine materialises it first
+    for cat in ["category", "segment", "region", "ship_mode", "state"]:
+        t = target("bar", cat, "days_between(order_date, ship_date)", groupby=cat,
+                   agg="mean", sort="value_desc",
+                   reason=f"Delivery time is the gap between the two date columns, averaged per {pretty(cat)}.",
+                   insight=f"The chart shows which {pretty(cat)} groups wait longest between order and shipment.")
+        for q in [f"Which {pretty(cat)} waits longest between order and shipment?",
+                  f"Compare average delivery time across {pretty(cat)} groups.",
+                  f"How does shipping delay differ by {pretty(cat)}?"]:
+            add("retail", q, t)
+    for cat in ["sub_category", "category", "region", "segment"]:
+        t = target("bar", cat, "ratio(profit, sales)", groupby=cat, agg="mean",
+                   sort="value_asc",
+                   reason="Margin is profit over sales; ascending order puts the loss makers first.",
+                   insight=f"The chart shows which {pretty(cat)} groups earn the thinnest margin on each sale.")
+        for q in [f"Which {pretty(cat)} groups have the weakest profit margin?",
+                  f"Rank {pretty(cat)} groups from worst to best profit margin.",
+                  f"Where is the profit margin thinnest across {pretty(cat)} groups?"]:
+            add("retail", q, t)
+    for cat in ["sub_category", "category"]:
+        t = target("bar", cat, "ratio(sales, quantity)", groupby=cat, agg="mean",
+                   sort="value_desc",
+                   reason="Revenue per unit is sales divided by quantity.",
+                   insight=f"The chart shows which {pretty(cat)} groups bring in the most revenue per unit sold.")
+        for q in [f"Which {pretty(cat)} groups earn the most per unit sold?",
+                  f"Compare revenue per unit across {pretty(cat)} groups."]:
+            add("retail", q, t)
+    for cat in ["region", "category"]:
+        t = target("bar", cat, "diff(sales, profit)", groupby=cat, agg="sum",
+                   sort="value_desc",
+                   reason="The gap between revenue and profit is the cost side of each group.",
+                   insight=f"The chart shows how much of each {pretty(cat)} group's revenue does not reach profit.")
+        add("retail", f"How large is the gap between sales and profit for each {pretty(cat)}?", t)
+
+    bank["intent"] = "trend"
+    for period, expr in [("monthly", "month"), ("quarterly", "quarter"), ("weekly", "week")]:
+        t = target("line", "order_date", "days_between(order_date, ship_date)",
+                   groupby=f"{expr}(order_date)", agg="mean", sort="date_asc",
+                   reason=f"A {period} line shows whether delivery time is drifting.",
+                   insight=f"The chart shows how average delivery time developed {period}.")
+        for q in [f"Is delivery time getting better or worse {period}?",
+                  f"Trace the {period} course of average delivery time.",
+                  f"Has shipping speed changed over time, {period}?"]:
+            add("retail", q, t)
+    for period, expr in [("monthly", "month"), ("quarterly", "quarter")]:
+        t = target("line", "order_date", "ratio(profit, sales)", groupby=f"{expr}(order_date)",
+                   agg="mean", sort="date_asc",
+                   reason=f"A {period} margin line shows whether profitability is eroding.",
+                   insight=f"The chart shows how the {period} profit margin developed.")
+        for q in [f"Is our profit margin eroding {period}?",
+                  f"Trace the {period} profit margin over time."]:
+            add("retail", q, t)
+
+    bank["intent"] = "trend"
+    # descending time order: "most recent first" phrasing
+    for ds, metric in [("retail", "sales"), ("retail", "profit"), ("retail", "quantity"),
+                       ("energy", "appliances"), ("energy", "lights")]:
+        d = DATASETS[ds]
+        for expr, unit in [("month", "months"), ("week", "weeks")]:
+            t = target("bar", d["date"], metric, groupby=f"{expr}({d['date']})", agg="sum",
+                       sort="date_desc", limit=6,
+                       reason="The most recent periods come first when the question asks for the latest figures.",
+                       insight=f"The chart shows the six most recent {unit} of total {pretty(metric)}.")
+            for q in [f"Show the six most recent {unit} of total {pretty(metric)}, newest first.",
+                      f"What do the latest {unit} look like for {pretty(metric)}?"]:
+                add(ds, q, t)
+
+    bank["intent"] = "filter_aggregation"
+    # ascending value order: "lowest / worst" phrasing
+    for cat, metric in [("sub_category", "profit"), ("state", "profit"), ("city", "sales"),
+                        ("sub_category", "sales"), ("state", "quantity"), ("city", "profit")]:
+        for n in (5, 10):
+            t = target("bar", cat, metric, groupby=cat, agg="sum", sort="value_asc", limit=n,
+                       reason=f"Ascending order surfaces the weakest {pretty(cat)} groups first.",
+                       insight=f"The chart shows the {n} weakest {pretty(cat)} groups by total {pretty(metric)}.")
+            for q in [f"Which {n} {pretty(cat)} groups perform worst on {pretty(metric)}?",
+                      f"Show the bottom {n} {pretty(cat)} groups by total {pretty(metric)}."]:
+                add("retail", q, t)
+
     bank["intent"] = "anomaly"
     # anomaly (a line over time; the groupby granularity follows the wording of the question, and bar is never an anomaly answer)
     _UNITS = [("days", "day", "daily"), ("weeks", "week", "weekly"), ("months", "month", "monthly")]

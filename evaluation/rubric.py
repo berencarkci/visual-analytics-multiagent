@@ -68,16 +68,24 @@ _GENERIC_PHRASES = ("result rows", "the analysis produced", "the chart shows the
 
 
 # Column helpers:
-def _base_column(expr: str | None) -> str | None:
-    """month(order_date) -> order_date; plain columns pass through"""
+def _base_columns(expr: str | None) -> list[str]:
+    """month(order_date) -> [order_date]; ratio(profit, sales) -> [profit, sales]"""
     if not expr:
-        return None
+        return []
     m = _DERIVED_RE.match(expr.strip())
-    return m.group(2).strip() if m else expr.strip()
+    if not m:
+        return [expr.strip()]
+    return [p.strip() for p in m.group(2).split(",")]
+
+
+def _base_column(expr: str | None) -> str | None:
+    """First base column of an expression (single-column derivations)"""
+    cols = _base_columns(expr)
+    return cols[0] if cols else None
 
 
 def _column_exists(col: str | None, df: pd.DataFrame) -> bool:
-    return col is None or _base_column(col) in df.columns
+    return col is None or all(c in df.columns for c in _base_columns(col))
 #################################
 
 
@@ -94,8 +102,11 @@ def _score_schema_validity(cand: dict, df: pd.DataFrame) -> int:
 def _score_column_selection(cand: dict, ref: dict, df: pd.DataFrame) -> int:
     """Did the answer pick the columns the question is actually about?"""
     def cols_of(d: dict) -> set[str]:
-        out = {_base_column(c) for c in (d.get("x_axis"), d.get("y_axis")) if c}
-        out |= {_base_column(c) for c in (d.get("target_columns") or [])}
+        out: set[str] = set()
+        for c in (d.get("x_axis"), d.get("y_axis")):
+            out |= set(_base_columns(c))
+        for c in (d.get("target_columns") or []):
+            out |= set(_base_columns(c))
         return {c for c in out if c}
 
     got, want = cols_of(cand), cols_of(ref)
@@ -119,7 +130,8 @@ def _score_transform_correctness(cand: dict, ref: dict) -> int:
     c = cand.get("transform") or {}
     r = ref.get("transform")
     if r is None:
-        return 1 # reference free scoring (live labeling): nothing to compare against, stay neutral
+        return 1                                    # reference-free scoring (live labeling):
+                                                    # nothing to compare against, stay neutral
     def norm(v):
         return None if v in ("", None) else str(v).strip().lower()
 
