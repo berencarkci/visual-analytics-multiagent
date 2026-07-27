@@ -25,6 +25,7 @@ from chart_render import render_chart
 from data_ingestion import load_table, profile_table, schema_summary
 from model_client import HFClient, MockClient
 from orchestrator import run_workflow, trace_view
+from labeling import build_labeling_tab
 
 # Sample datasets shipped with the repo:
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -193,7 +194,7 @@ with gr.Blocks(title="Visual Analytics Assistant") as demo:
         gr.Markdown("*Coming in later:* metric tables, preference win rates and failure case explorer over the frozen 60 question benchmark.")
 
     with gr.Tab("Preference Labeling"):
-        gr.Markdown("*Coming in later:* pairwise labeling interface and two candidate answers per prompt, pick A / B / tie / both poor.")
+        build_labeling_tab(CLIENT, SAMPLE_DATASETS)
 
     with gr.Tab("Methodology"):
         gr.Markdown(
