@@ -1,0 +1,185 @@
+{
+  "adapter": "berencarkci/qwen2.5-3b-va-sft-v2",
+  "passed": 5,
+  "total": 8,
+  "rows": [
+    {
+      "question": "Which shipping mode keeps customers waiting longest between order and dispatch?",
+      "intent": "comparison",
+      "expect": {
+        "measure": "days_between"
+      },
+      "plan": {
+        "target_columns": [
+          "ship_mode",
+          "days_between(order_date, ship_date)"
+        ],
+        "transform": {
+          "groupby": "ship_mode",
+          "agg": "mean",
+          "filter": null,
+          "sort": "value_desc",
+          "limit": null
+        }
+      },
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "question": "Has the gap between ordering and shipping widened over the quarters?",
+      "intent": "trend",
+      "expect": {
+        "measure": "days_between",
+        "groupby": "quarter"
+      },
+      "plan": {
+        "target_columns": [
+          "order_date",
+          "days_between(order_date, ship_date)"
+        ],
+        "transform": {
+          "groupby": "quarter(order_date)",
+          "agg": "mean",
+          "filter": null,
+          "sort": "date_asc",
+          "limit": null
+        }
+      },
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "question": "Which sub-categories keep the least profit out of every sales dollar?",
+      "intent": "comparison",
+      "expect": {
+        "measure": "ratio"
+      },
+      "plan": {
+        "target_columns": [
+          "sub_category",
+          "profit"
+        ],
+        "transform": {
+          "groupby": "sub_category",
+          "agg": "ratio(profit, sales)",
+          "filter": null,
+          "sort": "value_asc",
+          "limit": null
+        }
+      },
+      "passed": false,
+      "detail": "no derived measure in target_columns"
+    },
+    {
+      "question": "Show me the ten states at the bottom of the profit ranking.",
+      "intent": "filter_aggregation",
+      "expect": {
+        "sort": "value_asc"
+      },
+      "plan": {
+        "target_columns": [
+          "state",
+          "profit"
+        ],
+        "transform": {
+          "groupby": "state",
+          "agg": "sum",
+          "filter": null,
+          "sort": "value_asc",
+          "limit": 10
+        }
+      },
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "question": "Which cities lose us the most money overall?",
+      "intent": "filter_aggregation",
+      "expect": {
+        "sort": "value_asc"
+      },
+      "plan": {
+        "target_columns": [
+          "city",
+          "profit"
+        ],
+        "transform": {
+          "groupby": "city",
+          "agg": "sum",
+          "filter": null,
+          "sort": "value_desc",
+          "limit": null
+        }
+      },
+      "passed": false,
+      "detail": "sort is value_desc, expected value_asc"
+    },
+    {
+      "question": "Give me the last six months of revenue, newest first.",
+      "intent": "trend",
+      "expect": {
+        "sort": "date_desc"
+      },
+      "plan": {
+        "target_columns": [
+          "order_date",
+          "sales"
+        ],
+        "transform": {
+          "groupby": "month(order_date)",
+          "agg": "sum",
+          "filter": null,
+          "sort": "date_desc",
+          "limit": 6
+        }
+      },
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "question": "How much more electricity do appliances draw than the lights, per weekday?",
+      "intent": "comparison",
+      "expect": {
+        "measure": "diff"
+      },
+      "plan": {
+        "target_columns": [
+          "date",
+          "appliances",
+          "lights"
+        ],
+        "transform": {
+          "groupby": "day_of_week(date)",
+          "agg": "sum",
+          "filter": null,
+          "sort": null,
+          "limit": null
+        }
+      },
+      "passed": false,
+      "detail": "no derived measure in target_columns"
+    },
+    {
+      "question": "Which product categories earn the most per item sold?",
+      "intent": "comparison",
+      "expect": {
+        "measure": "ratio"
+      },
+      "plan": {
+        "target_columns": [
+          "category",
+          "ratio(sales, quantity)"
+        ],
+        "transform": {
+          "groupby": "category",
+          "agg": "mean",
+          "filter": null,
+          "sort": "value_desc",
+          "limit": null
+        }
+      },
+      "passed": true,
+      "detail": "ok"
+    }
+  ]
+}

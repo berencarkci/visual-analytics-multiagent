@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import re
+import typing
 
 import pandas as pd
 
@@ -28,6 +29,8 @@ def _build_plan_messages(schema_text: str, question: str, intent: str, feedback:
             {"role": "user", "content": user}]
 #################################
 
+# Read off the schema instead of being listed again here: the two drifted apart once already, and the model was penalised for using a value the schema allows.
+_VALID_SORTS = (None,) + typing.get_args(Transform.model_fields["sort"].annotation)[0].__args__
 
 # Plan validation against the real schema:
 # Field slot reminder fed back on a format error: small models sometimes put a value in the wrong Transform slot (e.g. agg="date_asc", which belongs in sort).
@@ -47,7 +50,7 @@ def _validate_plan(raw: str, profile: TableProfile) -> tuple[TransformPlan | Non
         # sort only affects display order, so an invalid value is repaired and recorded (like a visualization guardrail) instead of failing the plan
         dropped_sort = None
         tf = data.get("transform") or {}
-        if tf.get("sort") not in (None, "date_asc", "value_desc"):
+        if tf.get("sort") not in _VALID_SORTS:
             dropped_sort = tf["sort"]
             tf["sort"] = None
             data["transform"] = tf
