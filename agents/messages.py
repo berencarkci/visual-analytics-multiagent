@@ -1,4 +1,4 @@
-"""Structured inter-agent message schemas for the multi agent workflow.
+"""Structured inter agent message schemas for the multi agent workflow.
 Every hop between agents is a typed pydantic payload wrapped in an AgentMessage envelope. 
 No free form text travels between agents, each step's output is a validated contract. 
 The envelope feeds the trace logger (and the Agent Trace tab) uniformly.
@@ -8,28 +8,30 @@ from datetime import datetime, timezone
 from typing import Literal, Union
 from pydantic import ConfigDict, BaseModel, Field
 from schemas import ChartRecommendation, Transform
+
 # Intent taxonomy (Must stay identical to benchmark question types):
 IntentLabel = Literal["trend", "comparison", "composition", "relationship", "distribution", "filter_aggregation", "anomaly"]
 #################################
+
 # Step payloads:
 class IntentResult(BaseModel):
     """Supervisor output: classified question intent"""
 
-    model_config = ConfigDict(extra="forbid")   # invented fields are errors, not silently dropped
+    model_config = ConfigDict(extra="forbid") # invented fields are errors, not silently dropped
     intent: IntentLabel
     source: Literal["llm", "rule_fallback"]
-    matched_keywords: list[str] = Field(default_factory=list)  # filled by fallback
+    matched_keywords: list[str] = Field(default_factory=list) # filled by fallback
 class WorkflowPlan(BaseModel):
     """Supervisor output: which pipeline variant to run for this intent"""
 
-    model_config = ConfigDict(extra="forbid")   # invented fields are errors, not silently dropped
+    model_config = ConfigDict(extra="forbid") # invented fields are errors, not silently dropped
     intent: IntentLabel
     steps: list[str]
     insight_focus: Literal["group_stats", "trend_stats", "correlation", "distribution_stats", "outlier_detection", "share_stats"]
 class TransformPlan(BaseModel):
     """Data Analyst output: the plan and its execution result"""
 
-    model_config = ConfigDict(extra="forbid")   # invented fields are errors, not silently dropped
+    model_config = ConfigDict(extra="forbid") # invented fields are errors, not silently dropped
     transform: Transform
     target_columns: list[str]
     notes: list[str] = Field(default_factory=list)
@@ -39,20 +41,20 @@ class TransformPlan(BaseModel):
 class ChartDecision(BaseModel):
     """Visualization Agent output (skeleton)"""
 
-    model_config = ConfigDict(extra="forbid")   # invented fields are errors, not silently dropped
+    model_config = ConfigDict(extra="forbid") # invented fields are errors, not silently dropped
     recommendation: ChartRecommendation
     guardrails_applied: list[str] = Field(default_factory=list)
 class InsightResult(BaseModel):
     """Insight Agent output: statement + the computed stats backing it"""
 
-    model_config = ConfigDict(extra="forbid")   # invented fields are errors, not silently dropped
+    model_config = ConfigDict(extra="forbid") # invented fields are errors, not silently dropped
     insight: str
     supporting_stats: dict = Field(default_factory=dict)
-    source: Literal["llm", "template_fallback"] = "llm"  # fallback count is itself a metric
+    source: Literal["llm", "template_fallback"] = "llm" # fallback count is itself a metric
 class StepError(BaseModel):
     """Structured failure any agent can return to the Supervisor"""
 
-    model_config = ConfigDict(extra="forbid")   # invented fields are errors, not silently dropped
+    model_config = ConfigDict(extra="forbid") # invented fields are errors, not silently dropped
     agent: str
     error_type: Literal["missing_column", "type_mismatch", "empty_result", "invalid_llm_output", "execution_error"]
     detail: str
@@ -60,20 +62,20 @@ class StepError(BaseModel):
 class EvalVerdict(BaseModel):
     """Evaluation Agent output: rule-based consistency review of the final answer"""
 
-    model_config = ConfigDict(extra="forbid")   # invented fields are errors, not silently dropped
+    model_config = ConfigDict(extra="forbid") # invented fields are errors, not silently dropped
     passed: bool
-    issues: list[str] = Field(default_factory=list)    # hard failures (block)
-    warnings: list[str] = Field(default_factory=list)  # soft concerns (delivered with the answer)
-    checks: dict = Field(default_factory=dict)         # per-rule pass/fail map
-    retried_step: str | None = None                    # which agent was re-run, if any
-    retry_helped: bool | None = None                   # did the retry fix the failure
+    issues: list[str] = Field(default_factory=list) # hard failures (block)
+    warnings: list[str] = Field(default_factory=list) # soft concerns (delivered with the answer)
+    checks: dict = Field(default_factory=dict) # per rule pass/fail map
+    retried_step: str | None = None # which agent was rerun, if any
+    retry_helped: bool | None = None # did the retry fix the failure
 #################################
 # Envelope:
 Payload = Union[IntentResult, WorkflowPlan, TransformPlan, ChartDecision, InsightResult, EvalVerdict, StepError]
 class AgentMessage(BaseModel):
     """Uniform envelope every agent emits, the unit the trace logger stores"""
 
-    model_config = ConfigDict(extra="forbid")   # invented fields are errors, not silently dropped
+    model_config = ConfigDict(extra="forbid") # invented fields are errors, not silently dropped
     agent: str # e.g. "supervisor", "data_analyst"
     step: int # phase in the workflow
     timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())

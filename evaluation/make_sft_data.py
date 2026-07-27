@@ -32,6 +32,7 @@ def pretty(col: str) -> str:
 def target(chart, x, y, groupby=None, agg=None, filter=None, sort=None, limit=None, reason="", insight=""):
     return {"chart_type": chart, "x_axis": x, "y_axis": y, "transform": {"groupby": groupby, "agg": agg, "filter": filter, "sort": sort, "limit": limit}, "reason": reason, "insight": insight}
 #################################
+
 # Template banks
 def build_template_examples() -> list[dict]:
     ex: list[dict] = []
@@ -315,7 +316,7 @@ def build_template_examples() -> list[dict]:
                 add("retail", q, t)
 
     bank["intent"] = "anomaly"
-    # anomaly (a line over time; the groupby granularity follows the wording of the question, and bar is never an anomaly answer)
+    # anomaly (a line over time, the groupby granularity follows the wording of the question, and bar is never an anomaly answer)
     _UNITS = [("days", "day", "daily"), ("weeks", "week", "weekly"), ("months", "month", "monthly")]
     for ds, metric in [("energy", "appliances"), ("energy", "lights"), ("retail", "sales"), ("retail", "profit")]:
         d = DATASETS[ds]
@@ -330,7 +331,8 @@ def build_template_examples() -> list[dict]:
                 add(ds, q, t)
     return ex
 #################################
-# Handwritten vague / free form examples:
+
+# Handwritten vague/free form examples:
 def build_handwritten_examples() -> list[dict]:
     H = [
         ("retail", "Does anything stand out in this data?",
@@ -430,12 +432,14 @@ def build_handwritten_examples() -> list[dict]:
                 reason="A scatter answers whether income and spending move together.",
                 insight="The chart shows whether higher income maps to higher spending scores.")),
     ]
+
     # a second phrasing for a subset, to teach phrasing robustness
     H += [
         ("retail", "What jumps out at you here?", H[0][2]),
         ("mall", "Tell me something I do not know about the shoppers.", H[5][2]),
         ("energy", "Any weird days in the usage data?", H[7][2]),
     ]
+    
     # intent per handwritten example, in list order (vague questions still map onto the taxonomy, the agents need it even when the user did not say it)
     intents = ["trend", "comparison", "comparison", "trend", "distribution",
                "relationship", "comparison", "anomaly", "comparison", "trend",
@@ -447,6 +451,7 @@ def build_handwritten_examples() -> list[dict]:
     return [{"dataset": d, "question": q, "target": t, "source": "handwritten", "intent": intent}
             for (d, q, t), intent in zip(H, intents)]
 #################################
+
 # Assembly:
 def main() -> int:
     examples = build_template_examples() + build_handwritten_examples()

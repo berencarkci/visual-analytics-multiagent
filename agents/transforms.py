@@ -1,11 +1,7 @@
 """Shared transform engine for the Visual Analytics Assistant.
 
-Executes the structured transform (filter -> derived grouping ->
-aggregation -> sort -> limit) on a DataFrame, including the histogram
-guardrails discovered during Space testing. Lives in its own module
-because BOTH the single-agent baseline (via chart_render) and the
-multi-agent Data Analyst import it: one source of truth, no cross-system
-dependency in either direction.
+Executes the structured transform (filter -> derived grouping -> aggregation -> sort -> limit) on a DataFrame, including the histogram guardrails discovered during Space testing. 
+Lives in its own module because both the single agent baseline (via chart_render) and the multi agent Data Analyst import it: one source of truth, no cross system dependency in either direction.
 """
 from __future__ import annotations
 import re
@@ -48,19 +44,17 @@ def _resolve_grouping(df: pd.DataFrame, expr: str) -> tuple[pd.Series, str]:
 
 # Derived measures on the y axis:
 #
-# Questions like "average delivery time" or "profit margin" ask for a quantity
-# that is not a column: it has to be computed from two of them first, and only
-# then aggregated. Same notation as the derived groupings, so nothing new has to
-# be added to the schema — y_axis simply accepts an expression as well.
+# Questions like "average delivery time" or "profit margin" ask for a quantity that is not a column: it has to be computed from two of them first, and only then aggregated. 
+# Same notation as the derived groupings, so nothing new has to be added to the schema, y_axis simply accepts an expression as well.
 _DERIVED_MEASURES = ("days_between", "ratio", "diff")
 
 
 def _resolve_measure(df: pd.DataFrame, expr: str) -> tuple[pd.Series, str]:
-    """Turn a y-axis expression into a Series; plain column names pass through
+    """Turn a y axis expression into a Series; plain column names pass through
 
     days_between(a, b) -> whole days from a to b (delivery time, delay)
-    ratio(a, b)        -> a / b, guarded against division by zero (margin, unit price)
-    diff(a, b)         -> a - b
+    ratio(a, b) -> a / b, guarded against division by zero (margin, unit price)
+    diff(a, b) -> a - b
     """
     m = _DERIVED_RE.match(expr.strip())
     if not m:
@@ -81,13 +75,13 @@ def _resolve_measure(df: pd.DataFrame, expr: str) -> tuple[pd.Series, str]:
         delta = pd.to_datetime(df[b]) - pd.to_datetime(df[a])
         return delta.dt.total_seconds() / 86400, f"days between {a} and {b}"
     if func == "ratio":
-        denom = df[b].replace(0, pd.NA)              # 0 denominators become NaN, not inf
+        denom = df[b].replace(0, pd.NA) # 0 denominators become NaN, not inf
         return df[a] / denom, f"{a} / {b}"
     return df[a] - df[b], f"{a} - {b}"
 
 
 def measure_base_columns(expr: str | None) -> list[str]:
-    """Which real columns a y-axis expression depends on"""
+    """Which real columns a y axis expression depends on"""
     if not expr:
         return []
     m = _DERIVED_RE.match(expr.strip())
@@ -95,6 +89,7 @@ def measure_base_columns(expr: str | None) -> list[str]:
         return [expr.strip()]
     return [p.strip() for p in m.group(2).split(",")]
 #################################
+
 # Transform application:
 _AGG_MAP = {"sum": "sum", "mean": "mean", "count": "count", "count_distinct": "nunique"}
 def apply_transform(df: pd.DataFrame, rec: ChartRecommendation) -> tuple[pd.DataFrame, str, str | None, list[str]]:
@@ -119,9 +114,7 @@ def apply_transform(df: pd.DataFrame, rec: ChartRecommendation) -> tuple[pd.Data
     x_col, y_col = rec.x_axis, rec.y_axis
 
     # derived measure on y: materialise it as a real column before aggregating.
-    # Any parenthesised y axis is treated as a measure attempt, including
-    # unknown functions — failing loudly here is better than silently dropping
-    # the y axis and aggregating something else instead.
+    # Any parenthesised y axis is treated as a measure attempt, including unknown functions, failing loudly here is better than silently dropping the y axis and aggregating something else instead.
     if y_col and _DERIVED_RE.match(y_col):
         try:
             series, label = _resolve_measure(out, y_col)
@@ -132,7 +125,7 @@ def apply_transform(df: pd.DataFrame, rec: ChartRecommendation) -> tuple[pd.Data
 
     # groupby + agg
     if t.groupby and t.agg:
-        # histogram over an already numeric x bins the RAW values itself, a groupby+agg would collapse the data first and destroy the distribution. Skip it with a note.
+        # histogram over an already numeric x bins the raw values itself, a groupby+agg would collapse the data first and destroy the distribution. Skip it with a note.
         if (rec.chart_type == "histogram" and rec.x_axis in out.columns and pd.api.types.is_numeric_dtype(out[rec.x_axis])):
             notes.append("groupby/agg ignored: histogram bins the raw numeric values itself")
             t = t.model_copy(update={"groupby": None, "agg": None})

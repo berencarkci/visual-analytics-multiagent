@@ -1,8 +1,6 @@
 """Structured output schemas for the Visual Analytics Assistant.
 
-Defines the JSON contract that every model configuration (prompt-only,
-SFT, DPO) and later the Visualization Agent must follow, plus helpers
-for parsing and validating raw model output.
+Defines the JSON contract that every model configuration (prompt only, SFT, DPO) and later the Visualization Agent must follow, plus helpers for parsing and validating raw model output.
 """
 
 from __future__ import annotations
@@ -21,7 +19,7 @@ AggType = Literal["sum", "mean", "count", "count_distinct"]
 class Transform(BaseModel):
     """Data preparation step; mirrors the benchmark ground-truth format"""
 
-    model_config = ConfigDict(extra="forbid")   # invented fields are errors, not silently dropped
+    model_config = ConfigDict(extra="forbid") # invented fields are errors, not silently dropped
     groupby: str | None = None
     agg: AggType | None = None
     filter: str | None = None
@@ -32,15 +30,15 @@ class Transform(BaseModel):
 class ChartRecommendation(BaseModel):
     """The full structured answer a model must return for one question"""
 
-    model_config = ConfigDict(extra="forbid")   # invented fields are errors, not silently dropped
+    model_config = ConfigDict(extra="forbid") # invented fields are errors, not silently dropped
     chart_type: ChartType
     x_axis: str
-    y_axis: str | None = None          # histogram/box may not need a y axis
+    y_axis: str | None = None # histogram/box may not need a y axis
     transform: Transform = Field(default_factory=Transform)
-    reason: str                        # short: why this chart fits the intent
-    insight: str                       # grounded statement; no unsupported claims
+    reason: str # short: why this chart fits the intent
+    insight: str # grounded statement, no unsupported claims
 
-    model_config = {"extra": "forbid"}  # unknown fields = schema violation
+    model_config = {"extra": "forbid"} # unknown fields = schema violation
 #################################
 
 
@@ -78,9 +76,8 @@ def extract_json_block(text: str) -> str | None:
 def validate_output(raw_text: str) -> tuple[ChartRecommendation | None, str | None]:
     """Validate raw model text against the contract
 
-    Returns (recommendation, None) on success or (None, error_message)
-    on failure. The error message is written to be fed back to the model
-    on a retry attempt.
+    Returns (recommendation, None) on success or (None, error_message) on failure. 
+    The error message is written to be fed back to the model on a retry attempt.
     """
     block = extract_json_block(raw_text)
     if block is None:

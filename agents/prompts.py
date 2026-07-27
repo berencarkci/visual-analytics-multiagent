@@ -1,9 +1,8 @@
-"""Prompt templates for the prompt-only baseline.
+"""Prompt templates for the prompt only baseline.
 
-This file IS the prompt-only experimental arm. It may be iterated on the
-dev split, but must be frozen before the final test-split runs (B5) and
-must not change afterwards. Few-shot examples use fictional schemas so
-no model configuration gets prior exposure to the project datasets.
+This file is the prompt only experimental arm. 
+It may be iterated on the dev split, but must be frozen before the final test split runs and must not change afterwards. 
+Few shot examples use fictional schemas so no model configuration gets prior exposure to the project datasets.
 """
 
 from __future__ import annotations
@@ -39,7 +38,7 @@ Chart selection rules:
 Return ONLY the JSON object. No explanations, no markdown fences."""
 #################################
 
-# Few-shot examples (fictional schemas, one per chart type):
+# Few shot examples (fictional schemas, one per chart type):
 FEW_SHOT_EXAMPLES = [
     {
         "schema": (
@@ -124,12 +123,10 @@ def build_messages(schema_summary: str, question: str) -> list[dict]:
 #################################
 # MULTI-AGENT PROMPTS
 #
-# Every prompt any agent sends to the model lives in this file (single
-# source of truth). Unlike the frozen baseline prompt above, these may
-# still be iterated during B2-B4 development; they freeze before the
-# final B5 test-split runs.
+# Every prompt any agent sends to the model lives in this file (single source of truth). 
+# Unlike the frozen baseline prompt above, these may still be iterated during development, they freeze before the final test split runs.
 
-# Supervisor - intent classification:
+# Supervisor: intent classification:
 INTENT_SYSTEM = """Classify a data analytics question into exactly one intent label.
 Return ONLY a JSON object: {"intent": "<label>"}
 
@@ -148,7 +145,7 @@ Q: "Which region has the highest profit?" -> {"intent": "comparison"}
 Q: "Were there any strange spikes in usage?" -> {"intent": "anomaly"}"""
 
 
-# Data Analyst - transform planning (data preparation ONLY):
+# Data Analyst: transform planning (data preparation only):
 PLAN_SYSTEM = """You plan data preparation for an analytics question. Given a table schema and a question, return ONLY a JSON object:
 
 {
@@ -173,7 +170,7 @@ Rules:
 - sort direction follows the question: value_desc for "highest / top", value_asc for "lowest / worst / losing money", date_asc for a timeline, date_desc for "most recent first"."""
 
 
-# Visualization Agent - chart choice ONLY:
+# Visualization Agent: chart choice only:
 VIZ_SYSTEM = """You choose the best chart for an analytics question. You are given the question, its intent, a short summary of the ALREADY PREPARED data, and the list of allowed chart types for this intent.
 
 Return ONLY a JSON object: {"chart_type": "<one of the allowed types>", "reason": "<one short sentence>"}
@@ -181,7 +178,7 @@ Return ONLY a JSON object: {"chart_type": "<one of the allowed types>", "reason"
 Do NOT plan data transformations. Do NOT write insights. Chart choice only."""
 
 
-# Insight Agent - grounded statement from computed statistics:
+# Insight Agent: grounded statement from computed statistics:
 INSIGHT_SYSTEM = """You write ONE short data insight (1-2 sentences) answering the question, using ONLY the numbers and labels in the provided statistics. 
 
 Rules:
@@ -190,7 +187,7 @@ Rules:
 - Return ONLY a JSON object: {"insight": "<your sentence(s)>"}"""
 
 
-# SFT training - short system prompt (no few-shots; Decision C in docs/data.md):
+# SFT training: short system prompt (no few shots):
 SFT_SYSTEM = """You are a visual analytics assistant. Given a table schema and a question, return ONLY a JSON object:
 {"chart_type": "bar"|"line"|"scatter"|"pie"|"histogram"|"box", "x_axis": <source column>, "y_axis": <source column or null>, "transform": {"groupby": <column, derived expression like month(col)/day_of_week(col)/bins(col), or null>, "agg": "sum"|"mean"|"count"|"count_distinct"|null, "filter": <pandas query or null>, "sort": "date_asc"|"date_desc"|"value_asc"|"value_desc"|null, "limit": <int or null>}, "reason": <one sentence>, "insight": <one sentence describing what the chart shows>}
 
@@ -203,16 +200,14 @@ sort: value_desc for "highest", value_asc for "lowest/worst", date_asc for a tim
 
 # Retry feedback (Evaluation Agent -> the blamed agent):
 #
-# Inference runs greedy, so a retry that re-sends the identical prompt is
-# guaranteed to reproduce the rejected answer. The reviewer's reason is the only
-# thing that can change the outcome, so it is fed back into the prompt.
+# Inference runs greedy, so a retry that resends the identical prompt is guaranteed to reproduce the rejected answer. 
+# The reviewer's reason is the only thing that can change the outcome, so it is fed back into the prompt.
 REVIEW_FEEDBACK = ("A previous attempt was rejected by the reviewer for this reason: {issues}\n"
                    "{hint}"
                    "Produce a corrected answer that specifically fixes it.")
 
-# Rule specific corrective hints. Echoing the reviewer's complaint tells the model
-# that something is wrong but not what to do differently, and a 3B model rarely
-# infers the corrective move on its own, so the move is spelled out per rule.
+# Rule specific corrective hints. 
+# Echoing the reviewer's complaint tells the model that something is wrong but not what to do differently, and a 3B model rarely infers the corrective move on its own, so the move is spelled out per rule.
 RETRY_HINTS = {
     "stats_health": ("A correlation needs two NUMERIC columns. If one of them is categorical, "
                      "do not correlate: compare the numeric column across that column's groups "

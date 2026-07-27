@@ -1,11 +1,7 @@
 """Data Analyst agent: column mapping, safe transform execution, real stats.
 
-Plans the data preparation with a small LLM call (validated against the
-actual schema, one retry with error feedback), executes it through the
-shared transform engine, then computes REAL summary statistics according
-to the workflow's insight_focus. Those numbers are what the Insight Agent
-will ground its statements in — the structural fix for the prompt-only
-baseline's unsupported-insight weakness.
+Plans the data preparation with a small LLM call (validated against the actual schema, one retry with error feedback), executes it through the shared transform engine, then computes real summary statistics according to the workflow's insight_focus. 
+Those numbers are what the Insight Agent will ground its statements in the structural fix for the prompt only baseline's unsupported insight weakness.
 """
 
 from __future__ import annotations
@@ -21,13 +17,10 @@ from model_client import ModelClient
 from prompts import PLAN_SYSTEM
 from schemas import Transform, extract_json_block
 from transforms import ColumnNotFoundError, apply_transform, measure_base_columns
-from schemas import ChartRecommendation  # transform execution reuses its container
+from schemas import ChartRecommendation # transform execution reuses its container
 
-# LLM planning prompt (data preparation ONLY — no chart choice, no insight):
-
-
-def _build_plan_messages(schema_text: str, question: str, intent: str,
-                         feedback: str | None = None) -> list[dict]:
+# LLM planning prompt (data preparation only, no chart choice, no insight):
+def _build_plan_messages(schema_text: str, question: str, intent: str, feedback: str | None = None) -> list[dict]:
     user = f"{schema_text}\n\nQuestion intent: {intent}\nQuestion: {question}"
     if feedback:
         user += f"\n\n{feedback}"
@@ -37,22 +30,21 @@ def _build_plan_messages(schema_text: str, question: str, intent: str,
 
 
 # Plan validation against the real schema:
-# Field-slot reminder fed back on a format error: small models sometimes put a
-# value in the wrong Transform slot (e.g. agg="date_asc", which belongs in sort).
+# Field slot reminder fed back on a format error: small models sometimes put a value in the wrong Transform slot (e.g. agg="date_asc", which belongs in sort).
 _FIELD_HINT = ('Field reminder: agg must be sum/mean/count/count_distinct; '
-               'sort must be date_asc/value_desc; date_asc/value_desc are NOT agg values; '
-               'groupby is a column or derived expression; filter is a pandas query string.')
+               'sort must be date_asc/date_desc/value_asc/value_desc, and none of these are agg values; '
+               'groupby is a column or derived expression; filter is a pandas query string; '
+               'a derived measure like days_between(a, b) belongs in target_columns, not in agg.')
 
 
 def _validate_plan(raw: str, profile: TableProfile) -> tuple[TransformPlan | None, str | None]:
-    """Parse LLM output, check schema conformity AND column existence"""
+    """Parse LLM output, check schema conformity and column existence"""
     block = extract_json_block(raw)
     if block is None:
         return None, "No JSON object found. Return ONLY the JSON object."
     try:
         data = json.loads(block)
-        # sort only affects display order, so an invalid value is repaired and
-        # recorded (like a visualization guardrail) instead of failing the plan
+        # sort only affects display order, so an invalid value is repaired and recorded (like a visualization guardrail) instead of failing the plan
         dropped_sort = None
         tf = data.get("transform") or {}
         if tf.get("sort") not in (None, "date_asc", "value_desc"):
@@ -69,8 +61,7 @@ def _validate_plan(raw: str, profile: TableProfile) -> tuple[TransformPlan | Non
         return None, f"Invalid plan format: {e}. {_FIELD_HINT}"
 
     valid_cols = {c.name for c in profile.columns}
-    # A derived measure names the columns it needs inside the expression, so it
-    # is validated by its base columns rather than as a literal column name.
+    # A derived measure names the columns it needs inside the expression, so it is validated by its base columns rather than as a literal column name.
     referenced: set[str] = set()
     for col in plan.target_columns:
         referenced |= set(measure_base_columns(col))
@@ -82,18 +73,15 @@ def _validate_plan(raw: str, profile: TableProfile) -> tuple[TransformPlan | Non
                            if tok in valid_cols or "." in tok or tok.islower()}
     unknown = [c for c in referenced
                if c not in valid_cols
-               and c not in {"month", "quarter", "week", "day", "year", "hour_of_day",
-                             "day_of_week", "weekend_flag", "bins", "threshold_flag",
-                             "and", "or", "in", "not"}]
+               and c not in {"month", "quarter", "week", "day", "year", "hour_of_day", "day_of_week", "weekend_flag", "bins", "threshold_flag", "and", "or", "in", "not"}]
     if unknown:
         return None, f"Unknown column(s): {unknown}. Use only columns from the schema."
     return plan, None
 #################################
 
 
-# Summary statistics per insight focus (REAL numbers for the Insight Agent):
-def _compute_stats(focus: str, raw_df: pd.DataFrame, transformed: pd.DataFrame,
-                   x_col: str, y_col: str | None, plan: TransformPlan) -> dict:
+# Summary statistics per insight focus (real numbers for the Insight Agent):
+def _compute_stats(focus: str, raw_df: pd.DataFrame, transformed: pd.DataFrame, x_col: str, y_col: str | None, plan: TransformPlan) -> dict:
     s: dict = {"focus": focus, "n_rows_input": int(len(raw_df)), "n_rows_result": int(len(transformed))}
     try:
         if focus in ("group_stats", "share_stats") and y_col and y_col in transformed.columns:
@@ -147,10 +135,7 @@ def _compute_stats(focus: str, raw_df: pd.DataFrame, transformed: pd.DataFrame,
 
 
 # Agent entry point:
-def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfile,
-                      schema_text: str, question: str, workflow: WorkflowPlan,
-                      feedback: str | None = None
-                      ) -> tuple[TransformPlan | StepError, pd.DataFrame | None]:
+def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfile, schema_text: str, question: str, workflow: WorkflowPlan, feedback: str | None = None) -> tuple[TransformPlan | StepError, pd.DataFrame | None]:
     """Plan (LLM, 1 retry) -> execute safely -> compute focus stats
 
     Returns (TransformPlan, prepared_df) on success or (StepError, None).
@@ -159,7 +144,7 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
     first = client.generate(messages)
     plan, err = _validate_plan(first, profile)
 
-    if plan is None:  # one retry with the error fed back
+    if plan is None: # one retry with the error fed back
         retry = messages + [
             {"role": "assistant", "content": first},
             {"role": "user", "content": f"Your plan was rejected: {err} Return ONLY a corrected JSON object."},
@@ -171,10 +156,8 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
                              detail=err or "unknown", recoverable=False), None
         plan.plan_source = "llm_retry"
 
-    # PLAN GUARDRAIL (mechanical, mirrors the visualization guardrails):
-    # a share/composition question needs the WHOLE data; a filter that pins the
-    # groupby column to one value collapses the composition to a single 100% group.
-    # Small models sometimes do this despite the prompt rule — so we enforce it here.
+    # PLAN GUARDRAIL (mechanical, mirrors the visualization guardrails): a share/composition question needs the whole data, a filter that pins the groupby column to one value collapses the composition to a single 100% group.
+    # Small models sometimes do this despite the prompt rule so we enforce it here.
     t = plan.transform
     if (workflow.intent == "composition" and t.filter and t.groupby
             and re.search(rf"\b{re.escape(str(t.groupby))}\b\s*==", str(t.filter))):
@@ -201,7 +184,7 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
                          detail=f"Transform left 0 rows (filter: {plan.transform.filter})",
                          recoverable=True), None
 
-    plan.notes = plan.notes + notes          # keep plan-repair notes, then transform notes
+    plan.notes = plan.notes + notes # keep plan repair notes, then transform notes
     plan.result_rows = int(len(prepared))
     plan.summary_stats = _compute_stats(workflow.insight_focus, df, prepared, x_col, y_col, plan)
     return plan, prepared

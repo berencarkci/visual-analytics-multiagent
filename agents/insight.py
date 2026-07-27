@@ -1,11 +1,8 @@
 """Insight agent: grounded statements from computed statistics.
 
-The LLM writes a short insight USING ONLY the numbers the Data Analyst
-computed; a mechanical verifier then checks every number in the sentence
-actually exists in the stats dict. Any invented number (or an empty/broken
-output) drops the result to a deterministic template — so an unsupported
-claim can never reach the user. The verifier is also the prototype of the
-B5 groundedness metric.
+The LLM writes a short insight using only the numbers the Data Analyst computed, a mechanical verifier then checks every number in the sentence actually exists in the stats dict. 
+Any invented number (or an empty/broken output) drops the result to a deterministic template so an unsupported claim can never reach the user. 
+The verifier is also the prototype of the groundedness metric.
 """
 
 from __future__ import annotations
@@ -18,15 +15,11 @@ from messages import InsightResult
 from model_client import ModelClient
 from prompts import INSIGHT_SYSTEM
 
-# LLM prompt (numbers-only contract):
+# LLM prompt (numbers only contract):
 
-
-# A grouped result can carry hundreds of entries (138 days, 49 states, 48
-# months). Handing all of them to the model is counter-productive twice over:
-# it drowns the one sentence we want in a wall of numbers, and on long results
-# it pushes the prompt past the context we train with. The extremes and the
-# total are already extracted into their own fields, so the model only needs a
-# readable sample of the rest.
+# A grouped result can carry hundreds of entries (138 days, 49 states, 48 months). 
+# Handing all of them to the model is counter productive twice over: it drowns the one sentence we want in a wall of numbers, and on long results it pushes the prompt past the context we train with. 
+# The extremes and the total are already extracted into their own fields, so the model only needs a readable sample of the rest.
 _MAX_GROUPS_SHOWN = 8
 
 
@@ -42,8 +35,7 @@ def _compact_stats(stats: dict) -> dict:
     return out
 
 
-def _build_insight_messages(question: str, stats: dict,
-                            feedback: str | None = None) -> list[dict]:
+def _build_insight_messages(question: str, stats: dict, feedback: str | None = None) -> list[dict]:
     user = (f"Question: {question}\n"
             f"Statistics: {json.dumps(_compact_stats(stats), ensure_ascii=False)}")
     if feedback:
@@ -63,13 +55,12 @@ def _numbers_in(obj) -> set[float]:
     if isinstance(obj, bool):
         return found
     if isinstance(obj, (int, float)):
-        # NaN and inf are skipped: a text cannot legitimately cite them, and they
-        # poison the comparison below (round(nan) raises). Correlation stats go
-        # NaN whenever a categorical column reaches Pearson, so this is reachable.
+        # NaN and inf are skipped: a text cannot legitimately cite them, and they poison the comparison below (round(nan) raises). 
+        # Correlation stats go NaN whenever a categorical column reaches Pearson, so this is reachable.
         if not math.isfinite(float(obj)):
             return found
         found.add(round(float(obj), 3))
-        found.add(round(abs(float(obj)), 3))            # sign phrasing tolerance
+        found.add(round(abs(float(obj)), 3)) # sign phrasing tolerance
     elif isinstance(obj, str):
         for m in _NUM_RE.findall(obj):
             try:
@@ -86,7 +77,7 @@ def _numbers_in(obj) -> set[float]:
 
 
 def verify_grounded(text: str, stats: dict) -> tuple[bool, list[str]]:
-    """True if every number in the text exists in the stats (rounding-tolerant)"""
+    """True if every number in the text exists in the stats (rounding tolerant)"""
     allowed = _numbers_in(stats)
     problems: list[str] = []
     for m in _NUM_RE.findall(text):
@@ -94,11 +85,9 @@ def verify_grounded(text: str, stats: dict) -> tuple[bool, list[str]]:
             val = round(float(m.replace(",", "")), 3)
         except ValueError:
             continue
-        # Rounding tolerance, scaled to magnitude. A flat 0.5 window was wrong
-        # for correlation: r values live in [-1, 1], so r=-0.219 would have
-        # "matched" a stated r=-0.48 and the check silently passed. Large
-        # numbers still get the loose window, because models drop decimals
-        # there (836154.033 -> 836154).
+        # Rounding tolerance, scaled to magnitude. 
+        # A flat 0.5 window was wrong for correlation: r values live in [-1, 1], so r=-0.219 would have "matched" a stated r=-0.48 and the check silently passed. 
+        # Large numbers still get the loose window, because models drop decimals there (836154.033 -> 836154).
         ok = any(abs(val - a) <= (0.5 if abs(a) >= 1 else 0.005) for a in allowed)
         if not ok:
             problems.append(m)
@@ -106,7 +95,7 @@ def verify_grounded(text: str, stats: dict) -> tuple[bool, list[str]]:
 #################################
 
 
-# Deterministic templates (the guaranteed-grounded fallback):
+# Deterministic templates (the guaranteed grounded fallback):
 def _template_insight(question: str, stats: dict) -> str:
     f = stats.get("focus")
     try:
@@ -142,8 +131,7 @@ def _template_insight(question: str, stats: dict) -> str:
 
 
 # Agent entry point:
-def run_insight(client: ModelClient, question: str, stats: dict,
-                feedback: str | None = None) -> InsightResult:
+def run_insight(client: ModelClient, question: str, stats: dict, feedback: str | None = None) -> InsightResult:
     """LLM writes from the stats -> verifier checks -> template on any violation"""
     messages = _build_insight_messages(question, stats, feedback)
     raw = client.generate(messages)

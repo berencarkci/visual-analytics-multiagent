@@ -4,8 +4,7 @@ question -> Supervisor (intent + workflow) -> Data Analyst (plan + stats) -> Vis
 Every step is wrapped in an AgentMessage and logged to the trace, a StepError stops the chain gracefully and is itself logged. 
 Evaluation (rule based consistency review).
 
-If the evaluation fails, the orchestrator reruns only the step the failed
-checks point at (one targeted retry), re-evaluates, and delivers either way a second failure ships the answer with the verdict attached instead of blocking.
+If the evaluation fails, the orchestrator reruns only the step the failed checks point at (one targeted retry), re-evaluates, and delivers either way a second failure ships the answer with the verdict attached instead of blocking.
 """
 
 from __future__ import annotations
@@ -82,8 +81,7 @@ def run_workflow(client: ModelClient, df: pd.DataFrame, profile: TableProfile, q
 
     # 3-5) Data Analyst -> Visualization -> Insight, wrapped so a targeted retry blamed on the analyst can rerun the dependent steps too:
     def run_analysis_chain(feedback: str | None = None):
-        plan, prepared = run_data_analysis(client, df, profile, schema_text,
-                                           question, workflow, feedback)
+        plan, prepared = run_data_analysis(client, df, profile, schema_text, question, workflow, feedback)
         if isinstance(plan, StepError):
             return plan, None, None, None
         log("data_analyst", plan)
@@ -105,17 +103,14 @@ def run_workflow(client: ModelClient, df: pd.DataFrame, profile: TableProfile, q
     # Targeted single retry if the review failed:
     if not verdict.passed:
         blamed = _blame(verdict)
-        # The rejected attempt is fed back: a retry with an identical prompt is a
-        # no-op under greedy decoding, so the reviewer's reason is the only thing
-        # that can change the outcome.
+        # The rejected attempt is fed back: a retry with an identical prompt is a no-op under greedy decoding, so the reviewer's reason is the only thing that can change the outcome.
         feedback = REVIEW_FEEDBACK.format(issues="; ".join(verdict.issues))
         if blamed == "data_analyst":
             plan2, prepared2, decision2, ins2 = run_analysis_chain(feedback)
             if not isinstance(plan2, StepError):
                 plan, prepared, decision, ins = plan2, prepared2, decision2, ins2
         elif blamed == "visualization":
-            decision = run_visualization(client, question, workflow, plan, df,
-                                         prepared, feedback)
+            decision = run_visualization(client, question, workflow, plan, df, prepared, feedback)
             log("visualization", decision)
         elif blamed == "insight":
             ins = run_insight(client, question, plan.summary_stats, feedback)
