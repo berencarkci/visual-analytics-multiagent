@@ -41,6 +41,7 @@ import argparse
 import copy
 import json
 import random
+import re
 import sys
 from pathlib import Path
 
@@ -72,6 +73,12 @@ INTENTS = ["trend", "comparison", "composition", "relationship",
 
 # Synthetic corruption: each function reproduces a failure mode seen in this
 # project, so a pair teaches a specific lesson rather than a generic "be better".
+def _base_of(expr: str) -> list[str]:
+    """ratio(profit, sales) -> ["profit", "sales"]; plain columns pass through"""
+    m = re.match(r"^\w+\((.+)\)$", str(expr).strip())
+    return [p.strip() for p in m.group(1).split(",")] if m else [str(expr).strip()]
+
+
 def _corrupt_wrong_column(target: dict, df: pd.DataFrame, **_) -> dict | None:
     """Swap a target column for an unrelated one (the order_id-in-correlation bug)"""
     out = copy.deepcopy(target)
@@ -140,6 +147,58 @@ def _corrupt_drop_groupby(target: dict, **_) -> dict | None:
     return out
 
 
+def _corrupt_agg_slot(target: dict, **_) -> dict | None:
+    """Put the derived measure in the agg slot instead of target_columns
+
+    Observed in the capability probe: asked for profit margin, the model wrote
+    agg="ratio(profit, sales)". The Transform schema only accepts the four
+    aggregation names, so pydantic rejects the plan and the chain stops.
+    """
+    y = target.get("y_axis") or ""
+    if "(" not in str(y):
+        return None
+    out = copy.deepcopy(target)
+    out["y_axis"] = _base_of(y)[0]
+    out["transform"]["agg"] = y                     # the expression lands in the wrong slot
+    return out
+
+
+def _corrupt_sort_direction(target: dict, **_) -> dict | None:
+    """Flip the sort direction: right ranking, wrong end of it
+
+    Observed in the probe: "which cities lose us the most money" came back with
+    value_desc, which lists the best performers when the question asked for the
+    worst.
+    """
+    flip = {"value_asc": "value_desc", "value_desc": "value_asc",
+            "date_asc": "date_desc", "date_desc": "date_asc"}
+    sort = target["transform"].get("sort")
+    if sort not in flip:
+        return None
+    out = copy.deepcopy(target)
+    out["transform"]["sort"] = flip[sort]
+    return out
+
+
+def _corrupt_split_derived(target: dict, **_) -> dict | None:
+    """Drop the derived measure and list its base columns separately
+
+    Observed in the probe: asked how much more appliances draw than lights, the
+    model listed both columns instead of diff(appliances, lights), so nothing
+    computes the comparison the question is about.
+    """
+    y = target.get("y_axis") or ""
+    if "(" not in str(y):
+        return None
+    bases = _base_of(y)
+    if len(bases) < 2:
+        return None
+    out = copy.deepcopy(target)
+    out["y_axis"] = bases[0]
+    out["extra_columns"] = bases[1:]                # carried into target_columns below
+    return out
+
+
 def _corrupt_chart(target: dict, intent: str, **_) -> dict | None:
     """Pick a chart outside the intent's allowed list"""
     allowed = ALLOWED_CHARTS.get(intent, [])
@@ -164,7 +223,11 @@ def _corrupt_filter_to_one(target: dict, **_) -> dict | None:
 
 PLAN_CORRUPTIONS = [_corrupt_wrong_column, _corrupt_drop_filter, _corrupt_granularity,
                     _corrupt_agg, _corrupt_camel_case, _corrupt_drop_groupby,
-                    _corrupt_filter_to_one]
+                    _corrupt_filter_to_one, _corrupt_agg_slot, _corrupt_sort_direction,
+                    _corrupt_split_derived]
+# Only applicable when the target carries a derived measure:
+MEASURE_CORRUPTIONS = [_corrupt_agg_slot, _corrupt_split_derived]
+
 VIZ_CORRUPTIONS = [_corrupt_chart]
 #################################
 
@@ -291,11 +354,23 @@ def generate_synthetic(examples: list[dict], frames: dict, schemas: dict,
         pair = None
 
         if fmt == "data_analyst":
-            for fn in random.sample(PLAN_CORRUPTIONS, len(PLAN_CORRUPTIONS)):
+            # Two corruptions only make sense on a derived measure, and there
+            # are few such targets, so they are tried first when the target has
+            # one. The rest rotate: with a random order the rare corruptions
+            # almost never get their turn, because _corrupt_wrong_column applies
+            # to everything and always wins the draw.
+            has_measure = "(" in str(ex["target"].get("y_axis") or "")
+            start = (i // len(rotation)) % len(PLAN_CORRUPTIONS)
+            ordered = PLAN_CORRUPTIONS[start:] + PLAN_CORRUPTIONS[:start]
+            if has_measure:
+                ordered = MEASURE_CORRUPTIONS + [f for f in ordered
+                                                 if f not in MEASURE_CORRUPTIONS]
+            for fn in ordered:
                 bad = fn(ex["target"], df=ctx["df"], intent=intent)
                 if bad is None:
                     continue
                 bad_cols = [c for c in (bad["x_axis"], bad["y_axis"]) if c]
+                bad_cols += bad.pop("extra_columns", [])   # _corrupt_split_derived
                 pair = make_pair("data_analyst", ex, ctx,
                                  dict(bad, target_columns=bad_cols, intent=intent),
                                  source="synthetic", corruption=fn.__name__)

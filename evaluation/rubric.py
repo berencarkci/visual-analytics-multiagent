@@ -1,10 +1,14 @@
 """Scoring rubric for preference pair construction.
 
-Two candidate answers to the same question need a defensible ordering before they can become a (chosen, rejected) pair. 
-This module scores one candidate against a reference answer across six dimensions and returns a total, so pairs can be built mechanically and only the close calls reach a human.
+Two candidate answers to the same question need a defensible ordering before
+they can become a (chosen, rejected) pair. This module scores one candidate
+against a reference answer across six dimensions and returns a total, so pairs
+can be built mechanically and only the close calls reach a human.
 
-Why mechanical scoring at all: the preference labels matter more than the strength of the models that produced the candidates, so the labelling has to be consistent. 
-A rule that says "the column is either in the schema or it is not" never drifts, a human reading 450 JSON blobs does.
+Why mechanical scoring at all: the preference labels matter more than the
+strength of the models that produced the candidates, so the labelling has to be
+consistent. A rule that says "the column is either in the schema or it is not"
+never drifts; a human reading 450 JSON blobs does.
 
 The six dimensions, and which formats they apply to:
 
@@ -17,15 +21,18 @@ The six dimensions, and which formats they apply to:
     clarity                    -            -              x            x         x
     intent_correctness         x            -              -            -         -
 
-Each dimension scores 0 / 1 / 2 (wrong / acceptable / correct). 
-A candidate's total is the sum over the dimensions that apply to its format, normalised to 0-100 so formats with different dimension counts stay comparable.
+Each dimension scores 0 / 1 / 2 (wrong / acceptable / correct). A candidate's
+total is the sum over the dimensions that apply to its format, normalised to
+0-100 so formats with different dimension counts stay comparable.
 
-Some dimensions are hard gates: a chart type outside the intent's allowed list, or a column that does not exist, scores 0 regardless of everything else, because the system would reject that answer anyway.
+Some dimensions are hard gates: a chart type outside the intent's allowed list,
+or a column that does not exist, scores 0 regardless of everything else, because
+the system would reject that answer anyway.
 
 Usage:
     from rubric import score_candidate, compare
     s = score_candidate(cand, reference, fmt="data_analyst", df=df, intent="trend")
-    verdict = compare(score_a, score_b) # "a" | "b" | "tie" | "unclear"
+    verdict = compare(score_a, score_b)     # "a" | "b" | "tie" | "unclear"
 """
 
 from __future__ import annotations
@@ -39,9 +46,11 @@ import pandas as pd
 
 from visualization import ALLOWED_CHARTS
 
-# A pair is auto labelled only when the candidates differ by more than this many raw points. 
-# A one-point gap means they differ in a single dimension by one grade, a real but weak difference, which makes a noisy training signal, so those pairs go to manual review instead.
-UNCLEAR_MARGIN = 1 # raw points
+# A pair is auto-labelled only when the candidates differ by MORE than this many
+# raw points. A one-point gap means they differ in a single dimension by one
+# grade — a real but weak difference, which makes a noisy training signal, so
+# those pairs go to manual review instead.
+UNCLEAR_MARGIN = 1             # raw points
 
 DIMENSIONS_BY_FORMAT = {
     "supervisor":    ["intent_correctness"],
@@ -80,13 +89,28 @@ def _column_exists(col: str | None, df: pd.DataFrame) -> bool:
 
 
 # Individual dimensions (each returns 0, 1 or 2):
+_VALID_AGGS = (None, "sum", "mean", "count", "count_distinct")
+_VALID_SORTS = (None, "date_asc", "date_desc", "value_asc", "value_desc")
+
+
 def _score_schema_validity(cand: dict, df: pd.DataFrame) -> int:
-    """Hard gate: every column the answer names must exist in the table"""
+    """Hard gate: would the system accept this answer at all?
+
+    Covers three ways an answer can be rejected before it ever runs: a column
+    that is not in the table, and a value in the agg or sort slot that the
+    Transform schema does not allow. The last one is not hypothetical — the
+    capability probe caught the model writing agg="ratio(profit, sales)", which
+    pydantic refuses, so the whole chain would stop there.
+    """
     cols = [cand.get("x_axis"), cand.get("y_axis")]
     cols += cand.get("target_columns") or []
     tf = cand.get("transform") or {}
     cols += [tf.get("groupby")]
-    return 2 if all(_column_exists(c, df) for c in cols if c) else 0
+    if not all(_column_exists(c, df) for c in cols if c):
+        return 0
+    if tf.get("agg") not in _VALID_AGGS or tf.get("sort") not in _VALID_SORTS:
+        return 0
+    return 2
 
 
 def _score_column_selection(cand: dict, ref: dict, df: pd.DataFrame) -> int:
@@ -112,13 +136,12 @@ def _score_column_selection(cand: dict, ref: dict, df: pd.DataFrame) -> int:
 def _score_transform_correctness(cand: dict, ref: dict) -> int:
     """groupby and agg carry the meaning, sort and limit are presentation
 
-    A wrong groupby changes what the chart is about (daily vs monthly, category vs state), so it is weighted as a gate. 
-    Sort and limit shift only how the same numbers are shown.
+    A wrong groupby changes what the chart is about (daily vs monthly, category vs state), so it is weighted as a gate. Sort and limit shift only how the same numbers are shown.
     """
     c = cand.get("transform") or {}
     r = ref.get("transform")
     if r is None:
-        return 1 # reference free scoring (live labeling): nothing to compare against, stay neutral
+        return 1 # reference-free scoring (live labeling): nothing to compare against, stay neutral
     def norm(v):
         return None if v in ("", None) else str(v).strip().lower()
 
@@ -128,10 +151,20 @@ def _score_transform_correctness(cand: dict, ref: dict) -> int:
     detail_ok = norm(c.get("sort")) == norm(r.get("sort")) and \
                 norm(c.get("limit")) == norm(r.get("limit"))
 
+    # A reversed sort is not a presentation detail. "Which cities lose the most
+    # money" answered with value_desc shows the best performers instead of the
+    # worst: the ranking is right and the end shown is wrong, which is a wrong
+    # answer to the question asked. A missing sort stays a minor flaw.
+    opposites = {("value_asc", "value_desc"), ("value_desc", "value_asc"),
+                 ("date_asc", "date_desc"), ("date_desc", "date_asc")}
+    sort_reversed = (norm(c.get("sort")), norm(r.get("sort"))) in opposites
+
     if not core_ok:
         return 0
     if not filter_ok:
         return 0  # a dropped filter answers another question
+    if sort_reversed:
+        return 0
     return 2 if detail_ok else 1
 
 
@@ -141,11 +174,11 @@ def _score_chart_appropriateness(cand: dict, ref: dict, intent: str | None) -> i
     if not chart:
         return 0
     if intent and chart not in ALLOWED_CHARTS.get(intent, ()):
-        return 0 # the guardrails would override this
+        return 0                                    # the guardrails would override this
     ref_charts = ref.get("chart_family") or ([ref["chart_type"]] if ref.get("chart_type") else [])
     if not ref_charts:
         return 1
-    return 2 if chart in ref_charts else 1 # allowed but not the reference pick
+    return 2 if chart in ref_charts else 1          # allowed but not the reference pick
 
 
 def _score_groundedness(cand: dict, stats: dict | None) -> int:
@@ -154,7 +187,7 @@ def _score_groundedness(cand: dict, stats: dict | None) -> int:
     if not text:
         return 0
     if stats is None:
-        return 1 # nothing to verify against
+        return 1                                    # nothing to verify against
     from insight import verify_grounded
     ok, _ = verify_grounded(text, stats)
     return 2 if ok else 0
@@ -163,7 +196,9 @@ def _score_groundedness(cand: dict, stats: dict | None) -> int:
 def _score_clarity(cand: dict, ref: dict) -> int:
     """Is the prose specific, or a placeholder that says nothing?
 
-    Deliberately conservative: clarity is the one dimension a rule cannot really judge, so it only punishes what is clearly bad: empty text, the generic fallback template, or a reason naming a chart other than the one chosen.
+    Deliberately conservative: clarity is the one dimension a rule cannot really
+    judge, so it only punishes what is clearly bad — empty text, the generic
+    fallback template, or a reason naming a chart other than the one chosen.
     """
     text = (cand.get("insight") or cand.get("reason") or "").strip()
     if not text:
@@ -174,7 +209,7 @@ def _score_clarity(cand: dict, ref: dict) -> int:
     if len(text.split()) < 4:
         return 0
     chart = cand.get("chart_type")
-    if chart: # reason must not describe another chart
+    if chart:                                       # reason must not describe another chart
         named = [c for c in ("bar", "line", "scatter", "pie", "histogram", "box")
                  if re.search(rf"\b{c}\b", low)]
         if named and chart not in named:
@@ -191,8 +226,9 @@ def _score_intent_correctness(cand: dict, ref: dict) -> int:
 
 
 # Public API:
-def score_candidate(cand: dict, ref: dict, fmt: str, df: pd.DataFrame | None = None, intent: str | None = None, stats: dict | None = None) -> dict:
-    """Score one candidate, returns per dimension scores and a 0-100 total"""
+def score_candidate(cand: dict, ref: dict, fmt: str, df: pd.DataFrame | None = None,
+                    intent: str | None = None, stats: dict | None = None) -> dict:
+    """Score one candidate; returns per-dimension scores and a 0-100 total"""
     dims = DIMENSIONS_BY_FORMAT[fmt]
     scores: dict[str, int] = {}
 
@@ -220,13 +256,15 @@ def score_candidate(cand: dict, ref: dict, fmt: str, df: pd.DataFrame | None = N
 def compare(score_a: dict, score_b: dict, margin: int = UNCLEAR_MARGIN) -> str:
     """Order two scored candidates: 'a', 'b', 'tie' or 'unclear'
 
-    Compared on the raw point difference, not the normalised total: formats have different dimension counts, so the same one point gap is 16.7 normalised points in a three dimension format and 25 in a two dimension one. 
-    Raw points keep "one dimension apart" meaning the same thing everywhere.
+    Compared on the RAW point difference, not the normalised total: formats have
+    different dimension counts, so the same one-point gap is 16.7 normalised
+    points in a three-dimension format and 25 in a two-dimension one. Raw points
+    keep "one dimension apart" meaning the same thing everywhere.
     """
     diff = score_a["raw"] - score_b["raw"]
     if diff == 0:
         return "tie"
     if abs(diff) <= margin:
-        return "unclear" # one dimension apart: weak DPO signal
+        return "unclear"                            # one dimension apart: weak DPO signal
     return "a" if diff > 0 else "b"
 #################################
