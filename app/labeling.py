@@ -48,7 +48,14 @@ from pathlib import Path
 import gradio as gr
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / "agents"))
+# The Space flattens the layout: labeling.py, rubric.py and agents/ all sit in
+# the app root. In the repo they are app/labeling.py, evaluation/rubric.py and
+# agents/. Searching both the module's own directory and its parent covers each.
+_HERE = Path(__file__).resolve().parent
+for _dir in (_HERE, _HERE / "agents", _HERE.parent,
+             _HERE.parent / "agents", _HERE.parent / "evaluation"):
+    if _dir.is_dir():
+        sys.path.insert(0, str(_dir))
 
 from data_analyst import _build_plan_messages
 from data_ingestion import load_table, profile_table, schema_summary
