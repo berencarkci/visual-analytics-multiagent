@@ -117,8 +117,9 @@ def _score_transform_correctness(cand: dict, ref: dict) -> int:
     same numbers are shown.
     """
     c = cand.get("transform") or {}
-    r = ref.get("transform") or {}
-
+    r = ref.get("transform")
+    if r is None:
+        return 1 # reference free scoring (live labeling): nothing to compare against, stay neutral
     def norm(v):
         return None if v in ("", None) else str(v).strip().lower()
 
