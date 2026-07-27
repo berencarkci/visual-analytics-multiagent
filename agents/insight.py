@@ -1,9 +1,11 @@
 """Insight agent: grounded statements from computed statistics.
 
-The LLM writes a short insight using only the numbers the Data Analyst computed. 
-A mechanical verifier then checks every number in the sentence actually exists in the stats dict. 
-Any invented number (or an empty/broken output) drops the result to a deterministic template, so an unsupported claim can never reach the user. 
-The verifier is also the prototype of the groundedness metric.
+The LLM writes a short insight USING ONLY the numbers the Data Analyst
+computed; a mechanical verifier then checks every number in the sentence
+actually exists in the stats dict. Any invented number (or an empty/broken
+output) drops the result to a deterministic template — so an unsupported
+claim can never reach the user. The verifier is also the prototype of the
+B5 groundedness metric.
 """
 
 from __future__ import annotations
@@ -16,12 +18,15 @@ from messages import InsightResult
 from model_client import ModelClient
 from prompts import INSIGHT_SYSTEM
 
-# The Insight agent gets one sentence to write, so a group dictionary with 48
-# months or 138 days in it is not information, it is noise: the model cannot
-# use that many numbers and tends to echo the dump back as its "insight".
-# top_group / bottom_group / total already carry the answer. Trimming here (at
-# the prompt layer, not in the stats themselves) keeps the trace and the
-# groundedness check working on the full data.
+# LLM prompt (numbers-only contract):
+
+
+# A grouped result can carry hundreds of entries (138 days, 49 states, 48
+# months). Handing all of them to the model is counter-productive twice over:
+# it drowns the one sentence we want in a wall of numbers, and on long results
+# it pushes the prompt past the context we train with. The extremes and the
+# total are already extracted into their own fields, so the model only needs a
+# readable sample of the rest.
 _MAX_GROUPS_SHOWN = 8
 
 
@@ -36,9 +41,11 @@ def _compact_stats(stats: dict) -> dict:
             out[f"{key}_omitted"] = len(values) - _MAX_GROUPS_SHOWN
     return out
 
+
 def _build_insight_messages(question: str, stats: dict,
                             feedback: str | None = None) -> list[dict]:
-    user = f"Question: {question}\nStatistics: {json.dumps(_compact_stats(stats), ensure_ascii=False)}"
+    user = (f"Question: {question}\n"
+            f"Statistics: {json.dumps(_compact_stats(stats), ensure_ascii=False)}")
     if feedback:
         user += f"\n\n{feedback}"
     return [{"role": "system", "content": INSIGHT_SYSTEM},
@@ -79,7 +86,7 @@ def _numbers_in(obj) -> set[float]:
 
 
 def verify_grounded(text: str, stats: dict) -> tuple[bool, list[str]]:
-    """True if every number in the text exists in the stats (rounding tolerant)"""
+    """True if every number in the text exists in the stats (rounding-tolerant)"""
     allowed = _numbers_in(stats)
     problems: list[str] = []
     for m in _NUM_RE.findall(text):
@@ -99,7 +106,7 @@ def verify_grounded(text: str, stats: dict) -> tuple[bool, list[str]]:
 #################################
 
 
-# Deterministic templates (the guaranteed,grounded fallback):
+# Deterministic templates (the guaranteed-grounded fallback):
 def _template_insight(question: str, stats: dict) -> str:
     f = stats.get("focus")
     try:
@@ -154,5 +161,6 @@ def run_insight(client: ModelClient, question: str, stats: dict,
         if grounded and 10 <= len(text) <= 400:
             return InsightResult(insight=text, supporting_stats=stats, source="llm")
 
-    return InsightResult(insight=_template_insight(question, stats), supporting_stats=stats, source="template_fallback")
+    return InsightResult(insight=_template_insight(question, stats),
+                         supporting_stats=stats, source="template_fallback")
 #################################

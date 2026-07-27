@@ -1,7 +1,12 @@
 """Visualization agent: constrained chart selection with guardrail review.
 
-The LLM (swappable client: prompt only today, SFT/DPO checkpoints later) picks a chart from the intent's allowed list only, guardrails then verify the choice against the actual prepared data (category counts, negative values, discrete x) and correct it when a rule is violated. 
-Every correction is recorded in guardrails_applied, the models raw choice stays visible for model level evaluation, the corrected chart is the system level output.
+The LLM (swappable client: prompt-only today, SFT/DPO checkpoints later)
+picks a chart from the intent's ALLOWED list only; guardrails then verify
+the choice against the ACTUAL prepared data (category counts, negative
+values, discrete x) and correct it when a rule is violated. Every
+correction is recorded in guardrails_applied — the model's raw choice
+stays visible for model-level evaluation, the corrected chart is the
+system-level output.
 """
 
 from __future__ import annotations
@@ -12,10 +17,10 @@ import pandas as pd
 
 from messages import ChartDecision, StepError, TransformPlan, WorkflowPlan
 from model_client import ModelClient
-from schemas import ChartRecommendation, ChartType, extract_json_block
 from prompts import VIZ_SYSTEM
+from schemas import ChartRecommendation, ChartType, extract_json_block
 
-# Intent -> allowed chart families (first=preferred, benchmark aligned):
+# Intent -> allowed chart families (first = preferred; benchmark-aligned):
 ALLOWED_CHARTS: dict[str, list[str]] = {
     "trend": ["line", "bar"],
     "comparison": ["bar", "box"],
@@ -26,6 +31,9 @@ ALLOWED_CHARTS: dict[str, list[str]] = {
     "anomaly": ["line", "box"],
 }
 #################################
+
+
+# Narrow LLM prompt (chart choice ONLY — transform and insight belong to others):
 
 
 def _build_viz_messages(question: str, intent: str, data_summary: str,
@@ -40,12 +48,13 @@ def _build_viz_messages(question: str, intent: str, data_summary: str,
 
 
 # Data facts the guardrails check against:
-def _data_facts(raw_df: pd.DataFrame, prepared_df: pd.DataFrame, plan: TransformPlan) -> dict:
+def _data_facts(raw_df: pd.DataFrame, prepared_df: pd.DataFrame,
+                plan: TransformPlan) -> dict:
     x = plan.target_columns[0] if plan.target_columns else None
     y = plan.target_columns[1] if len(plan.target_columns) > 1 else None
 
     if plan.transform.groupby:
-        n_categories = int(len(prepared_df)) # after groupby: one row per group
+        n_categories = int(len(prepared_df))          # after groupby: one row per group
     elif x is not None and x in raw_df.columns:
         n_categories = int(raw_df[x].nunique())
     else:
@@ -54,12 +63,18 @@ def _data_facts(raw_df: pd.DataFrame, prepared_df: pd.DataFrame, plan: Transform
     numeric_cols = prepared_df.select_dtypes("number")
     has_negative = bool((numeric_cols < 0).any().any()) if not numeric_cols.empty else False
 
-    x_discrete_numeric = bool(x is not None and x in raw_df.columns and pd.api.types.is_numeric_dtype(raw_df[x]) and raw_df[x].nunique() <= 12)
-    return {"x": x, "y": y, "n_categories": n_categories, "has_negative": has_negative, "x_discrete_numeric": x_discrete_numeric, "n_rows": int(len(prepared_df))}
+    x_discrete_numeric = bool(
+        x is not None and x in raw_df.columns
+        and pd.api.types.is_numeric_dtype(raw_df[x])
+        and raw_df[x].nunique() <= 12
+    )
+    return {"x": x, "y": y, "n_categories": n_categories,
+            "has_negative": has_negative, "x_discrete_numeric": x_discrete_numeric,
+            "n_rows": int(len(prepared_df))}
 #################################
 
 
-# Guardrail review (checks against real data, not hoped for model obedience):
+# Guardrail review (checks against REAL data, not hoped-for model obedience):
 def _apply_guardrails(chart: str, facts: dict, allowed: list[str]) -> tuple[str, list[str]]:
     applied: list[str] = []
 
@@ -84,12 +99,15 @@ def _apply_guardrails(chart: str, facts: dict, allowed: list[str]) -> tuple[str,
 
 
 # Agent entry point:
-def run_visualization(client: ModelClient, question: str, workflow: WorkflowPlan, plan: TransformPlan, raw_df: pd.DataFrame, prepared_df: pd.DataFrame,
+def run_visualization(client: ModelClient, question: str, workflow: WorkflowPlan,
+                      plan: TransformPlan, raw_df: pd.DataFrame,
+                      prepared_df: pd.DataFrame,
                       feedback: str | None = None) -> ChartDecision | StepError:
-    """LLM picks from the allowed list then guardrails verify against the data
+    """LLM picks from the allowed list -> guardrails verify against the data
 
-    Returns a ChartDecision whose recommendation is render ready (source column convention + the Data Analyst's transform). 
-    The insight field is left empty, the orchestrator fills it from the Insight Agent's result.
+    Returns a ChartDecision whose recommendation is render-ready (source-column
+    convention + the Data Analyst's transform). The insight field is left empty;
+    the orchestrator fills it from the Insight Agent's result.
     """
     allowed = ALLOWED_CHARTS[workflow.intent]
     facts = _data_facts(raw_df, prepared_df, plan)
@@ -98,7 +116,7 @@ def run_visualization(client: ModelClient, question: str, workflow: WorkflowPlan
 
     messages = _build_viz_messages(question, workflow.intent, summary, allowed, feedback)
     chart, reason, source = None, "", "llm"
-    for attempt in range(2): # one retry on unparseable output
+    for attempt in range(2):                          # one retry on unparseable output
         raw = client.generate(messages)
         block = extract_json_block(raw)
         if block:
@@ -118,7 +136,7 @@ def run_visualization(client: ModelClient, question: str, workflow: WorkflowPlan
             source = "llm_retry"
 
     applied: list[str] = []
-    if chart is None: # both attempts failed go with the safe default
+    if chart is None:                                 # both attempts failed -> safe default
         chart = allowed[0]
         reason = "Default choice: model output was invalid twice."
         applied.append(f"invalid_llm_output->{allowed[0]}: default applied")
@@ -130,9 +148,9 @@ def run_visualization(client: ModelClient, question: str, workflow: WorkflowPlan
         chart_type=chart,
         x_axis=facts["x"] or "",
         y_axis=facts["y"],
-        transform=plan.transform, # Data Analyst's plan, not touched
+        transform=plan.transform,                     # Data Analyst's plan, untouched
         reason=reason,
-        insight="", # Insight Agent fills this
+        insight="",                                   # Insight Agent fills this (T2.4)
     )
     return ChartDecision(recommendation=rec, guardrails_applied=applied)
 #################################
