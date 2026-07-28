@@ -1,42 +1,29 @@
-"""Agent-format SFT data generator (Task B4/T1).
+"""Agent-format SFT data generator.
 
-The single-call generator (make_sft_data.py) teaches one skill: schema +
-question -> full chart recommendation. That is what baseline.py asks for, and
-training on it turned out to transfer well to the Data Analyst — but it also
-broke the Insight agent, which started emitting JSON dumps instead of
-sentences (observed in the 3B smoke test).
+The single call generator (make_sft_data.py) teaches one skill: schema + question -> full chart recommendation. 
+That is what baseline.py asks for, and training on it turned out to transfer well to the Data Analyst but it also broke the Insight agent, which started emitting JSON dumps instead of sentences (observed in the 3B smoke test).
 
-This script fixes the mismatch by decomposing every single-call example into
+This script fixes the mismatch by decomposing every single call example into
 the formats the agents actually use at inference time:
 
-    Supervisor     question                       -> {"intent"}
-    Data Analyst   schema + intent + question   -> {"target_columns", "transform"}
-    Visualization  question + intent + data facts -> {"chart_type", "reason"}
-    Insight        question + computed statistics -> {"insight"}
+    Supervisor   question -> {"intent"}
+    Data Analyst   schema + intent + question -> {"target_columns", "transform"}
+    Visualization   question + intent + data facts -> {"chart_type", "reason"}
+    Insight   question + computed statistics -> {"insight"}
 
 Two design points worth knowing:
 
-  * The prompts are not re-implemented here. This module imports each agent's
-    own `_build_*_messages()` function, so a training example is byte-identical
-    to what the agent will send at inference. When a prompt changes, the
-    training data follows automatically — no silent drift.
+  * The prompts are not reimplemented here. 
+    This module imports each agent's own `_build_*_messages()` function, so a training example is byte identical to what the agent will send at inference. 
+    When a prompt changes, the training data follows automatically, no silent drift.
 
-  * Insight targets DO contain numbers, unlike the single-call ones. The rule
-    was never "avoid numbers", it was "never state a number you cannot see".
-    The Insight agent is handed computed statistics, so quoting them is the
-    correct behaviour; the transforms are executed here against the real data
-    so the target sentences carry real values.
+  * Insight targets do contain numbers, unlike the single call ones. 
+    The rule was never "avoid numbers", it was "never state a number you cannot see".
+    The Insight agent is handed computed statistics, so quoting them is the correct behaviour, the transforms are executed here against the real data so the target sentences carry real values.
 
-Supervisor exclusion was REVERSED in v3. It was originally left out because it
-classified all 16 smoke-test questions correctly — but the dev split later
-showed a systematic failure the smoke test never probed: filters named as noun
-modifiers ("of the X category", "for Y customers", "at night") are misread as
-comparison/trend, and softly-worded anomaly questions slide to trend. DPO on
-supervisor pairs did not fix this (preference pairs cannot build a behaviour
-SFT never established), so the fix moves here: every source example now also
-yields a Supervisor record (question -> intent, known by construction), plus a
-small intent-only bank in make_sft_data.py for lure patterns without a clean
-executable chart target.
+Supervisor exclusion was reversed before. 
+It was originally left out because it classified all 16 smoke test questions correctly but the dev split later showed a systematic failure the smoke test never probed: filters named as noun modifiers ("of the X category", "for Y customers", "at night") are misread as comparison/trend, and softly-worded anomaly questions slide to trend. 
+DPO on supervisor pairs did not fix this (preference pairs cannot build a behaviour SFT never established), so the fix moves here: every source example now also yields a Supervisor record (question -> intent, known by construction), plus a small intent only bank in make_sft_data.py for lure patterns without a clean executable chart target.
 
 Usage (from the repo root):
     python evaluation/make_agent_sft_data.py
@@ -59,9 +46,7 @@ from check_contamination import check_contamination
 from data_analyst import _build_plan_messages, _compute_stats
 from data_ingestion import load_table, profile_table, schema_summary
 from insight import _build_insight_messages
-from make_sft_data import (DATASETS, build_handwritten_examples,
-                           build_intent_only_examples,
-                           build_template_examples, pretty)
+from make_sft_data import (DATASETS, build_handwritten_examples, build_intent_only_examples, build_template_examples, pretty)
 from failure_examples import FAILURE_EXAMPLES
 from messages import TransformPlan
 from schemas import ChartRecommendation
@@ -77,10 +62,7 @@ OUT_PATH = Path("data/sft_agents_train.jsonl")
 
 # Insight targets: real numbers, varied phrasing.
 #
-# Three variants per focus. One variant would teach the model to reproduce a
-# fixed string, which is what the deterministic template fallback already does
-# for free; the point of the LLM call is a sentence that reads naturally while
-# staying pinned to the computed values.
+# Three variants per focus. One variant would teach the model to reproduce a fixed string, which is what the deterministic template fallback already does for free, the point of the LLM call is a sentence that reads naturally while staying pinned to the computed values.
 def _insight_targets(stats: dict, question: str) -> list[str]:
     f = stats.get("focus")
     g = stats.get
@@ -142,7 +124,7 @@ def _insight_targets(stats: dict, question: str) -> list[str]:
 
 # Running one example through the real transform machinery:
 def _prepare(example: dict, frames: dict) -> tuple | None:
-    """Execute the target transform on the real data; None if it produces nothing"""
+    """Execute the target transform on the real data, None if it produces nothing"""
     t = example["target"]
     ds_key = example["dataset"]
     df = frames[ds_key]
@@ -161,12 +143,10 @@ def _prepare(example: dict, frames: dict) -> tuple | None:
 #################################
 
 
-# Per-format example builders:
-def build_agent_examples(examples: list[dict], frames: dict,
-                         schemas: dict) -> dict[str, list[dict]]:
-    """Decompose single-call examples into per-agent training records"""
-    out: dict[str, list[dict]] = {"supervisor": [], "data_analyst": [],
-                                  "visualization": [], "insight": []}
+# Per format example builders:
+def build_agent_examples(examples: list[dict], frames: dict, schemas: dict) -> dict[str, list[dict]]:
+    """Decompose single call examples into per agent training records"""
+    out: dict[str, list[dict]] = {"supervisor": [], "data_analyst": [], "visualization": [], "insight": []}
     skipped = 0
 
     for ex in examples:
@@ -174,14 +154,11 @@ def build_agent_examples(examples: list[dict], frames: dict,
         if intent is None:
             skipped += 1
             continue
-        meta_base = {"source": ex.get("source", "template"), "dataset": ex["dataset"],
-                     "intent": intent}
+        meta_base = {"source": ex.get("source", "template"), "dataset": ex["dataset"], "intent": intent}
 
-        # --- Supervisor (question -> intent; needs no executed transform, so it
-        # is built before _prepare and survives transform skips) ---
+        # Supervisor (question -> intent; needs no executed transform, so it is built before _prepare and survives transform skips)
         out["supervisor"].append({
-            "messages": _build_intent_messages(ex["question"])
-                        + [{"role": "assistant", "content": json.dumps({"intent": intent})}],
+            "messages": _build_intent_messages(ex["question"]) + [{"role": "assistant", "content": json.dumps({"intent": intent})}],
             "meta": dict(meta_base, format="supervisor")})
 
         prep = _prepare(ex, frames)
@@ -191,34 +168,28 @@ def build_agent_examples(examples: list[dict], frames: dict,
         raw_df, prepared, x_col, y_col, plan, target_columns = prep
         question, t = ex["question"], ex["target"]
 
-        # --- Data Analyst ---
+        # Data Analyst
         out["data_analyst"].append({
-            "messages": _build_plan_messages(schemas[ex["dataset"]], question, intent)
-                        + [{"role": "assistant", "content": json.dumps(
-                            {"target_columns": target_columns, "transform": t["transform"]})}],
+            "messages": _build_plan_messages(schemas[ex["dataset"]], question, intent) + [{"role": "assistant", "content": json.dumps({"target_columns": target_columns, "transform": t["transform"]})}],
             "meta": dict(meta_base, format="data_analyst")})
 
-        # --- Visualization (same summary string the agent builds at runtime) ---
+        # Visualization (same summary string the agent builds at runtime)
         facts = _data_facts(raw_df, prepared, plan)
         summary = (f"{facts['n_rows']} rows; x={facts['x']} ({facts['n_categories']} categories), "
                    f"y={facts['y']}; negatives={facts['has_negative']}")
         allowed = ALLOWED_CHARTS[intent]
-        if t["chart_type"] in allowed:          # never teach a chart the guardrails reject
+        if t["chart_type"] in allowed: # never teach a chart the guardrails reject
             out["visualization"].append({
-                "messages": _build_viz_messages(question, intent, summary, allowed)
-                            + [{"role": "assistant", "content": json.dumps(
-                                {"chart_type": t["chart_type"], "reason": t["reason"]})}],
+                "messages": _build_viz_messages(question, intent, summary, allowed) + [{"role": "assistant", "content": json.dumps({"chart_type": t["chart_type"], "reason": t["reason"]})}],
                 "meta": dict(meta_base, format="visualization")})
 
-        # --- Insight (real computed statistics -> grounded sentence) ---
+        # Insight (real computed statistics -> grounded sentence)
         focus = _INSIGHT_FOCUS[intent]
         stats = _compute_stats(focus, raw_df, prepared, x_col, y_col, plan)
         variants = _insight_targets(stats, question)
         if variants and "stats_error" not in stats:
             out["insight"].append({
-                "messages": _build_insight_messages(question, stats)
-                            + [{"role": "assistant", "content": json.dumps(
-                                {"insight": random.choice(variants)})}],
+                "messages": _build_insight_messages(question, stats) + [{"role": "assistant", "content": json.dumps({"insight": random.choice(variants)})}],
                 "meta": dict(meta_base, format="insight")})
 
     if skipped:
@@ -230,10 +201,8 @@ def build_agent_examples(examples: list[dict], frames: dict,
 # Main:
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--per-format", type=int, default=None,
-                    help="cap the number of examples kept per agent format")
-    ap.add_argument("--single-call", default="data/sft_train.jsonl",
-                    help="single-call set to merge in (pass '' to skip)")
+    ap.add_argument("--per-format", type=int, default=None, help="cap the number of examples kept per agent format")
+    ap.add_argument("--single-call", default="data/sft_train.jsonl", help="single-call set to merge in (pass '' to skip)")
     args = ap.parse_args()
 
     examples = build_template_examples() + build_handwritten_examples()
@@ -253,9 +222,8 @@ def main() -> int:
 
     by_format = build_agent_examples(examples, frames, schemas)
 
-    # Intent-only bank (v3): supervisor-format records for lure patterns with no
-    # clean executable chart target. These questions are NOT in the single-call
-    # set, so they get their own contamination check here.
+    # Intent only bank: supervisor format records for lure patterns with no clean executable chart target. 
+    # These questions are not in the single call set, so they get their own contamination check here.
     intent_only = build_intent_only_examples()
     hits = check_contamination([e["question"] for e in intent_only])
     if hits:
@@ -265,10 +233,8 @@ def main() -> int:
         return 1
     for e in intent_only:
         by_format["supervisor"].append({
-            "messages": _build_intent_messages(e["question"])
-                        + [{"role": "assistant", "content": json.dumps({"intent": e["intent"]})}],
-            "meta": {"source": "intent_only", "dataset": e["dataset"],
-                     "intent": e["intent"], "format": "supervisor"}})
+            "messages": _build_intent_messages(e["question"]) + [{"role": "assistant", "content": json.dumps({"intent": e["intent"]})}],
+            "meta": {"source": "intent_only", "dataset": e["dataset"], "intent": e["intent"], "format": "supervisor"}})
 
     records: list[dict] = []
     for fmt, items in by_format.items():
@@ -281,7 +247,7 @@ def main() -> int:
     if args.single_call:
         path = Path(args.single_call)
         if not path.exists():
-            raise SystemExit(f"single-call set not found: {path} — run make_sft_data.py first")
+            raise SystemExit(f"single call set not found: {path} — run make_sft_data.py first")
         n_single = 0
         for line in path.read_text(encoding="utf-8").splitlines():
             if line.strip():
@@ -298,8 +264,8 @@ def main() -> int:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
     print(f"\nwrote {len(records)} examples -> {OUT_PATH}")
-    print("contamination: single-call questions are checked by make_sft_data.py; "
-          "intent-only questions are checked above in this script")
+    print("contamination: single call questions are checked by make_sft_data.py; "
+          "intent only questions are checked above in this script")
     return 0
 
 

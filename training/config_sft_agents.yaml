@@ -1,9 +1,6 @@
-# Multi-task SFT + QLoRA configuration — v3 (Task B5)
+# Multi-task SFT + QLoRA configuration — v3
 #
-# Same machinery as config_sft.yaml, different data: this run trains ONE
-# adapter on FIVE output formats at once (single-call, Supervisor, Data
-# Analyst, Visualization, Insight). The single-call examples stay in the mix
-# so the baseline arm of the B5 comparison keeps its trained model.
+# Same machinery as config_sft.yaml, different data: this run trains one adapter on five output formats at once (single-call, Supervisor, Data Analyst, Visualization, Insight). The single call examples stay in the mix so the baseline arm of the previous models comparison keeps its trained model.
 #
 # v3 change: Supervisor joined the mix. It was excluded in v1/v2 after a clean
 # smoke test, but the dev split showed a systematic miss (filters named as
@@ -11,23 +8,22 @@
 # trend), and DPO on supervisor pairs could not repair a behaviour SFT never
 # built. v3 also expands the diff / value_asc / soft-anomaly banks.
 
-# --- Base model ---
+# Base model
 base_model: Qwen/Qwen2.5-3B-Instruct
 
-# --- Data ---
+# Data
 train_file: data/sft_agents_train.jsonl
-val_ratio: 0.10                 # stratified by output format, not just source
+val_ratio: 0.10 # stratified by output format, not just source
 max_seq_length: 1536
 
-# --- QLoRA (4-bit base) ---
+# QLoRA (4-bit base)
 load_in_4bit: true
 bnb_4bit_quant_type: nf4
 bnb_4bit_compute_dtype: float16
 bnb_4bit_use_double_quant: true
 
-# --- LoRA ---
-# Same rank as the single-task run so the two adapters stay comparable; four
-# formats in one adapter is exactly the capacity question this run answers.
+# LoRA
+# Same rank as the single task run so the two adapters stay comparable, four formats in one adapter is exactly the capacity question this run answers.
 lora_r: 16
 lora_alpha: 32
 lora_dropout: 0.05
@@ -40,9 +36,8 @@ lora_target_modules:
   - up_proj
   - down_proj
 
-# --- Training ---
-# Three epochs rather than four: the set is 4x larger, so each epoch already
-# sees far more gradient steps than the single-task run did.
+# Training
+# Three epochs rather than four: the set is 4x larger, so each epoch already sees far more gradient steps than the single task run did.
 num_train_epochs: 3
 per_device_train_batch_size: 2
 gradient_accumulation_steps: 4
@@ -62,7 +57,7 @@ metric_for_best_model: eval_loss
 greater_is_better: false
 seed: 42
 
-# --- Output ---
+# Output
 output_dir: outputs/sft-agents-v3-qwen2.5-3b
 hub_model_id: berencarkci/qwen2.5-3b-va-sft-v3
 push_to_hub: false
