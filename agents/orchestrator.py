@@ -23,7 +23,7 @@ from schemas import ChartRecommendation
 from supervisor import classify_intent, select_workflow
 from trace import TraceLogger, summarize
 from visualization import run_visualization
-from prompts import REVIEW_FEEDBACK
+from prompts import REVIEW_FEEDBACK, RETRY_HINTS
 
 # Workflow result container:
 @dataclass
@@ -113,8 +113,10 @@ def run_workflow(client: ModelClient, df: pd.DataFrame, profile: TableProfile, q
     # Targeted single retry if the review failed:
     if not verdict.passed:
         blamed = _blame(verdict)
-        # The rejected attempt is fed back: a retry with an identical prompt is a no-op under greedy decoding, so the reviewer's reason is the only thing that can change the outcome.
-        feedback = REVIEW_FEEDBACK.format(issues="; ".join(verdict.issues))
+        # Echoing the reviewer's complaint tells the model something is wrong but not what to do differently, a 3B model rarely infers the corrective move, so the rule specific hint is appended per failed check.
+        failed_checks = [name for name, ok in verdict.checks.items() if not ok]
+        hint = "".join(RETRY_HINTS[c] for c in failed_checks if c in RETRY_HINTS)
+        feedback = REVIEW_FEEDBACK.format(issues="; ".join(verdict.issues or []), hint=hint)
         if blamed == "data_analyst":
             plan2, prepared2, decision2, ins2 = run_analysis_chain(feedback)
             if not isinstance(plan2, StepError):
