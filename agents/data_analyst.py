@@ -108,19 +108,46 @@ def _compute_stats(focus: str, raw_df: pd.DataFrame, transformed: pd.DataFrame, 
             cols = [c for c in plan.target_columns if c in raw_df.columns][:2]
             if len(cols) == 2:
                 sub = raw_df[cols].apply(pd.to_numeric, errors="coerce").dropna()
+                n_dropped = int(len(raw_df) - len(sub))
                 r = float(sub[cols[0]].corr(sub[cols[1]]))
                 strength = ("strong" if abs(r) >= 0.6 else
                             "moderate" if abs(r) >= 0.3 else "weak")
                 s |= {"pearson_r": round(r, 3), "n": int(len(sub)),
                       "direction": "positive" if r > 0 else "negative",
                       "strength": strength, "columns": cols}
+                if n_dropped:            # missing rows must not vanish silently
+                    s["n_rows_dropped_missing"] = n_dropped
+                if len(sub) < 12:
+                    s["caution"] = (f"only {len(sub)} rows remain after dropping "
+                                    "missing values; the correlation is unreliable")
+        elif focus == "single_value" and y_col and y_col in transformed.columns:
+            s |= {"metric": y_col,
+                  "value": round(float(transformed[y_col].iloc[0]), 3)}
         elif focus == "distribution_stats":
             col = y_col if (y_col and y_col in transformed.columns) else x_col
-            ser = pd.to_numeric(transformed[col], errors="coerce").dropna()
-            s |= {"column": col, "mean": round(float(ser.mean()), 3),
-                  "median": round(float(ser.median()), 3), "std": round(float(ser.std()), 3),
-                  "min": round(float(ser.min()), 3), "max": round(float(ser.max()), 3),
-                  "q1": round(float(ser.quantile(0.25)), 3), "q3": round(float(ser.quantile(0.75)), 3)}
+            raw = transformed[col]
+            if pd.api.types.is_bool_dtype(raw):   # quantile crashes on bool dtype
+                raw = raw.astype(int)
+            coerced = pd.to_numeric(raw, errors="coerce")
+            n_failed = int(coerced.isna().sum()) - int(raw.isna().sum())
+            if len(raw) and n_failed / len(raw) > 0.2:
+                # mostly non-numeric: coercing would silently describe only the
+                # numeric-looking subset (the "median 6.0" failure). Count instead.
+                counts = raw.dropna().astype(str).value_counts()
+                s |= {"focus": "category_counts", "column": col,
+                      "counts": {str(k): int(v) for k, v in counts.items()},
+                      "top_group": str(counts.idxmax()), "top_value": int(counts.max()),
+                      "n_groups": int(len(counts)),
+                      "note": f"{n_failed} of {len(raw)} values are not numeric; "
+                              "treated as categories"}
+            else:
+                ser = coerced.dropna()
+                s |= {"column": col, "mean": round(float(ser.mean()), 3),
+                      "median": round(float(ser.median()), 3), "std": round(float(ser.std()), 3),
+                      "min": round(float(ser.min()), 3), "max": round(float(ser.max()), 3),
+                      "q1": round(float(ser.quantile(0.25)), 3), "q3": round(float(ser.quantile(0.75)), 3)}
+                if n_failed:
+                    s["n_non_numeric_dropped"] = n_failed
         elif focus == "outlier_detection" and y_col and y_col in transformed.columns:
             ser = transformed.set_index(x_col)[y_col].dropna()
             q1, q3 = float(ser.quantile(0.25)), float(ser.quantile(0.75))
@@ -167,7 +194,24 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
         plan.transform = t.model_copy(update={"filter": None})
         plan.notes.append(
             f"plan guardrail: filter '{t.filter}' removed — share questions need all groups")
-
+    # PLAN GUARDRAIL: a distribution question over a categorical, boolean
+    # or text column cannot histogram raw values — the honest answer is the count
+    # of rows per value. Observed on a user upload: histogram over a text column
+    # produced NaN statistics, and worse, silent numeric coercion produced
+    # plausible-looking but wrong ones. The Supervisor cannot make this call (it
+    # sees only the question, never the schema), so the rewrite lives here.
+    focus = workflow.insight_focus
+    x_target = plan.target_columns[0] if plan.target_columns else None
+    col_dtypes = {c.name: c.dtype for c in profile.columns}
+    if (focus == "distribution_stats" and x_target
+            and col_dtypes.get(x_target) in ("categorical", "boolean", "text")
+            and not plan.transform.groupby):
+        plan.transform = plan.transform.model_copy(
+            update={"groupby": x_target, "agg": "count"})
+        plan.notes.append(
+            f"plan guardrail: '{x_target}' is {col_dtypes.get(x_target)} — "
+            "distribution rewritten to per-category counts")
+        focus = "group_stats"
     # execute through the shared engine (reusing the recommendation container)
     x = plan.target_columns[0] if plan.target_columns else None
     y = plan.target_columns[1] if len(plan.target_columns) > 1 else None
@@ -187,8 +231,34 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
                          detail=f"Transform left 0 rows (filter: {plan.transform.filter})",
                          recoverable=True), None
 
-    plan.notes = plan.notes + notes # keep plan repair notes, then transform notes
+    plan.notes = plan.notes + notes
+    # Single-value query ("what is the average X overall"): an aggregate with no
+    # groupby. Restricted to group_stats on purpose — trend, distribution,
+    # anomaly, correlation and composition all need every row, so an aggregate
+    # appearing there is a planning slip, not a request for one number.
+    # Collapsing those destroys the answer instead of fixing the insight
+    # (observed on the untrained model: 7 trend/distribution questions collapsed
+    # to a scalar, and a share question collapsed to a single count).
+    if (plan.transform.agg and not plan.transform.groupby
+            and focus == "group_stats"):
+        col = y_col if (y_col and y_col in prepared.columns) else x_col
+        if col in prepared.columns:
+            ser = (pd.to_numeric(prepared[col], errors="coerce").dropna()
+                   if plan.transform.agg in ("sum", "mean") else prepared[col].dropna())
+            try:
+                val = float({"sum": ser.sum, "mean": ser.mean,
+                             "count": lambda: len(ser),
+                             "count_distinct": ser.nunique}[plan.transform.agg]())
+                if pd.isna(val):        # mean of an empty series is NaN, not an error
+                    raise ValueError("aggregate is NaN (no usable values)")
+                label = f"{plan.transform.agg}({col})"
+                prepared = pd.DataFrame({"metric": [label], label: [val]})
+                x_col, y_col = "metric", label
+                focus = "single_value"
+                plan.notes.append(f"single-value aggregate: {label}")
+            except Exception as e:
+                plan.notes.append(f"single-value aggregate skipped: {e}")
     plan.result_rows = int(len(prepared))
-    plan.summary_stats = _compute_stats(workflow.insight_focus, df, prepared, x_col, y_col, plan)
+    plan.summary_stats = _compute_stats(focus, df, prepared, x_col, y_col, plan)
     return plan, prepared
 #################################

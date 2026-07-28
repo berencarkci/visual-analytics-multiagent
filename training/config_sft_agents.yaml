@@ -58,6 +58,6 @@ greater_is_better: false
 seed: 42
 
 # Output
-output_dir: outputs/sft-agents-v3-qwen2.5-3b
-hub_model_id: berencarkci/qwen2.5-3b-va-sft-v3-1
+output_dir: outputs/sft-agents-v4-qwen2.5-3b
+hub_model_id: berencarkci/qwen2.5-3b-va-sft-v4
 push_to_hub: false

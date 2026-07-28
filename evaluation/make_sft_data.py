@@ -122,6 +122,22 @@ def build_template_examples() -> list[dict]:
                        reason=f"With many {pretty(cat)} groups a pie is unreadable; sorted bars still show shares.",
                        insight=f"The chart shows each {pretty(cat)}'s contribution to total {pretty(metric)}.")
             add("retail", f"How is total {pretty(metric)} distributed across {pretty(cat)} groups?", t)
+    # nested share (v4, probe-driven): the share of ONE fixed slice split by
+    # ANOTHER column. The probe showed the model pinning the groupby to the
+    # filtered column itself ("share of Technology sales from West" ->
+    # groupby=category, filter=Technology -> a single 100% group). The pattern:
+    # the named value is a filter, the "from each X" column is the groupby.
+    for cat_val, cat_col, grp in [("Technology", "category", "region"),
+                                  ("Consumer", "segment", "category"),
+                                  ("West", "region", "category")]:
+        t = target("pie", grp, "sales", groupby=grp, agg="sum",
+                   filter=f"{cat_col} == '{cat_val}'",
+                   reason=f"The question fixes {cat_val} with a filter and asks how the {pretty(grp)} groups share it.",
+                   insight=f"The chart shows how {cat_val}'s total sales split across {pretty(grp)} groups.")
+        for q in [f"What share of {cat_val} sales comes from each {pretty(grp)}?",
+                  f"Within {cat_val}, how do the {pretty(grp)} groups split the sales?",
+                  f"Break {cat_val}'s sales into {pretty(grp)} shares."]:
+            add("retail", q, t)
     bank["intent"] = "relationship"
     # relationship (scatter for continuous pairs)
     pairs = [("mall", "age", "annual_income_k_usd"), ("mall", "age", "spending_score"),
@@ -152,6 +168,26 @@ def build_template_examples() -> list[dict]:
                   f"Bin the {pretty(col)} values and show their shape.",
                   f"Show a histogram of {pretty(col)}.",
                   f"What does the spread of {pretty(col)} look like?"]:
+            add(ds, q, t)
+    # categorical distribution (v4, observed on a user upload): every distribution
+    # example above uses a NUMERIC column, so the model learned "distribution ->
+    # histogram, no groupby" as an unconditional rule and applied it to text
+    # columns (histogram over a category column, NaN statistics — or worse,
+    # silently coerced ones). Contrast twins to the bank above: same "distribution"
+    # wording, categorical column -> per-category row counts as bars. The intent
+    # stays "distribution": the Supervisor sees only the question text and cannot
+    # know the column type; the split happens in the Data Analyst's plan.
+    for ds, cat, ycol in [("retail", "category", "order_id"),
+                          ("retail", "ship_mode", "order_id"),
+                          ("retail", "segment", "order_id"),
+                          ("retail", "region", "order_id"),
+                          ("mall", "gender", "age")]:
+        t = target("bar", cat, ycol, groupby=cat, agg="count", sort="value_desc",
+                   reason=f"{pretty(cat)} is categorical, so its distribution is the count of rows per value, shown as bars.",
+                   insight=f"The chart shows how the rows distribute across the {pretty(cat)} values.")
+        for q in [f"What is the distribution of the {pretty(cat)} values?",
+                  f"How is the data distributed across {pretty(cat)} groups?",
+                  f"Show the distribution of {pretty(cat)}."]:
             add(ds, q, t)
     bank["intent"] = "filter_aggregation"
     # filter_aggregation
@@ -402,6 +438,18 @@ def build_template_examples() -> list[dict]:
                    insight=f"The chart surfaces the {pretty(cat)} groups that lose the most money.")
         for q in [f"Which {pretty(cat)} groups are losing us money?",
                   f"Show the {pretty(cat)} groups where we bleed the most profit."]:
+            add("retail", q, t)
+    # negation (v4, probe-driven): "not profitable" flipped the sort to value_desc
+    # and the insight praised the TOP earner — the exact "wrong end of the
+    # ranking" error the DPO rubric defines as a wrong answer, reached through
+    # negated wording the losing-money bank above does not cover.
+    for cat in ["sub_category", "state", "city"]:
+        t = target("bar", cat, "profit", groupby=cat, agg="sum", sort="value_asc", limit=10,
+                   reason="Not profitable means the lowest profit totals, so the sort is ascending.",
+                   insight=f"The chart surfaces the {pretty(cat)} groups that fail to turn a profit.")
+        for q in [f"Which {pretty(cat)} groups are not profitable?",
+                  f"Which {pretty(cat)} groups are unprofitable?",
+                  f"Show the {pretty(cat)} groups that are in the red."]:
             add("retail", q, t)
     bank["intent"] = "comparison"
     for cat in ["state", "ship_mode"]:

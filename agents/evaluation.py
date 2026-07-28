@@ -102,6 +102,25 @@ def _check_insight_informative(ins: InsightResult) -> str | None:
     return None
 #################################
 
+def _check_data_sufficiency(plan: TransformPlan) -> str | None:
+    """Warn when the statistics rest on fewer rows than the user handed in
+
+    Missing values are dropped before a correlation is computed, so an insight
+    can report "over 10 rows" for a 14-row upload without the user ever learning
+    that 4 were discarded — and at that size the coefficient is not trustworthy
+    anyway. The Data Analyst records both facts; this is what surfaces them.
+    Warning, not an issue: dropping incomplete rows is correct behaviour, the
+    problem is only that it happens invisibly.
+    """
+    s = plan.summary_stats or {}
+    parts: list[str] = []
+    dropped = s.get("n_rows_dropped_missing")
+    if dropped:
+        parts.append(f"{dropped} row(s) dropped for missing values")
+    if s.get("caution"):
+        parts.append(str(s["caution"]))
+    return "; ".join(parts) if parts else None
+
 # Agent entry point:
 def run_evaluation(workflow: WorkflowPlan, plan: TransformPlan, decision: ChartDecision, ins: InsightResult, df: pd.DataFrame) -> EvalVerdict:
     """Run all seven checks, hard issues block, warnings ride along with the answer"""
@@ -132,6 +151,11 @@ def run_evaluation(workflow: WorkflowPlan, plan: TransformPlan, decision: ChartD
     checks["insight_informative"] = info_warn is None
     if info_warn:
         warnings.append(info_warn)
+
+    data_warn = _check_data_sufficiency(plan)
+    checks["data_sufficiency"] = data_warn is None
+    if data_warn:
+        warnings.append(data_warn)
 
     return EvalVerdict(passed=len(issues) == 0, issues=issues, warnings=warnings, checks=checks)
 #################################

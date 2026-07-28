@@ -21,7 +21,9 @@ ALLOWED_CHARTS: dict[str, list[str]] = {
     "comparison": ["bar", "box"],
     "composition": ["pie", "bar"],
     "relationship": ["scatter", "box"],
-    "distribution": ["histogram", "box"],
+    # bar is last on purpose: histogram stays the preferred chart for a numeric
+    # distribution, bar is valid only for the categorical case (counts per value)
+    "distribution": ["histogram", "box", "bar"],
     "filter_aggregation": ["bar", "line"],
     "anomaly": ["line", "box"],
 }
@@ -61,9 +63,15 @@ def _data_facts(raw_df: pd.DataFrame, prepared_df: pd.DataFrame, plan: Transform
         and pd.api.types.is_numeric_dtype(raw_df[x])
         and raw_df[x].nunique() <= 12
     )
+    # The prepared data is per-category counts, so there are no raw values left
+    # to bin. Deliberately NOT a dtype check on raw_df: a date column read from
+    # CSV has object dtype there (data_ingestion detects datetime semantically
+    # but does not write the converted series back), which made an earlier
+    # dtype-based version rewrite a legitimate histogram.
+    is_category_counts = bool(plan.transform.groupby and plan.transform.agg == "count")
     return {"x": x, "y": y, "n_categories": n_categories,
             "has_negative": has_negative, "x_discrete_numeric": x_discrete_numeric,
-            "n_rows": int(len(prepared_df))}
+            "is_category_counts": is_category_counts, "n_rows": int(len(prepared_df))}
 #################################
 
 
@@ -86,7 +94,10 @@ def _apply_guardrails(chart: str, facts: dict, allowed: list[str]) -> tuple[str,
     if chart == "scatter" and facts["x_discrete_numeric"]:
         applied.append(f"scatter->box: x takes few discrete values (overplotting)")
         chart = "box"
-
+    if chart in ("histogram", "box") and facts.get("is_category_counts"):
+        applied.append(f"{chart}->bar: the data is one count per category; "
+                       "there are no raw values left to bin")
+        chart = "bar"
     return chart, applied
 #################################
 

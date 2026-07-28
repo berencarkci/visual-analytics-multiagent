@@ -53,8 +53,9 @@ def scan_question(client, q: dict, frames: dict, profiles: dict) -> dict:
     row = {"id": q["id"], "type": q["type"], "dataset": ds, "question": q["question"],
            "ok": result.ok}
 
-    if not result.ok:                                   # chain stopped early
-        row["step_error"] = result.error.message if result.error else "unknown"
+    if not result.ok: # chain stopped early
+        row["step_error"] = (f"{result.error.error_type}: {result.error.detail}"
+                             if result.error else "unknown")
         return row
 
     v = result.verdict
