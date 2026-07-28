@@ -136,12 +136,16 @@ Labels:
 - composition: part-to-whole share / mix
 - relationship: association between two numeric variables
 - distribution: how values of one variable are spread
-- filter_aggregation: aggregate over a filtered subset (e.g. one year, one region, top N)
+- filter_aggregation: aggregate over a filtered subset (e.g. one year, one region, one category or segment, an age or time-of-day window, top/bottom N)
 - anomaly: unusual values, outliers, spikes
+
+A subset named as a modifier is still a filter: "of the Furniture category", "for corporate customers", "older than 40", "at night" all mean filter_aggregation, even when the verb says compare, evolve or how much.
 
 Examples:
 Q: "How did monthly sales change?" -> {"intent": "trend"}
 Q: "Which region has the highest profit?" -> {"intent": "comparison"}
+Q: "Compare the monthly profit of the Furniture category." -> {"intent": "filter_aggregation"}
+Q: "How did orders for corporate customers evolve?" -> {"intent": "filter_aggregation"}
 Q: "Were there any strange spikes in usage?" -> {"intent": "anomaly"}"""
 
 

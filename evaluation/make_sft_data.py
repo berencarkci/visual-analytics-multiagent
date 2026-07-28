@@ -234,6 +234,59 @@ def build_template_examples() -> list[dict]:
                    reason="Both restrictions go into the filter, then the categories are compared inside that slice.",
                    insight=f"The chart compares categories within the {seg} segment of the {reg} region.")
         add("retail", f"Inside the {reg} region, {seg} segment only, rank the categories by sales.", t)
+
+    bank["intent"] = "filter_aggregation"
+    # LURE phrasings (v3, dev-failure driven). Every filter question above marks
+    # the subset explicitly ("only", "within", "restricted to", "top N"). The dev
+    # split showed the model misses filters named as a plain noun modifier: the
+    # surface verb (compare / evolve / track / how much) pulls it to comparison
+    # or trend while "of the X category" / "for Y customers" silently defines a
+    # filter. These examples teach the structural cue, not the keyword.
+    for cat_val, cat_col, noun in [("Furniture", "category", "category"),
+                                   ("Office Supplies", "category", "category"),
+                                   ("Home Office", "segment", "segment"),
+                                   ("East", "region", "region")]:
+        for metric in ["profit", "quantity"]:
+            t = target("line", "order_date", metric, groupby="month(order_date)",
+                       agg="sum", sort="date_asc", filter=f"{cat_col} == '{cat_val}'",
+                       reason=f"The {noun} named in the question is a filter; the monthly line then tracks that slice alone.",
+                       insight=f"The chart shows the monthly course of total {pretty(metric)} for {cat_val}.")
+            for q in [f"Compare the monthly total {pretty(metric)} of the {cat_val} {noun}.",
+                      f"How did {pretty(metric)} for the {cat_val} {noun} evolve month by month?",
+                      f"Track the monthly {pretty(metric)} of the {cat_val} {noun} over time."]:
+                add("retail", q, t)
+    # contrast twins: the SAME lure verbs with no modifier stay comparison / trend.
+    # Adjacent pairs teach the discriminating feature (the modifier), not the verb.
+    bank["intent"] = "comparison"
+    for metric in ["profit", "quantity"]:
+        t = target("bar", "category", metric, groupby="category", agg="sum", sort="value_desc",
+                   reason="No subset is named, so the categories are compared over the whole data.",
+                   insight=f"The chart compares total {pretty(metric)} across all categories.")
+        add("retail", f"Compare the total {pretty(metric)} across the categories.", t)
+    bank["intent"] = "trend"
+    for metric in ["profit", "quantity"]:
+        t = target("line", "order_date", metric, groupby="month(order_date)", agg="sum",
+                   sort="date_asc",
+                   reason="No subset is named, so the whole data is tracked over time.",
+                   insight=f"The chart shows how overall {pretty(metric)} evolved month by month.")
+        add("retail", f"How did overall {pretty(metric)} evolve month by month?", t)
+    bank["intent"] = "filter_aggregation"
+    # numeric-condition modifiers ("older than", "younger than") on mall
+    for cond, phrase in [("age > 40", "older than 40"), ("age < 30", "younger than 30")]:
+        for metric in ["spending_score", "annual_income_k_usd"]:
+            t = target("bar", "gender", metric, groupby="gender", agg="mean", filter=cond,
+                       reason="The age condition is a filter; averages are then compared inside that subset.",
+                       insight=f"The chart compares average {pretty(metric)} by gender among customers {phrase}.")
+            for q in [f"Split by gender, what do customers {phrase} average on {pretty(metric)}?",
+                      f"Among customers {phrase}, compare the average {pretty(metric)} by gender."]:
+                add("mall", q, t)
+    # implicit year restriction ("during YEAR" with no "only")
+    for year in (2016, 2017):
+        t = target("bar", "category", "profit", groupby="category", agg="sum",
+                   filter=f"year(order_date) == {year}",
+                   reason="Naming a year restricts the data to it even without the word only.",
+                   insight=f"The chart shows what each category earned during {year}.")
+        add("retail", f"What did each category earn during {year}?", t)
     bank["intent"] = "comparison"
     # derived measures: the question asks for a quantity that is not a column,
     # so y_axis carries the expression and the engine materialises it first
@@ -269,6 +322,33 @@ def build_template_examples() -> list[dict]:
                    reason="The gap between revenue and profit is the cost side of each group.",
                    insight=f"The chart shows how much of each {pretty(cat)} group's revenue does not reach profit.")
         add("retail", f"How large is the gap between sales and profit for each {pretty(cat)}?", t)
+    # diff expansion (v3): the probe showed diff was never learned — it had 2
+    # examples, and the project's own finding is that a structural behaviour
+    # needs ~20+. Same target family, many phrasings and group columns.
+    for cat in ["sub_category", "segment", "ship_mode", "region", "category"]:
+        t = target("bar", cat, "diff(sales, profit)", groupby=cat, agg="sum", sort="value_desc",
+                   reason="Sales minus profit is the cost side; diff materialises it per group.",
+                   insight=f"The chart shows how much revenue each {pretty(cat)} group spends before reaching profit.")
+        for q in [f"How much of each {pretty(cat)} group's sales never becomes profit?",
+                  f"Show the gap between sales and profit for every {pretty(cat)} group.",
+                  f"Which {pretty(cat)} groups have the widest spread between sales and profit?"]:
+            add("retail", q, t)
+    bank["intent"] = "trend"
+    for period, expr in [("monthly", "month"), ("quarterly", "quarter")]:
+        t = target("line", "order_date", "diff(sales, profit)", groupby=f"{expr}(order_date)",
+                   agg="sum", sort="date_asc",
+                   reason=f"A {period} line of the sales-profit gap shows whether costs are growing.",
+                   insight=f"The chart shows how the {period} gap between sales and profit developed.")
+        for q in [f"Track the {period} gap between sales and profit.",
+                  f"How did the difference between sales and profit develop {period}?"]:
+            add("retail", q, t)
+    bank["intent"] = "comparison"
+    t = target("bar", "date", "diff(appliances, lights)", groupby="day_of_week(date)", agg="mean",
+               reason="The appliance-light gap per weekday is a derived difference measure.",
+               insight="The chart shows on which weekdays appliances outdraw the lights the most.")
+    for q in ["How big is the gap between appliance and light consumption per weekday?",
+              "Compare the difference between appliance and light usage across weekdays."]:
+        add("energy", q, t)
 
     bank["intent"] = "trend"
     for period, expr in [("monthly", "month"), ("quarterly", "quarter"), ("weekly", "week")]:
@@ -314,6 +394,23 @@ def build_template_examples() -> list[dict]:
             for q in [f"Which {n} {pretty(cat)} groups perform worst on {pretty(metric)}?",
                       f"Show the bottom {n} {pretty(cat)} groups by total {pretty(metric)}."]:
                 add("retail", q, t)
+    # "losing money" semantics (v3): the probe failure was the wrong sort
+    # direction for loss questions — losing means the LOWEST totals, ascending.
+    for cat in ["sub_category", "state", "city"]:
+        t = target("bar", cat, "profit", groupby=cat, agg="sum", sort="value_asc", limit=10,
+                   reason="Losing money means the lowest profit totals, so the sort is ascending.",
+                   insight=f"The chart surfaces the {pretty(cat)} groups that lose the most money.")
+        for q in [f"Which {pretty(cat)} groups are losing us money?",
+                  f"Show the {pretty(cat)} groups where we bleed the most profit."]:
+            add("retail", q, t)
+    bank["intent"] = "comparison"
+    for cat in ["state", "ship_mode"]:
+        t = target("bar", cat, "ratio(profit, sales)", groupby=cat, agg="mean", sort="value_asc",
+                   reason="Margin is profit over sales; ascending order puts the thinnest margins first.",
+                   insight=f"The chart shows which {pretty(cat)} groups convert sales into profit worst.")
+        for q in [f"Which {pretty(cat)} groups convert their sales into profit the worst?",
+                  f"Rank the {pretty(cat)} groups by profit margin, thinnest first."]:
+            add("retail", q, t)
 
     bank["intent"] = "anomaly"
     # anomaly (a line over time, the groupby granularity follows the wording of the question, and bar is never an anomaly answer)
@@ -329,6 +426,24 @@ def build_template_examples() -> list[dict]:
                       f"Identify the {plural} whose {pretty(metric)} ran abnormally high.",
                       f"Which {plural} had {pretty(metric)} totals that look out of line?"]:
                 add(ds, q, t)
+    # soft anomaly wording (v3, dev-failure driven). The bank above uses hard
+    # markers (spiked, abnormally, out of line); the dev split showed soft
+    # wording ("strange periods", "does anything stand out in how X behaves")
+    # slides to trend. Also covers sensor columns (t1, rh_1), where the miss
+    # was observed on readings-style phrasing.
+    soft = [("energy", "appliances", "sum"), ("energy", "lights", "sum"),
+            ("energy", "t1", "mean"), ("energy", "rh_1", "mean"),
+            ("retail", "sales", "sum"), ("retail", "profit", "sum")]
+    for ds, metric, agg in soft:
+        d = DATASETS[ds]
+        t = target("line", d["date"], metric, groupby=f"day({d['date']})", agg=agg,
+                   sort="date_asc",
+                   reason="Soft wording still asks for outliers; a daily line makes odd periods visible.",
+                   insight=f"The chart exposes days where {pretty(metric)} breaks from its usual pattern.")
+        for q in [f"Did the {pretty(metric)} readings go through any strange stretches?",
+                  f"Does anything look odd in how {pretty(metric)} behaved over the days?",
+                  f"Point out stretches where {pretty(metric)} broke from its normal rhythm."]:
+            add(ds, q, t)
     return ex
 #################################
 
@@ -450,6 +565,35 @@ def build_handwritten_examples() -> list[dict]:
     assert len(intents) == len(H), f"{len(intents)} intents for {len(H)} examples"
     return [{"dataset": d, "question": q, "target": t, "source": "handwritten", "intent": intent}
             for (d, q, t), intent in zip(H, intents)]
+#################################
+
+# Intent-only examples (v3): consumed ONLY by the Supervisor format in
+# make_agent_sft_data.py. These cover lure patterns whose full chart target is
+# either awkward or would require filter mechanics the engine does not support
+# (e.g. an hour-of-day filter) — but the intent label is unambiguous, and the
+# Supervisor is the agent that was failing on exactly these patterns.
+# They never enter data/sft_train.jsonl and are contamination-checked separately.
+def build_intent_only_examples() -> list[dict]:
+    Q = [
+        # time-of-day subset named as a modifier -> filter_aggregation
+        ("energy", "How much power do the lights draw during the night hours?", "filter_aggregation"),
+        ("energy", "What is the average appliance load in the evening?", "filter_aggregation"),
+        ("energy", "How much energy goes to the appliances in the morning hours?", "filter_aggregation"),
+        ("energy", "Looking only at weekend days, how high does appliance consumption run?", "filter_aggregation"),
+        # subset named as a noun phrase -> filter_aggregation
+        ("retail", "How did sales develop for the home office crowd?", "filter_aggregation"),
+        ("retail", "What did the western stores bring in per month?", "filter_aggregation"),
+        ("mall", "How do the over-50 customers score on spending?", "filter_aggregation"),
+        # soft / readings-style anomaly wording -> anomaly
+        ("energy", "Do the temperature sensors show any suspicious stretches?", "anomaly"),
+        ("energy", "Is there anything odd about how the humidity readings behave?", "anomaly"),
+        ("energy", "Anything in the sensor data that should not be there?", "anomaly"),
+        ("retail", "Did any stretch of orders look out of the ordinary?", "anomaly"),
+        # contrast anchor: no subset, no anomaly cue -> plain trend
+        ("retail", "How are things going overall, month by month?", "trend"),
+    ]
+    return [{"dataset": d, "question": q, "intent": i, "source": "intent_only"}
+            for d, q, i in Q]
 #################################
 
 # Assembly:

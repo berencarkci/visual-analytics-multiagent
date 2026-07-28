@@ -1,5 +1,5 @@
 {
-  "adapter": "berencarkci/qwen2.5-3b-va-dpo",
+  "adapter": "berencarkci/qwen2.5-3b-va-dpo-real",
   "passed": 5,
   "total": 8,
   "rows": [
@@ -61,7 +61,7 @@
         ],
         "transform": {
           "groupby": "sub_category",
-          "agg": "ratio",
+          "agg": "ratio(profit, sales)",
           "filter": null,
           "sort": "value_asc",
           "limit": null

@@ -9,6 +9,7 @@ sentences (observed in the 3B smoke test).
 This script fixes the mismatch by decomposing every single-call example into
 the formats the agents actually use at inference time:
 
+    Supervisor     question                       -> {"intent"}
     Data Analyst   schema + intent + question   -> {"target_columns", "transform"}
     Visualization  question + intent + data facts -> {"chart_type", "reason"}
     Insight        question + computed statistics -> {"insight"}
@@ -26,8 +27,16 @@ Two design points worth knowing:
     correct behaviour; the transforms are executed here against the real data
     so the target sentences carry real values.
 
-Supervisor is deliberately excluded: it classified all 16 smoke-test questions
-correctly with no fallback, so there is nothing to teach it.
+Supervisor exclusion was REVERSED in v3. It was originally left out because it
+classified all 16 smoke-test questions correctly — but the dev split later
+showed a systematic failure the smoke test never probed: filters named as noun
+modifiers ("of the X category", "for Y customers", "at night") are misread as
+comparison/trend, and softly-worded anomaly questions slide to trend. DPO on
+supervisor pairs did not fix this (preference pairs cannot build a behaviour
+SFT never established), so the fix moves here: every source example now also
+yields a Supervisor record (question -> intent, known by construction), plus a
+small intent-only bank in make_sft_data.py for lure patterns without a clean
+executable chart target.
 
 Usage (from the repo root):
     python evaluation/make_agent_sft_data.py
@@ -46,15 +55,17 @@ sys.path.insert(0, "agents")
 
 import pandas as pd
 
+from check_contamination import check_contamination
 from data_analyst import _build_plan_messages, _compute_stats
 from data_ingestion import load_table, profile_table, schema_summary
 from insight import _build_insight_messages
 from make_sft_data import (DATASETS, build_handwritten_examples,
+                           build_intent_only_examples,
                            build_template_examples, pretty)
 from failure_examples import FAILURE_EXAMPLES
 from messages import TransformPlan
 from schemas import ChartRecommendation
-from supervisor import _INSIGHT_FOCUS
+from supervisor import _INSIGHT_FOCUS, _build_intent_messages
 from transforms import apply_transform
 from visualization import ALLOWED_CHARTS, _build_viz_messages, _data_facts
 
@@ -154,7 +165,8 @@ def _prepare(example: dict, frames: dict) -> tuple | None:
 def build_agent_examples(examples: list[dict], frames: dict,
                          schemas: dict) -> dict[str, list[dict]]:
     """Decompose single-call examples into per-agent training records"""
-    out: dict[str, list[dict]] = {"data_analyst": [], "visualization": [], "insight": []}
+    out: dict[str, list[dict]] = {"supervisor": [], "data_analyst": [],
+                                  "visualization": [], "insight": []}
     skipped = 0
 
     for ex in examples:
@@ -162,14 +174,22 @@ def build_agent_examples(examples: list[dict], frames: dict,
         if intent is None:
             skipped += 1
             continue
+        meta_base = {"source": ex.get("source", "template"), "dataset": ex["dataset"],
+                     "intent": intent}
+
+        # --- Supervisor (question -> intent; needs no executed transform, so it
+        # is built before _prepare and survives transform skips) ---
+        out["supervisor"].append({
+            "messages": _build_intent_messages(ex["question"])
+                        + [{"role": "assistant", "content": json.dumps({"intent": intent})}],
+            "meta": dict(meta_base, format="supervisor")})
+
         prep = _prepare(ex, frames)
         if prep is None:
             skipped += 1
             continue
         raw_df, prepared, x_col, y_col, plan, target_columns = prep
         question, t = ex["question"], ex["target"]
-        meta_base = {"source": ex.get("source", "template"), "dataset": ex["dataset"],
-                     "intent": intent}
 
         # --- Data Analyst ---
         out["data_analyst"].append({
@@ -233,6 +253,23 @@ def main() -> int:
 
     by_format = build_agent_examples(examples, frames, schemas)
 
+    # Intent-only bank (v3): supervisor-format records for lure patterns with no
+    # clean executable chart target. These questions are NOT in the single-call
+    # set, so they get their own contamination check here.
+    intent_only = build_intent_only_examples()
+    hits = check_contamination([e["question"] for e in intent_only])
+    if hits:
+        print(f"ABORT: {len(hits)} intent-only overlap(s) with the benchmark:")
+        for h in hits:
+            print(f"  [{h['kind']} {h['score']}] {h['benchmark_id']}  <->  {h['sft_question'][:70]}")
+        return 1
+    for e in intent_only:
+        by_format["supervisor"].append({
+            "messages": _build_intent_messages(e["question"])
+                        + [{"role": "assistant", "content": json.dumps({"intent": e["intent"]})}],
+            "meta": {"source": "intent_only", "dataset": e["dataset"],
+                     "intent": e["intent"], "format": "supervisor"}})
+
     records: list[dict] = []
     for fmt, items in by_format.items():
         random.shuffle(items)
@@ -261,8 +298,8 @@ def main() -> int:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
     print(f"\nwrote {len(records)} examples -> {OUT_PATH}")
-    print("contamination: questions are unchanged from the single-call set, "
-          "which is checked against the benchmark by make_sft_data.py")
+    print("contamination: single-call questions are checked by make_sft_data.py; "
+          "intent-only questions are checked above in this script")
     return 0
 
 
