@@ -23,7 +23,7 @@
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-28T06:19:47.451309+00:00",
+        "timestamp": "2026-07-28T10:20:21.687649+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "trend",
@@ -34,7 +34,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-28T06:19:47.451838+00:00",
+        "timestamp": "2026-07-28T10:20:21.687970+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "trend",
@@ -50,7 +50,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-28T06:19:49.926538+00:00",
+        "timestamp": "2026-07-28T10:20:23.882249+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -86,7 +86,7 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-28T06:19:51.049476+00:00",
+        "timestamp": "2026-07-28T10:20:24.871782+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
@@ -109,7 +109,7 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-28T06:19:55.182225+00:00",
+        "timestamp": "2026-07-28T10:20:28.539030+00:00",
         "payload_type": "InsightResult",
         "payload": {
           "insight": "The series rose from 14236.895 at 2015-01-01 00:00:00 to 83829.319 at 2018-12-01 00:00:00, a change of 488.8%.",
@@ -133,7 +133,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-28T06:19:55.183020+00:00",
+        "timestamp": "2026-07-28T10:20:28.539738+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,
@@ -172,15 +172,15 @@
         "sort": "value_desc",
         "limit": null
       },
-      "reason": "Bars compare total sales across product categories.",
-      "insight": "Across 3 groups, Technology tops the ranking at 836154.033."
+      "reason": "No subset is named, so the categories are compared over the whole data.",
+      "insight": "The highest value belongs to Technology (836154.033); the lowest is Office Supplies (719047.032)."
     },
-    "insight": "Across 3 groups, Technology tops the ranking at 836154.033.",
+    "insight": "The highest value belongs to Technology (836154.033); the lowest is Office Supplies (719047.032).",
     "trace": [
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-28T06:19:55.536913+00:00",
+        "timestamp": "2026-07-28T10:20:28.901615+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "comparison",
@@ -191,7 +191,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-28T06:19:55.537273+00:00",
+        "timestamp": "2026-07-28T10:20:28.901870+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "comparison",
@@ -207,7 +207,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-28T06:19:57.849594+00:00",
+        "timestamp": "2026-07-28T10:20:30.972689+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -244,7 +244,7 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-28T06:19:58.849834+00:00",
+        "timestamp": "2026-07-28T10:20:32.157384+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
@@ -258,7 +258,7 @@
               "sort": "value_desc",
               "limit": null
             },
-            "reason": "Bars compare total sales across product categories.",
+            "reason": "No subset is named, so the categories are compared over the whole data.",
             "insight": ""
           },
           "guardrails_applied": []
@@ -267,10 +267,10 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-28T06:20:00.301001+00:00",
+        "timestamp": "2026-07-28T10:20:33.950176+00:00",
         "payload_type": "InsightResult",
         "payload": {
-          "insight": "Across 3 groups, Technology tops the ranking at 836154.033.",
+          "insight": "The highest value belongs to Technology (836154.033); the lowest is Office Supplies (719047.032).",
           "supporting_stats": {
             "focus": "group_stats",
             "n_rows_input": 9994,
@@ -292,7 +292,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-28T06:20:00.301511+00:00",
+        "timestamp": "2026-07-28T10:20:33.950554+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,
@@ -321,7 +321,7 @@
     "dataset": "retail_sales_superstore",
     "ok": true,
     "recommendation": {
-      "chart_type": "pie",
+      "chart_type": "bar",
       "x_axis": "region",
       "y_axis": "sales",
       "transform": {
@@ -331,7 +331,7 @@
         "sort": "value_desc",
         "limit": null
       },
-      "reason": "A pie shows each region's share of a small whole.",
+      "reason": "A regional share needs all groups; with 4 regions a bar chart stays readable where a pie would not.",
       "insight": "The largest share goes to West at 31.6%, with South the smallest."
     },
     "insight": "The largest share goes to West at 31.6%, with South the smallest.",
@@ -339,7 +339,7 @@
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-28T06:20:00.653895+00:00",
+        "timestamp": "2026-07-28T10:20:34.317295+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "composition",
@@ -350,7 +350,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-28T06:20:00.654269+00:00",
+        "timestamp": "2026-07-28T10:20:34.317601+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "composition",
@@ -366,7 +366,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-28T06:20:02.984473+00:00",
+        "timestamp": "2026-07-28T10:20:36.400296+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -410,11 +410,11 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-28T06:20:04.186803+00:00",
+        "timestamp": "2026-07-28T10:20:37.880095+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
-            "chart_type": "pie",
+            "chart_type": "bar",
             "x_axis": "region",
             "y_axis": "sales",
             "transform": {
@@ -424,7 +424,7 @@
               "sort": "value_desc",
               "limit": null
             },
-            "reason": "A pie shows each region's share of a small whole.",
+            "reason": "A regional share needs all groups; with 4 regions a bar chart stays readable where a pie would not.",
             "insight": ""
           },
           "guardrails_applied": []
@@ -433,7 +433,7 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-28T06:20:05.435422+00:00",
+        "timestamp": "2026-07-28T10:20:38.979259+00:00",
         "payload_type": "InsightResult",
         "payload": {
           "insight": "The largest share goes to West at 31.6%, with South the smallest.",
@@ -465,7 +465,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-28T06:20:05.435806+00:00",
+        "timestamp": "2026-07-28T10:20:38.979706+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,
@@ -512,7 +512,7 @@
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-28T06:20:05.782176+00:00",
+        "timestamp": "2026-07-28T10:20:39.342155+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "relationship",
@@ -523,7 +523,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-28T06:20:05.782531+00:00",
+        "timestamp": "2026-07-28T10:20:39.342374+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "relationship",
@@ -539,7 +539,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-28T06:20:07.878577+00:00",
+        "timestamp": "2026-07-28T10:20:41.237772+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -574,7 +574,7 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-28T06:20:09.022604+00:00",
+        "timestamp": "2026-07-28T10:20:42.248548+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
@@ -599,7 +599,7 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-28T06:20:10.680665+00:00",
+        "timestamp": "2026-07-28T10:20:43.709252+00:00",
         "payload_type": "InsightResult",
         "payload": {
           "insight": "The relationship between discount and profit is weak and negative, with r=-0.219 over 9994 rows.",
@@ -622,7 +622,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-28T06:20:10.681094+00:00",
+        "timestamp": "2026-07-28T10:20:43.709636+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,
@@ -669,7 +669,7 @@
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-28T06:20:11.032881+00:00",
+        "timestamp": "2026-07-28T10:20:44.074471+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "relationship",
@@ -680,7 +680,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-28T06:20:11.033299+00:00",
+        "timestamp": "2026-07-28T10:20:44.074674+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "relationship",
@@ -696,7 +696,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-28T06:20:13.270708+00:00",
+        "timestamp": "2026-07-28T10:20:46.167966+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -731,7 +731,7 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-28T06:20:14.396054+00:00",
+        "timestamp": "2026-07-28T10:20:47.191136+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
@@ -754,7 +754,7 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-28T06:20:16.007221+00:00",
+        "timestamp": "2026-07-28T10:20:48.728504+00:00",
         "payload_type": "InsightResult",
         "payload": {
           "insight": "The relationship between annual income and spending score is weak and positive, with r=0.01 over 200 rows.",
@@ -777,7 +777,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-28T06:20:16.007591+00:00",
+        "timestamp": "2026-07-28T10:20:48.728866+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,
@@ -819,14 +819,14 @@
         "limit": null
       },
       "reason": "A histogram bins the raw values to show their spread.",
-      "insight": "The distribution of customer ages has a median of 36.0 and a mean of 38.85, spanning 18.0 to 70.0."
+      "insight": "Values run from 18.0 to 70.0; half of them fall between 28.75 and 49.0, around a median of 36.0."
     },
-    "insight": "The distribution of customer ages has a median of 36.0 and a mean of 38.85, spanning 18.0 to 70.0.",
+    "insight": "Values run from 18.0 to 70.0; half of them fall between 28.75 and 49.0, around a median of 36.0.",
     "trace": [
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-28T06:20:16.360010+00:00",
+        "timestamp": "2026-07-28T10:20:49.092928+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "distribution",
@@ -837,7 +837,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-28T06:20:16.360428+00:00",
+        "timestamp": "2026-07-28T10:20:49.093188+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "distribution",
@@ -853,7 +853,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-28T06:20:18.217426+00:00",
+        "timestamp": "2026-07-28T10:20:50.789601+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -887,7 +887,7 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-28T06:20:19.385487+00:00",
+        "timestamp": "2026-07-28T10:20:51.858238+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
@@ -910,10 +910,10 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-28T06:20:21.540814+00:00",
+        "timestamp": "2026-07-28T10:20:53.948782+00:00",
         "payload_type": "InsightResult",
         "payload": {
-          "insight": "The distribution of customer ages has a median of 36.0 and a mean of 38.85, spanning 18.0 to 70.0.",
+          "insight": "Values run from 18.0 to 70.0; half of them fall between 28.75 and 49.0, around a median of 36.0.",
           "supporting_stats": {
             "focus": "distribution_stats",
             "n_rows_input": 200,
@@ -933,7 +933,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-28T06:20:21.541275+00:00",
+        "timestamp": "2026-07-28T10:20:53.949088+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,
@@ -980,7 +980,7 @@
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-28T06:20:21.947137+00:00",
+        "timestamp": "2026-07-28T10:20:54.350908+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "comparison",
@@ -991,7 +991,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-28T06:20:21.947527+00:00",
+        "timestamp": "2026-07-28T10:20:54.351185+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "comparison",
@@ -1007,7 +1007,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-28T06:20:24.429757+00:00",
+        "timestamp": "2026-07-28T10:20:56.576378+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -1048,7 +1048,7 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-28T06:20:25.449767+00:00",
+        "timestamp": "2026-07-28T10:20:57.453771+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
@@ -1071,7 +1071,7 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-28T06:20:26.741008+00:00",
+        "timestamp": "2026-07-28T10:20:58.585294+00:00",
         "payload_type": "InsightResult",
         "payload": {
           "insight": "Across 7 groups, Monday tops the ranking at 111.451.",
@@ -1100,7 +1100,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-28T06:20:26.741481+00:00",
+        "timestamp": "2026-07-28T10:20:58.585696+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,
@@ -1147,7 +1147,7 @@
       {
         "agent": "supervisor",
         "step": 1,
-        "timestamp": "2026-07-28T06:20:27.143661+00:00",
+        "timestamp": "2026-07-28T10:20:58.986290+00:00",
         "payload_type": "IntentResult",
         "payload": {
           "intent": "anomaly",
@@ -1158,7 +1158,7 @@
       {
         "agent": "supervisor",
         "step": 2,
-        "timestamp": "2026-07-28T06:20:27.144203+00:00",
+        "timestamp": "2026-07-28T10:20:58.986561+00:00",
         "payload_type": "WorkflowPlan",
         "payload": {
           "intent": "anomaly",
@@ -1174,7 +1174,7 @@
       {
         "agent": "data_analyst",
         "step": 3,
-        "timestamp": "2026-07-28T06:20:29.585195+00:00",
+        "timestamp": "2026-07-28T10:21:01.197726+00:00",
         "payload_type": "TransformPlan",
         "payload": {
           "transform": {
@@ -1209,7 +1209,7 @@
       {
         "agent": "visualization",
         "step": 4,
-        "timestamp": "2026-07-28T06:20:31.151526+00:00",
+        "timestamp": "2026-07-28T10:21:02.593319+00:00",
         "payload_type": "ChartDecision",
         "payload": {
           "recommendation": {
@@ -1232,7 +1232,7 @@
       {
         "agent": "insight",
         "step": 5,
-        "timestamp": "2026-07-28T06:20:34.513798+00:00",
+        "timestamp": "2026-07-28T10:21:05.558447+00:00",
         "payload_type": "InsightResult",
         "payload": {
           "insight": "The IQR bounds are 473.333 and 4016.664; 4 values break them, led by 2016-04-04 00:00:00 (4524.999).",
@@ -1255,7 +1255,7 @@
       {
         "agent": "evaluation",
         "step": 6,
-        "timestamp": "2026-07-28T06:20:34.514313+00:00",
+        "timestamp": "2026-07-28T10:21:05.558820+00:00",
         "payload_type": "EvalVerdict",
         "payload": {
           "passed": true,

@@ -1,5 +1,5 @@
 {
-  "adapter": "berencarkci/qwen2.5-3b-va-sft-v2",
+  "adapter": "berencarkci/qwen2.5-3b-va-sft-v3",
   "split": "dev",
   "summary": {
     "n_questions": 38,
@@ -9,15 +9,13 @@
     "retried": 0,
     "retry_helped": 0,
     "guardrail_corrected": 1,
-    "plan_degraded": 1,
+    "plan_degraded": 0,
     "template_fallback": 0,
     "issues_by_rule": {},
     "guardrails_by_kind": {
       "scatter->box": 1
     },
-    "plan_notes_by_kind": {
-      "dropped invalid sort value 'date_desc'": 1
-    }
+    "plan_notes_by_kind": {}
   },
   "rows": [
     {
@@ -85,11 +83,11 @@
       "transform": {
         "groupby": "month(order_date)",
         "agg": "sum",
-        "filter": null,
+        "filter": "category == 'Furniture'",
         "sort": "date_asc",
         "limit": null
       },
-      "insight": "The series rose from 14236.895 at 2015-01-01 00:00:00 to 83829.319 at 2018-12-01 00:00:00, a change of 488.8%.",
+      "insight": "The series rose from 6242.525 at 2015-01-01 00:00:00 to 31407.467 at 2018-12-01 00:00:00, a change of 403.1%.",
       "insight_source": "llm"
     },
     {
@@ -113,7 +111,7 @@
         "sort": "value_desc",
         "limit": null
       },
-      "insight": "Across 3 groups, Technology tops the ranking at 836154.033.",
+      "insight": "The highest value belongs to Technology (836154.033); the lowest is Office Supplies (719047.032).",
       "insight_source": "llm"
     },
     {
@@ -137,7 +135,7 @@
         "sort": "value_desc",
         "limit": null
       },
-      "insight": "The highest value belongs to Corporate (0.158); the lowest is Home Office (0.147).",
+      "insight": "Across 3 groups, Corporate tops the ranking at 0.158.",
       "insight_source": "llm"
     },
     {
@@ -175,7 +173,7 @@
       "warnings": [],
       "retried_step": null,
       "retry_helped": null,
-      "chart_type": "pie",
+      "chart_type": "bar",
       "x_axis": "region",
       "y_axis": "sales",
       "transform": {
@@ -206,10 +204,10 @@
         "groupby": "category",
         "agg": "count",
         "filter": null,
-        "sort": "value_desc",
+        "sort": null,
         "limit": null
       },
-      "insight": "The largest share goes to Office Supplies at 60.3%, with Technology the smallest.",
+      "insight": "Office Supplies makes up 60.3% of the whole; the total across groups is 9994.0.",
       "insight_source": "llm"
     },
     {
@@ -284,7 +282,7 @@
         "sort": null,
         "limit": null
       },
-      "insight": "The distribution of sales has a median of 54.49 and a mean of 229.858, spanning 0.444 to 22638.48.",
+      "insight": "Values run from 0.444 to 22638.48; half of them fall between 17.28 and 209.94, around a median of 54.49.",
       "insight_source": "llm"
     },
     {
@@ -298,7 +296,7 @@
       "warnings": [],
       "retried_step": null,
       "retry_helped": null,
-      "chart_type": "bar",
+      "chart_type": "line",
       "x_axis": "order_date",
       "y_axis": "sales",
       "transform": {
@@ -352,14 +350,11 @@
       "transform": {
         "groupby": "month(order_date)",
         "agg": "sum",
-        "filter": null,
-        "sort": null,
+        "filter": "segment == 'Corporate'",
+        "sort": "date_desc",
         "limit": 6
       },
-      "insight": "The series rose from 14236.895 at 2015-01-01 00:00:00 to 34595.128 at 2015-06-01 00:00:00, a change of 143.0%.",
-      "plan_notes": [
-        "dropped invalid sort value 'date_desc'"
-      ],
+      "insight": "The highest value belongs to 2018-11-01 00:00:00 (44644.076); the lowest is 2018-07-01 00:00:00 (16525.599).",
       "insight_source": "llm"
     },
     {
@@ -407,7 +402,7 @@
         "sort": null,
         "limit": null
       },
-      "insight": "Across 5 groups, (28.4, 38.8] tops the ranking at 61.206.",
+      "insight": "The highest value belongs to (28.4, 38.8] (61.206); the lowest is (49.2, 59.6] (34.72).",
       "insight_source": "llm"
     },
     {
@@ -431,7 +426,7 @@
         "sort": null,
         "limit": null
       },
-      "insight": "The share of Female is 56.0%, with Male at 44.0%.",
+      "insight": "Female makes up 56.0% of the whole; the total across groups is 200.0.",
       "insight_source": "llm"
     },
     {
@@ -481,7 +476,7 @@
         "sort": null,
         "limit": null
       },
-      "insight": "The relationship between customer age and spending score is moderate and negative, with r=-0.327 over 200 rows.",
+      "insight": "The relationship between age and spending score is moderate and negative, with r=-0.327 over 200 rows.",
       "insight_source": "llm"
     },
     {
@@ -505,7 +500,7 @@
         "sort": null,
         "limit": null
       },
-      "insight": "The relationship between age and spending score for female customers is moderate and negative, with r=-0.327 over 200 rows.",
+      "insight": "The relationship between age and spending score for female customers is moderate and negative, with r=-0.327 over 112 rows.",
       "insight_source": "llm"
     },
     {
@@ -529,7 +524,7 @@
         "sort": null,
         "limit": null
       },
-      "insight": "The distribution of customer ages has a median of 36.0 and a mean of 38.85, spanning 18.0 to 70.0.",
+      "insight": "Values run from 18.0 to 70.0; half of them fall between 28.75 and 49.0, around a median of 36.0.",
       "insight_source": "llm"
     },
     {
@@ -577,7 +572,7 @@
         "sort": null,
         "limit": null
       },
-      "insight": "The distribution of spending scores has a median of 50.0 and a mean of 50.2, spanning 1.0 to 99.0.",
+      "insight": "The distribution of spending score has a median of 50.0 and a mean of 50.2, spanning 1.0 to 99.0.",
       "insight_source": "llm"
     },
     {
@@ -601,7 +596,7 @@
         "sort": null,
         "limit": null
       },
-      "insight": "The highest value belongs to Female (39.111); the lowest is Male (36.136).",
+      "insight": "Across 2 groups, Female tops the ranking at 39.111.",
       "insight_source": "llm"
     },
     {
@@ -663,7 +658,7 @@
       "warnings": [],
       "retried_step": null,
       "retry_helped": null,
-      "chart_type": "line",
+      "chart_type": "bar",
       "x_axis": "date",
       "y_axis": "appliances",
       "transform": {
@@ -673,7 +668,7 @@
         "sort": null,
         "limit": null
       },
-      "insight": "The series rose from 52.786 at 0 to 56.983 at 23, a change of 8.0%.",
+      "insight": "The highest value belongs to 18 (191.812); the lowest is 3 (48.236).",
       "insight_source": "llm"
     },
     {
@@ -712,7 +707,7 @@
       "retried_step": null,
       "retry_helped": null,
       "chart_type": "scatter",
-      "x_axis": "t3",
+      "x_axis": "t_out",
       "y_axis": "appliances",
       "transform": {
         "groupby": null,
@@ -721,7 +716,7 @@
         "sort": null,
         "limit": null
       },
-      "insight": "The relationship between outdoor temperature and appliance energy consumption is weak and positive, with r=0.117 over 3290 rows.",
+      "insight": "The relationship between outdoor temperature and appliance energy consumption is weak and positive, with r=0.127 over 3290 rows.",
       "insight_source": "llm"
     },
     {
@@ -793,7 +788,7 @@
         "sort": null,
         "limit": null
       },
-      "insight": "The distribution of lighting energy has a median of 0.0 and a mean of 3.803, spanning 0.0 to 51.667.",
+      "insight": "The distribution of lighting energy use has a median of 0.0 and a mean of 3.803, spanning 0.0 to 51.667.",
       "insight_source": "llm"
     },
     {
@@ -808,13 +803,13 @@
       "retried_step": null,
       "retry_helped": null,
       "chart_type": "bar",
-      "x_axis": "t_out",
+      "x_axis": "date",
       "y_axis": "appliances",
       "transform": {
         "groupby": "day(date)",
         "agg": "mean",
         "filter": "t_out < 5",
-        "sort": "date_asc",
+        "sort": null,
         "limit": null
       },
       "insight": "The highest value belongs to 2016-01-13 00:00:00 (165.238); the lowest is 2016-01-29 00:00:00 (36.666).",
@@ -831,17 +826,17 @@
       "warnings": [],
       "retried_step": null,
       "retry_helped": null,
-      "chart_type": "histogram",
+      "chart_type": "bar",
       "x_axis": "date",
       "y_axis": "appliances",
       "transform": {
-        "groupby": null,
-        "agg": null,
+        "groupby": "hour_of_day(date)",
+        "agg": "mean",
         "filter": null,
         "sort": null,
         "limit": null
       },
-      "insight": "The distribution of appliance consumption has a median of 63.333 and a mean of 97.779, spanning 28.333 to 608.333.",
+      "insight": "The highest value belongs to 18 (191.812); the lowest is 3 (48.236).",
       "insight_source": "llm"
     },
     {

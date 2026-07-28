@@ -1,6 +1,6 @@
 {
-  "adapter": "berencarkci/qwen2.5-3b-va-dpo-real",
-  "passed": 5,
+  "adapter": "berencarkci/qwen2.5-3b-va-sft-v3",
+  "passed": 8,
   "total": 8,
   "rows": [
     {
@@ -57,18 +57,18 @@
       "plan": {
         "target_columns": [
           "sub_category",
-          "profit"
+          "ratio(profit, sales)"
         ],
         "transform": {
           "groupby": "sub_category",
-          "agg": "ratio(profit, sales)",
+          "agg": "mean",
           "filter": null,
           "sort": "value_asc",
           "limit": null
         }
       },
-      "passed": false,
-      "detail": "no derived measure in target_columns"
+      "passed": true,
+      "detail": "ok"
     },
     {
       "question": "Show me the ten states at the bottom of the profit ranking.",
@@ -107,12 +107,12 @@
           "groupby": "city",
           "agg": "sum",
           "filter": null,
-          "sort": "value_desc",
-          "limit": null
+          "sort": "value_asc",
+          "limit": 10
         }
       },
-      "passed": false,
-      "detail": "sort is value_desc, expected value_asc"
+      "passed": true,
+      "detail": "ok"
     },
     {
       "question": "Give me the last six months of revenue, newest first.",
@@ -145,19 +145,18 @@
       "plan": {
         "target_columns": [
           "date",
-          "appliances",
-          "lights"
+          "diff(appliances, lights)"
         ],
         "transform": {
           "groupby": "day_of_week(date)",
-          "agg": "sum",
+          "agg": "mean",
           "filter": null,
           "sort": null,
           "limit": null
         }
       },
-      "passed": false,
-      "detail": "no derived measure in target_columns"
+      "passed": true,
+      "detail": "ok"
     },
     {
       "question": "Which product categories earn the most per item sold?",
