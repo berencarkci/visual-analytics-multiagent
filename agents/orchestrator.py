@@ -59,8 +59,14 @@ def _blame(verdict: EvalVerdict) -> str | None:
 
 
 # End to end run:
-def run_workflow(client: ModelClient, df: pd.DataFrame, profile: TableProfile, question: str, log_dir: str = "logs") -> WorkflowResult:
-    """Full multi agent pass for one question, never raises, always returns a trace"""
+def run_workflow(client: ModelClient, df: pd.DataFrame, profile: TableProfile, question: str, log_dir: str = "logs", use_evaluator: bool = True) -> WorkflowResult:
+    """Full multi agent pass for one question, never raises, always returns a trace
+
+    use_evaluator=False stops after Insight and ships the unreviewed answer. 
+    It exists so the architecture comparison can measure what the Evaluation
+    agent actually contributes (multi-agent vs multi-agent+evaluator), the
+    shipped pipeline always runs with the reviewer on.
+    """
     logger = TraceLogger(log_dir=log_dir)
     # accept anything: if the caller passed schema text (or None) instead of a TableProfile, build the profile here. removes a whole class of caller bugs
     if not isinstance(profile, TableProfile):
@@ -97,6 +103,10 @@ def run_workflow(client: ModelClient, df: pd.DataFrame, profile: TableProfile, q
         return WorkflowResult(ok=False, error=plan, trace=logger.get_trace())
 
     # 6) Evaluation: rule based review
+    if not use_evaluator:
+        rec = decision.recommendation.model_copy(update={"insight": ins.insight})
+        return WorkflowResult(ok=True, recommendation=rec, insight=ins.insight, verdict=None, trace=logger.get_trace())
+
     verdict = run_evaluation(workflow, plan, decision, ins, df)
     log("evaluation", verdict)
 
