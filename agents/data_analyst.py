@@ -32,6 +32,11 @@ def _build_plan_messages(schema_text: str, question: str, intent: str, feedback:
 # Read off the schema instead of being listed again here: the two drifted apart once already, and the model was penalised for using a value the schema allows.
 _VALID_SORTS = (None,) + typing.get_args(Transform.model_fields["sort"].annotation)[0].__args__
 
+# An impossible conjunction: `col > a and col < b` where a >= b has no solution.
+# It is how the model writes a range that wraps past midnight or year end.
+_WRAPPING_RANGE_RE = re.compile(
+    r"^\s*(.+?)\s*>=?\s*([\d.]+)\s+and\s+\1\s*<=?\s*([\d.]+)\s*$")
+
 # Plan validation against the real schema:
 # Field slot reminder fed back on a format error: small models sometimes put a value in the wrong Transform slot (e.g. agg="date_asc", which belongs in sort).
 _FIELD_HINT = ('Field reminder: agg must be sum/mean/count/count_distinct; '
@@ -240,6 +245,23 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
                 f"plan guardrail: series '{plan.transform.series}' dropped — "
                 f"{n_series} distinct values is not a readable colour dimension")
             plan.transform = plan.transform.model_copy(update={"series": None})
+
+    # PLAN GUARDRAIL: a filter that can never match. `col > a and col < b` with
+    # a >= b has no solution, and it is how the model writes a range that wraps
+    # past midnight — "at night" came out as `hour > 17 and hour < 7`. The
+    # rewrite is not a guess: since no value satisfies both, a disjunction is
+    # the only reading under which the filter means anything. Caught here rather
+    # than at the empty-result retry, because the retry taught the model to drop
+    # the filter entirely, which answers an easier question than the one asked.
+    if plan.transform.filter:
+        _wrap = _WRAPPING_RANGE_RE.match(str(plan.transform.filter))
+        if _wrap and float(_wrap.group(2)) >= float(_wrap.group(3)):
+            plan.notes.append(
+                f"plan guardrail: filter `{plan.transform.filter}` can never match; "
+                "a range that wraps needs `or`, rewritten")
+            plan.transform = plan.transform.model_copy(
+                update={"filter": str(plan.transform.filter).replace(" and ", " or ", 1)})
+
     # PLAN GUARDRAIL (mechanical, mirrors the visualization guardrails): a share/composition question needs the whole data, a filter that pins the groupby column to one value collapses the composition to a single 100% group.
     # Small models sometimes do this despite the prompt rule so we enforce it here.
     t = plan.transform
@@ -248,7 +270,7 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
         plan.transform = t.model_copy(update={"filter": None})
         plan.notes.append(
             f"plan guardrail: filter '{t.filter}' removed — share questions need all groups")
-        
+
     focus = workflow.insight_focus
     x_target = plan.target_columns[0] if plan.target_columns else None
     col_dtypes = {c.name: c.dtype for c in profile.columns}
@@ -291,9 +313,10 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
 
     if prepared.empty:
         # A filter that matches nothing is recoverable and the model can often
-        # fix it when told — "at night" was written as `hour > 17 and hour < 7`,
-        # which no hour satisfies because the range wraps past midnight. One
-        # retry with the empty result fed back, then give up.
+        # fix it when told. One retry with the empty result fed back, then give
+        # up. Known limitation: the model tends to drop the filter rather than
+        # repair it, which turns a visible failure into a quieter one — the
+        # answer is then correct for an easier question than the one asked.
         if feedback is None:
             retry_note = (f"Your filter `{plan.transform.filter}` matched 0 rows. "
                           "Keep the filter — the question asks about a subset — but fix "
