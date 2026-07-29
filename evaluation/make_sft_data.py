@@ -29,8 +29,8 @@ DATASETS = {
 _PRETTY = {"annual_income_k_usd": "annual income", "spending_score": "spending score", "sub_category": "sub-category", "ship_mode": "ship mode", "order_date": "order date", "appliances": "appliance consumption", "lights": "light consumption", "t1": "kitchen temperature", "t2": "living room temperature", "t3": "laundry room temperature", "rh_1": "kitchen humidity", "rh_2": "living room humidity"}
 def pretty(col: str) -> str:
     return _PRETTY.get(col, col.replace("_", " "))
-def target(chart, x, y, groupby=None, agg=None, filter=None, sort=None, limit=None, reason="", insight=""):
-    return {"chart_type": chart, "x_axis": x, "y_axis": y, "transform": {"groupby": groupby, "agg": agg, "filter": filter, "sort": sort, "limit": limit}, "reason": reason, "insight": insight}
+def target(chart, x, y, groupby=None, series=None, agg=None, filter=None, sort=None, limit=None, reason="", insight=""):
+    return {"chart_type": chart, "x_axis": x, "y_axis": y, "transform": {"groupby": groupby, "series": series, "agg": agg, "filter": filter, "sort": sort, "limit": limit}, "reason": reason, "insight": insight}
 #################################
 
 # Template banks
@@ -458,6 +458,107 @@ def build_template_examples() -> list[dict]:
                    insight=f"The chart shows which {pretty(cat)} groups convert sales into profit worst.")
         for q in [f"Which {pretty(cat)} groups convert their sales into profit the worst?",
                   f"Rank the {pretty(cat)} groups by profit margin, thinnest first."]:
+            add("retail", q, t)
+
+    bank["intent"] = "comparison"
+    # ---- threshold_flag (v5) ----
+    # A numeric condition COMPARED AGAINST the rest is two groups, not a filter:
+    # filtering keeps one side and silently drops the half the question asked to
+    # compare with. The diagnostic sweep showed the model reaches for the
+    # mechanism when the wording is explicit ("above 5") but falls back to a
+    # filter on "versus other days" / "compared with the rest", which is exactly
+    # the phrasing that loses the comparison.
+    thresholds = [
+        ("energy", "t_out", 5, "appliances", "the outdoor temperature", "cold"),
+        ("energy", "rh_out", 80, "appliances", "the outdoor humidity", "damp"),
+        ("energy", "windspeed", 4, "lights", "the wind speed", "windy"),
+        ("retail", "discount", 0.3, "profit", "the discount", "heavily discounted"),
+        ("retail", "quantity", 5, "profit", "the order quantity", "large"),
+        ("mall", "age", 40, "spending_score", "customer age", "older"),
+        ("mall", "annual_income_k_usd", 60, "spending_score", "annual income", "higher-income"),
+    ]
+    for ds, col, thr, metric, phrase, word in thresholds:
+        t = target("bar", col, metric, groupby=f"threshold_flag({col}, {thr})",
+                   agg="mean",
+                   reason=f"The question compares one side of a {phrase} threshold against the rest, so the rows split into two groups rather than being filtered.",
+                   insight=f"The chart contrasts average {pretty(metric)} above and below {thr} on {pretty(col)}.")
+        for q in [f"Compare average {pretty(metric)} when {phrase} is above {thr} versus the rest.",
+                  f"Do the {word} records differ from the others on {pretty(metric)}?",
+                  f"Split the rows by whether {phrase} passes {thr} and compare {pretty(metric)}.",
+                  f"How does {pretty(metric)} on {word} records compare with everything else?"]:
+            add(ds, q, t)
+    # contrast twins: a genuine subset question stays a FILTER, not a split.
+    # "only", "just", "restricted to" ask about one side and never mention a
+    # comparison group.
+    bank["intent"] = "filter_aggregation"
+    for ds, col, thr, metric, phrase, word in thresholds[:5]:
+        t = target("bar", col, metric, groupby=f"bins({col})", agg="mean",
+                   filter=f"{col} > {thr}",
+                   reason="Only one side is asked about, so it is a filter; there is no comparison group.",
+                   insight=f"The chart covers only the records where {pretty(col)} exceeds {thr}.")
+        for q in [f"Looking only at records where {phrase} is above {thr}, what does {pretty(metric)} look like?",
+                  f"Restricted to the {word} records, show {pretty(metric)}."]:
+            add(ds, q, t)
+
+    # ---- series: second grouping dimension (v5) ----
+    # target_columns stays [axis, MEASURE]; the series column is named only in
+    # transform.series. The sweep showed the model listing the series column as
+    # the measure instead, which left the aggregate on a text column.
+    bank["intent"] = "comparison"
+    two_dim = [
+        ("retail", "ship_mode", "segment", "profit", "sum"),
+        ("retail", "region", "category", "sales", "sum"),
+        ("retail", "segment", "region", "profit", "mean"),
+        ("retail", "category", "ship_mode", "quantity", "sum"),
+        ("mall", "gender", "bins(age)", "spending_score", "mean"),
+    ]
+    for ds, axis, ser, metric, agg in two_dim:
+        ser_name = pretty(ser[5:-1]) if ser.startswith("bins(") else pretty(ser)
+        t = target("bar", axis, metric, groupby=axis, series=ser, agg=agg,
+                   reason=f"Two breakdowns are named, so {pretty(axis)} goes on the axis and {ser_name} becomes the colour.",
+                   insight=f"The chart shows {pretty(metric)} per {pretty(axis)}, split by {ser_name}.")
+        for q in [f"Show {pretty(metric)} per {pretty(axis)}, broken down by {ser_name}.",
+                  f"Compare {pretty(metric)} across {pretty(axis)} for each {ser_name}.",
+                  f"Break {pretty(metric)} down by {pretty(axis)} and {ser_name}.",
+                  f"What is the {agg} {pretty(metric)} of each {pretty(axis)} divided by {ser_name}?"]:
+            add(ds, q, t)
+    # time on the axis, a category as the colour
+    bank["intent"] = "trend"
+    for ds, datecol, ser, metric in [("retail", "order_date", "region", "sales"),
+                                     ("retail", "order_date", "category", "profit"),
+                                     ("energy", "date", "weekend_flag(date)", "appliances")]:
+        ser_name = "weekend or weekday" if ser.startswith("weekend") else pretty(ser)
+        t = target("line", datecol, metric, groupby=f"month({datecol})", series=ser,
+                   agg="sum", sort="date_asc",
+                   reason=f"A monthly line per {ser_name} shows the two dimensions at once.",
+                   insight=f"The chart traces monthly {pretty(metric)} separately for each {ser_name}.")
+        for q in [f"Show the monthly {pretty(metric)} for each {ser_name}.",
+                  f"Track {pretty(metric)} over time, one line per {ser_name}."]:
+            add(ds, q, t)
+    # contrast twins: ONE breakdown, series stays null. Over-triggering was the
+    # dominant failure in the sweep — a filter, a share question and a ranking
+    # all look like "two things" without being two dimensions, so these outnumber
+    # the positive examples above.
+    for ds, axis, metric, agg in [("retail", "ship_mode", "profit", "sum"),
+                                  ("retail", "region", "sales", "sum"),
+                                  ("retail", "category", "quantity", "sum"),
+                                  ("mall", "gender", "spending_score", "mean")]:
+        t = target("bar", axis, metric, groupby=axis, agg=agg, sort="value_desc",
+                   reason="Only one breakdown is named, so no second dimension is needed.",
+                   insight=f"The chart compares {pretty(metric)} across {pretty(axis)} values.")
+        for q in [f"Show {pretty(metric)} per {pretty(axis)}.",
+                  f"Compare {pretty(metric)} across {pretty(axis)}.",
+                  f"Which {pretty(axis)} leads on {pretty(metric)}?"]:
+            add(ds, q, t)
+    bank["intent"] = "filter_aggregation"
+    for cat_val, cat_col, axis in [("Technology", "category", "region"),
+                                   ("Consumer", "segment", "ship_mode")]:
+        t = target("bar", axis, "sales", groupby=axis, agg="sum",
+                   filter=f"{cat_col} == '{cat_val}'",
+                   reason=f"{cat_val} is a filter, not a second dimension: one breakdown remains.",
+                   insight=f"The chart shows {cat_val} sales across {pretty(axis)} groups.")
+        for q in [f"Within {cat_val}, compare sales by {pretty(axis)}.",
+                  f"For {cat_val} only, show sales per {pretty(axis)}."]:
             add("retail", q, t)
 
     bank["intent"] = "anomaly"
