@@ -96,6 +96,16 @@ def _compute_stats(focus: str, raw_df: pd.DataFrame, transformed: pd.DataFrame, 
                   "total": round(total, 3)}
             if focus == "share_stats" and total > 0:
                 s["shares_pct"] = {str(k): round(100 * float(v) / total, 1) for k, v in vals.items()}
+            if plan.transform.sort == "value_asc":
+                # "which ones are unprofitable / losing money" sorts ascending, so
+                # the answer is at the BOTTOM. Without this the insight template
+                # reaches for idxmax and praises the least-bad group as topping
+                # the ranking — the chart is right and the sentence contradicts it.
+                s["ranking_direction"] = "ascending"
+                s["answer_group"] = s["bottom_group"]
+                s["answer_value"] = s["bottom_value"]
+                s["note"] = (f"sorted ascending: the lowest values answer the question; "
+                             f"the weakest is {s['bottom_group']} at {s['bottom_value']}")
         elif focus == "trend_stats" and y_col and y_col in transformed.columns:
             ser = transformed.set_index(x_col)[y_col].dropna()
             first, last = float(ser.iloc[0]), float(ser.iloc[-1])

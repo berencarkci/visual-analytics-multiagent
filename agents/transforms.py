@@ -92,6 +92,20 @@ def measure_base_columns(expr: str | None) -> list[str]:
 
 # Transform application:
 _AGG_MAP = {"sum": "sum", "mean": "mean", "count": "count", "count_distinct": "nunique"}
+
+# Date parts usable inside a filter. Only year() was handled before, so a filter
+# like "hour_of_day(date) >= 22" raised inside query() and was skipped with a
+# note — the question "how much energy do appliances use at night" then summed
+# all 24 hours and answered a different question than the one asked.
+_FILTER_PARTS = {
+    "year": lambda s: s.dt.year,
+    "month": lambda s: s.dt.month,
+    "day": lambda s: s.dt.day,
+    "quarter": lambda s: s.dt.quarter,
+    "hour_of_day": lambda s: s.dt.hour,
+    "day_of_week": lambda s: s.dt.day_name(),
+    "weekend_flag": lambda s: s.dt.dayofweek >= 5,
+}
 def apply_transform(df: pd.DataFrame, rec: ChartRecommendation) -> tuple[pd.DataFrame, str, str | None, list[str]]:
     """Apply filter/groupby/agg/sort/limit, return (df, x_col, y_col, notes)
     Never raises for a recoverable issue: problems are recorded in 'notes' and the step is skipped.
@@ -101,12 +115,20 @@ def apply_transform(df: pd.DataFrame, rec: ChartRecommendation) -> tuple[pd.Data
     out = df.copy()
     # filter (pandas query, year(col) == N rewritten first)
     if t.filter:
-        expr = re.sub(r"year\((\w+)\)", r"\1.dt.year", t.filter)
+        expr = str(t.filter)
+        work = out
         try:
-            if ".dt.year" in expr:
-                col = re.search(r"(\w+)\.dt\.year", expr).group(1)
-                out[col] = pd.to_datetime(out[col])
-            out = out.query(expr)
+            # Materialise every func(col) the filter references as a real column,
+            # so pandas.query can see it. Temporary columns are dropped again
+            # afterwards; on failure `out` is left untouched.
+            for func, col in set(re.findall(r"(\w+)\((\w+)\)", expr)):
+                if func in _FILTER_PARTS and col in work.columns:
+                    tmp = f"_flt_{func}_{col}"
+                    work = work.assign(
+                        **{tmp: _FILTER_PARTS[func](pd.to_datetime(work[col]))})
+                    expr = expr.replace(f"{func}({col})", tmp)
+            work = work.query(expr)
+            out = work.drop(columns=[c for c in work.columns if c.startswith("_flt_")])
             if out.empty:
                 notes.append(f"filter left 0 rows: {t.filter}")
         except Exception as e:
