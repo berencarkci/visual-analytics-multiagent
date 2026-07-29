@@ -1,21 +1,26 @@
 {
-  "adapter": "berencarkci/qwen2.5-3b-va-sft-v3",
+  "adapter": "berencarkci/qwen2.5-3b-va-sft-v4",
   "split": "dev",
   "summary": {
     "n_questions": 38,
-    "chain_stopped": 0,
+    "chain_stopped": 2,
     "evaluation_failed": 0,
     "had_warnings": 1,
     "retried": 0,
     "retry_helped": 0,
-    "guardrail_corrected": 1,
-    "plan_degraded": 0,
+    "guardrail_corrected": 4,
+    "plan_degraded": 2,
     "template_fallback": 0,
     "issues_by_rule": {},
     "guardrails_by_kind": {
-      "scatter->box": 1
+      "scatter->box": 1,
+      "scatter->bar": 1,
+      "line->bar": 1,
+      "histogram->bar": 1
     },
-    "plan_notes_by_kind": {}
+    "plan_notes_by_kind": {
+      "plan guardrail": 3
+    }
   },
   "rows": [
     {
@@ -34,6 +39,7 @@
       "y_axis": "sales",
       "transform": {
         "groupby": "month(order_date)",
+        "series": null,
         "agg": "sum",
         "filter": null,
         "sort": "date_asc",
@@ -58,6 +64,7 @@
       "y_axis": "profit",
       "transform": {
         "groupby": "quarter(order_date)",
+        "series": null,
         "agg": "sum",
         "filter": null,
         "sort": "date_asc",
@@ -82,12 +89,13 @@
       "y_axis": "sales",
       "transform": {
         "groupby": "month(order_date)",
+        "series": null,
         "agg": "sum",
-        "filter": "category == 'Furniture'",
+        "filter": null,
         "sort": "date_asc",
         "limit": null
       },
-      "insight": "The series rose from 6242.525 at 2015-01-01 00:00:00 to 31407.467 at 2018-12-01 00:00:00, a change of 403.1%.",
+      "insight": "The series rose from 14236.895 at 2015-01-01 00:00:00 to 83829.319 at 2018-12-01 00:00:00, a change of 488.8%.",
       "insight_source": "llm"
     },
     {
@@ -106,6 +114,7 @@
       "y_axis": "sales",
       "transform": {
         "groupby": "category",
+        "series": null,
         "agg": "sum",
         "filter": null,
         "sort": "value_desc",
@@ -130,6 +139,7 @@
       "y_axis": "discount",
       "transform": {
         "groupby": "segment",
+        "series": null,
         "agg": "mean",
         "filter": null,
         "sort": "value_desc",
@@ -154,6 +164,7 @@
       "y_axis": "quantity",
       "transform": {
         "groupby": "ship_mode",
+        "series": null,
         "agg": "sum",
         "filter": null,
         "sort": "value_desc",
@@ -173,11 +184,12 @@
       "warnings": [],
       "retried_step": null,
       "retry_helped": null,
-      "chart_type": "bar",
+      "chart_type": "pie",
       "x_axis": "region",
       "y_axis": "sales",
       "transform": {
         "groupby": "region",
+        "series": null,
         "agg": "sum",
         "filter": null,
         "sort": "value_desc",
@@ -202,12 +214,13 @@
       "y_axis": "order_id",
       "transform": {
         "groupby": "category",
+        "series": null,
         "agg": "count",
         "filter": null,
-        "sort": null,
+        "sort": "value_desc",
         "limit": null
       },
-      "insight": "Office Supplies makes up 60.3% of the whole; the total across groups is 9994.0.",
+      "insight": "The largest share goes to Office Supplies at 60.3%, with Technology the smallest.",
       "insight_source": "llm"
     },
     {
@@ -226,6 +239,7 @@
       "y_axis": "profit",
       "transform": {
         "groupby": null,
+        "series": null,
         "agg": null,
         "filter": null,
         "sort": null,
@@ -253,6 +267,7 @@
       "y_axis": "sales",
       "transform": {
         "groupby": null,
+        "series": null,
         "agg": null,
         "filter": null,
         "sort": null,
@@ -277,12 +292,13 @@
       "y_axis": null,
       "transform": {
         "groupby": null,
+        "series": null,
         "agg": null,
         "filter": null,
         "sort": null,
         "limit": null
       },
-      "insight": "Values run from 0.444 to 22638.48; half of them fall between 17.28 and 209.94, around a median of 54.49.",
+      "insight": "The distribution of sales has a median of 54.49 and a mean of 229.858, spanning 0.444 to 22638.48.",
       "insight_source": "llm"
     },
     {
@@ -301,12 +317,13 @@
       "y_axis": "sales",
       "transform": {
         "groupby": "month(order_date)",
+        "series": "category",
         "agg": "sum",
         "filter": "category == 'Technology' and year(order_date) == 2018",
         "sort": "date_asc",
         "limit": null
       },
-      "insight": "The highest value belongs to 2018-11-01 00:00:00 (49918.773); the lowest is 2018-02-01 00:00:00 (6027.024).",
+      "insight": "The highest value belongs to 2018-11-01 · Technology (49918.773); the lowest is 2018-02-01 · Technology (6027.024).",
       "insight_source": "llm"
     },
     {
@@ -325,12 +342,13 @@
       "y_axis": "profit",
       "transform": {
         "groupby": "sub_category",
+        "series": "region",
         "agg": "sum",
         "filter": "region == 'West'",
-        "sort": "value_desc",
+        "sort": null,
         "limit": null
       },
-      "insight": "The highest value belongs to Copiers (19327.235); the lowest is Bookcases (-1646.512).",
+      "insight": "The highest value belongs to Copiers · West (19327.235); the lowest is Bookcases · West (-1646.512).",
       "insight_source": "llm"
     },
     {
@@ -349,12 +367,16 @@
       "y_axis": "sales",
       "transform": {
         "groupby": "month(order_date)",
+        "series": null,
         "agg": "sum",
         "filter": "segment == 'Corporate'",
         "sort": "date_desc",
         "limit": 6
       },
       "insight": "The highest value belongs to 2018-11-01 00:00:00 (44644.076); the lowest is 2018-07-01 00:00:00 (16525.599).",
+      "plan_notes": [
+        "plan guardrail: series 'customer_name' dropped — 793 distinct values is not a readable colour dimension"
+      ],
       "insight_source": "llm"
     },
     {
@@ -373,12 +395,13 @@
       "y_axis": "spending_score",
       "transform": {
         "groupby": "gender",
+        "series": null,
         "agg": "mean",
         "filter": null,
         "sort": null,
         "limit": null
       },
-      "insight": "The highest value belongs to Female (51.527); the lowest is Male (48.511).",
+      "insight": "Across 2 groups, Female tops the ranking at 51.527.",
       "insight_source": "llm"
     },
     {
@@ -397,6 +420,7 @@
       "y_axis": "spending_score",
       "transform": {
         "groupby": "bins(age)",
+        "series": null,
         "agg": "mean",
         "filter": null,
         "sort": null,
@@ -416,17 +440,22 @@
       "warnings": [],
       "retried_step": null,
       "retry_helped": null,
-      "chart_type": "bar",
+      "chart_type": "pie",
       "x_axis": "gender",
-      "y_axis": "customer_id",
+      "y_axis": null,
       "transform": {
         "groupby": "gender",
+        "series": null,
         "agg": "count",
         "filter": null,
-        "sort": null,
+        "sort": "value_desc",
         "limit": null
       },
-      "insight": "Female makes up 56.0% of the whole; the total across groups is 200.0.",
+      "insight": "The largest share goes to Female at 56.0%, with Male the smallest.",
+      "plan_notes": [
+        "plan guardrail: 'age' removed from target_columns — it is the series dimension, not a measure",
+        "plan guardrail: series 'age' dropped — 51 distinct values is not a readable colour dimension"
+      ],
       "insight_source": "llm"
     },
     {
@@ -447,6 +476,7 @@
       "y_axis": "spending_score",
       "transform": {
         "groupby": null,
+        "series": null,
         "agg": null,
         "filter": null,
         "sort": null,
@@ -471,6 +501,7 @@
       "y_axis": "spending_score",
       "transform": {
         "groupby": null,
+        "series": null,
         "agg": null,
         "filter": null,
         "sort": null,
@@ -490,17 +521,21 @@
       "warnings": [],
       "retried_step": null,
       "retry_helped": null,
-      "chart_type": "scatter",
+      "chart_type": "bar",
       "x_axis": "age",
       "y_axis": "spending_score",
       "transform": {
         "groupby": null,
+        "series": "gender",
         "agg": null,
         "filter": "gender == 'Female'",
         "sort": null,
         "limit": null
       },
-      "insight": "The relationship between age and spending score for female customers is moderate and negative, with r=-0.327 over 112 rows.",
+      "insight": "The highest value belongs to 35 (99.0); the lowest is 46 (5.0).",
+      "guardrails": [
+        "scatter->bar: not allowed for this intent"
+      ],
       "insight_source": "llm"
     },
     {
@@ -519,12 +554,13 @@
       "y_axis": null,
       "transform": {
         "groupby": null,
+        "series": null,
         "agg": null,
         "filter": null,
         "sort": null,
         "limit": null
       },
-      "insight": "Values run from 18.0 to 70.0; half of them fall between 28.75 and 49.0, around a median of 36.0.",
+      "insight": "The distribution of age has a median of 36.0 and a mean of 38.85, spanning 18.0 to 70.0.",
       "insight_source": "llm"
     },
     {
@@ -543,6 +579,7 @@
       "y_axis": null,
       "transform": {
         "groupby": null,
+        "series": null,
         "agg": null,
         "filter": null,
         "sort": null,
@@ -567,6 +604,7 @@
       "y_axis": null,
       "transform": {
         "groupby": null,
+        "series": null,
         "agg": null,
         "filter": null,
         "sort": null,
@@ -591,6 +629,7 @@
       "y_axis": "spending_score",
       "transform": {
         "groupby": "gender",
+        "series": null,
         "agg": "mean",
         "filter": "age > 50",
         "sort": null,
@@ -615,6 +654,7 @@
       "y_axis": "appliances",
       "transform": {
         "groupby": "day(date)",
+        "series": null,
         "agg": "sum",
         "filter": null,
         "sort": "date_asc",
@@ -639,6 +679,7 @@
       "y_axis": "t_out",
       "transform": {
         "groupby": "week(date)",
+        "series": null,
         "agg": "mean",
         "filter": null,
         "sort": "date_asc",
@@ -663,12 +704,16 @@
       "y_axis": "appliances",
       "transform": {
         "groupby": "hour_of_day(date)",
+        "series": null,
         "agg": "mean",
         "filter": null,
         "sort": null,
         "limit": null
       },
       "insight": "The highest value belongs to 18 (191.812); the lowest is 3 (48.236).",
+      "guardrails": [
+        "line->bar: not allowed for this intent"
+      ],
       "insight_source": "llm"
     },
     {
@@ -687,6 +732,7 @@
       "y_axis": "appliances",
       "transform": {
         "groupby": "day_of_week(date)",
+        "series": null,
         "agg": "mean",
         "filter": null,
         "sort": null,
@@ -707,16 +753,17 @@
       "retried_step": null,
       "retry_helped": null,
       "chart_type": "scatter",
-      "x_axis": "t_out",
+      "x_axis": "t3",
       "y_axis": "appliances",
       "transform": {
         "groupby": null,
+        "series": null,
         "agg": null,
         "filter": null,
         "sort": null,
         "limit": null
       },
-      "insight": "The relationship between outdoor temperature and appliance energy consumption is weak and positive, with r=0.127 over 3290 rows.",
+      "insight": "The relationship between outdoor temperature and appliance energy consumption is weak and positive, with r=0.117 over 3290 rows.",
       "insight_source": "llm"
     },
     {
@@ -735,6 +782,7 @@
       "y_axis": "appliances",
       "transform": {
         "groupby": null,
+        "series": null,
         "agg": null,
         "filter": null,
         "sort": null,
@@ -754,17 +802,21 @@
       "warnings": [],
       "retried_step": null,
       "retry_helped": null,
-      "chart_type": "histogram",
+      "chart_type": "bar",
       "x_axis": "date",
       "y_axis": "appliances",
       "transform": {
-        "groupby": null,
-        "agg": null,
+        "groupby": "hour_of_day(date)",
+        "series": null,
+        "agg": "count",
         "filter": null,
         "sort": null,
         "limit": null
       },
-      "insight": "The distribution of hourly appliance energy consumption has a median of 63.333 and a mean of 97.779, spanning 28.333 to 608.333.",
+      "insight": "The highest value belongs to 17 (138.0); the lowest is 0 (137.0).",
+      "guardrails": [
+        "histogram->bar: the data is one count per category; there are no raw values left to bin"
+      ],
       "insight_source": "llm"
     },
     {
@@ -783,6 +835,7 @@
       "y_axis": null,
       "transform": {
         "groupby": null,
+        "series": null,
         "agg": null,
         "filter": null,
         "sort": null,
@@ -796,48 +849,16 @@
       "type": "filter_aggregation",
       "dataset": "energy_consumption_hourly",
       "question": "Compare the average appliance consumption on days when outdoor temperature was below 5 degrees versus other days.",
-      "ok": true,
-      "passed": true,
-      "issues": [],
-      "warnings": [],
-      "retried_step": null,
-      "retry_helped": null,
-      "chart_type": "bar",
-      "x_axis": "date",
-      "y_axis": "appliances",
-      "transform": {
-        "groupby": "day(date)",
-        "agg": "mean",
-        "filter": "t_out < 5",
-        "sort": null,
-        "limit": null
-      },
-      "insight": "The highest value belongs to 2016-01-13 00:00:00 (165.238); the lowest is 2016-01-29 00:00:00 (36.666).",
-      "insight_source": "llm"
+      "ok": false,
+      "step_error": "empty_result: Transform left 0 rows (filter: t1 < 5)"
     },
     {
       "id": "energy_016",
       "type": "filter_aggregation",
       "dataset": "energy_consumption_hourly",
       "question": "How much energy do appliances use at night?",
-      "ok": true,
-      "passed": true,
-      "issues": [],
-      "warnings": [],
-      "retried_step": null,
-      "retry_helped": null,
-      "chart_type": "bar",
-      "x_axis": "date",
-      "y_axis": "appliances",
-      "transform": {
-        "groupby": "hour_of_day(date)",
-        "agg": "mean",
-        "filter": null,
-        "sort": null,
-        "limit": null
-      },
-      "insight": "The highest value belongs to 18 (191.812); the lowest is 3 (48.236).",
-      "insight_source": "llm"
+      "ok": false,
+      "step_error": "invalid_llm_output: series 'night' is not a column in the schema. series names a COLUMN to split the groups by, never a value; to restrict to one value use filter instead."
     },
     {
       "id": "energy_017",
@@ -855,6 +876,7 @@
       "y_axis": "appliances",
       "transform": {
         "groupby": "day(date)",
+        "series": null,
         "agg": "sum",
         "filter": null,
         "sort": "date_asc",
@@ -879,6 +901,7 @@
       "y_axis": "appliances",
       "transform": {
         "groupby": "day(date)",
+        "series": null,
         "agg": "sum",
         "filter": null,
         "sort": "date_asc",
@@ -903,6 +926,7 @@
       "y_axis": "lights",
       "transform": {
         "groupby": "day(date)",
+        "series": null,
         "agg": "sum",
         "filter": null,
         "sort": "date_asc",
@@ -927,12 +951,13 @@
       "y_axis": "press_mm_hg",
       "transform": {
         "groupby": "day(date)",
+        "series": null,
         "agg": "mean",
         "filter": null,
         "sort": "date_asc",
         "limit": null
       },
-      "insight": "The series rose from 735.174 at 2016-01-11 00:00:00 to 755.759 at 2016-05-27 00:00:00, a change of 2.8%.",
+      "insight": "The IQR bounds are 736.624 and 775.391; 2 values break them, led by 2016-02-13 00:00:00 (735.47).",
       "insight_source": "llm"
     }
   ]

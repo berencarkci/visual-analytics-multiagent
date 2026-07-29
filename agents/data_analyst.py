@@ -74,6 +74,18 @@ def _validate_plan(raw: str, profile: TableProfile) -> tuple[TransformPlan | Non
             cleaned = re.sub(r"'[^']*'", "", str(expr))
             referenced |= {tok for tok in re.findall(r"[a-zA-Z_][a-zA-Z0-9_.]*", cleaned)
                            if tok in valid_cols or "." in tok or tok.islower()}
+    # series is always a column or a derived expression over one — never a
+    # literal, unlike filter. The generic token scan skips capitalised tokens,
+    # so a category VALUE ("Technology") slipped through and only failed deep in
+    # the engine with a KeyError. Checking it here turns that into a retry with
+    # usable feedback.
+    if t.series:
+        base = re.sub(r"^\w+\(|\)$", "", str(t.series)).split(",")[0].strip()
+        if base not in valid_cols:
+            return None, (f"series '{t.series}' is not a column in the schema. "
+                          "series names a COLUMN to split the groups by, never a value; "
+                          "to restrict to one value use filter instead.")
+
     unknown = [c for c in referenced
                if c not in valid_cols
                and c not in {"month", "quarter", "week", "day", "year", "hour_of_day", "day_of_week", "weekend_flag", "bins", "threshold_flag", "and", "or", "in", "not"}]
@@ -196,6 +208,31 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
                              detail=err or "unknown", recoverable=False), None
         plan.plan_source = "llm_retry"
 
+    # PLAN GUARDRAIL: series names a grouping dimension, not a measure. When the
+    # model also lists it in target_columns the metric goes missing and the
+    # aggregate lands on a text column, which the engine downgrades to a count —
+    # observed as "profit per ship mode, broken down by segment" returning row
+    # counts instead of profit.
+    if plan.transform.series and plan.transform.series in plan.target_columns:
+        plan.target_columns = [c for c in plan.target_columns
+                               if c != plan.transform.series]
+        plan.notes.append(
+            f"plan guardrail: '{plan.transform.series}' removed from target_columns "
+            "— it is the series dimension, not a measure")
+
+    # A colour dimension is only readable with a handful of values; a plan that
+    # puts an identifier there ("distribution of categories" split by order_id)
+    # explodes the grouping into thousands of rows. Cardinality is read from the
+    # profile, and only plain columns are checked — a derived series like
+    # weekend_flag(date) has two values whatever the source column holds.
+    if plan.transform.series and "(" not in plan.transform.series:
+        card = {c.name: c.unique_count for c in profile.columns}
+        n_series = card.get(plan.transform.series)
+        if n_series and n_series > 12:
+            plan.notes.append(
+                f"plan guardrail: series '{plan.transform.series}' dropped — "
+                f"{n_series} distinct values is not a readable colour dimension")
+            plan.transform = plan.transform.model_copy(update={"series": None})
     # PLAN GUARDRAIL (mechanical, mirrors the visualization guardrails): a share/composition question needs the whole data, a filter that pins the groupby column to one value collapses the composition to a single 100% group.
     # Small models sometimes do this despite the prompt rule so we enforce it here.
     t = plan.transform
@@ -204,6 +241,7 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
         plan.transform = t.model_copy(update={"filter": None})
         plan.notes.append(
             f"plan guardrail: filter '{t.filter}' removed — share questions need all groups")
+        
     focus = workflow.insight_focus
     x_target = plan.target_columns[0] if plan.target_columns else None
     col_dtypes = {c.name: c.dtype for c in profile.columns}
@@ -222,6 +260,14 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
         # the aggregated table actually contains.
         if plan.transform.groupby and plan.transform.agg:
             focus = "group_stats"
+
+    # A trend sentence ("rose from X to Y") assumes a single series. With a
+    # second grouping dimension the first and last rows belong to different
+    # groups, so that sentence would compare unrelated numbers; describing the
+    # (period, group) pairs is the honest reading of the prepared table.
+    if focus == "trend_stats" and plan.transform.series:
+        focus = "group_stats"
+
     # execute through the shared engine (reusing the recommendation container)
     x = plan.target_columns[0] if plan.target_columns else None
     y = plan.target_columns[1] if len(plan.target_columns) > 1 else None

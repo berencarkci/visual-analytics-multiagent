@@ -1,5 +1,5 @@
 {
-  "adapter": "berencarkci/qwen2.5-3b-va-sft-v3",
+  "adapter": "berencarkci/qwen2.5-3b-va-sft-v4",
   "rows": [
     {
       "dataset": "retail",
@@ -9,15 +9,16 @@
       "ok": true,
       "chart_type": "bar",
       "x_axis": "category",
-      "y_axis": null,
+      "y_axis": "order_id",
       "transform": {
         "groupby": "category",
+        "series": "order_id",
         "agg": "count",
         "filter": null,
-        "sort": null,
+        "sort": "value_desc",
         "limit": null
       },
-      "insight": "Across 3 groups, Office Supplies tops the ranking at 6026.0.",
+      "insight": "The highest value belongs to Office Supplies \u00b7 CA-2017-165330 (8.0); the lowest is Office Supplies \u00b7 CA-2018-148929 (1.0).",
       "eval_passed": true,
       "eval_issues": [],
       "eval_warnings": []
@@ -33,6 +34,7 @@
       "y_axis": "order_id",
       "transform": {
         "groupby": "ship_mode",
+        "series": null,
         "agg": "count",
         "filter": null,
         "sort": "value_desc",
@@ -51,15 +53,16 @@
       "ok": true,
       "chart_type": "bar",
       "x_axis": "gender",
-      "y_axis": null,
+      "y_axis": "age",
       "transform": {
         "groupby": "gender",
+        "series": "age",
         "agg": "count",
         "filter": null,
-        "sort": null,
+        "sort": "value_desc",
         "limit": null
       },
-      "insight": "The highest value belongs to Female (112.0); the lowest is Male (88.0).",
+      "insight": "The highest value belongs to Female \u00b7 31 (7.0); the lowest is Male \u00b7 54 (1.0).",
       "eval_passed": true,
       "eval_issues": [],
       "eval_warnings": []
@@ -75,6 +78,7 @@
       "y_axis": null,
       "transform": {
         "groupby": null,
+        "series": null,
         "agg": null,
         "filter": null,
         "sort": null,
@@ -92,16 +96,17 @@
       "expected": "filter + single aggregate; a one-bar chart is acceptable, an invented number is not",
       "ok": true,
       "chart_type": "bar",
-      "x_axis": "sales",
-      "y_axis": null,
+      "x_axis": "order_date",
+      "y_axis": "sales",
       "transform": {
         "groupby": "year(order_date)",
+        "series": "region",
         "agg": "sum",
-        "filter": "region == 'West' and year(order_date) == 2017",
+        "filter": "year(order_date) == 2017 and region == 'West'",
         "sort": null,
         "limit": null
       },
-      "insight": "The highest value belongs to 2017-01-01 00:00:00 (187480.177); the lowest is 2017-01-01 00:00:00 (187480.177).",
+      "insight": "The highest value belongs to 2017-01-01 \u00b7 West (187480.177); the lowest is 2017-01-01 \u00b7 West (187480.177).",
       "eval_passed": true,
       "eval_issues": [],
       "eval_warnings": []
@@ -113,16 +118,17 @@
       "expected": "single aggregate over the whole table",
       "ok": true,
       "chart_type": "bar",
-      "x_axis": "spending_score",
-      "y_axis": null,
+      "x_axis": "customer_id",
+      "y_axis": "spending_score",
       "transform": {
-        "groupby": null,
+        "groupby": "customer_id",
+        "series": null,
         "agg": "mean",
         "filter": null,
         "sort": null,
         "limit": null
       },
-      "insight": "The average spending score across all customers is 50.2.",
+      "insight": "The highest value belongs to 12 (99.0); the lowest is 157 (1.0).",
       "eval_passed": true,
       "eval_issues": [],
       "eval_warnings": []
@@ -138,6 +144,7 @@
       "y_axis": "profit",
       "transform": {
         "groupby": "sub_category",
+        "series": null,
         "agg": "sum",
         "filter": null,
         "sort": "value_desc",
@@ -153,21 +160,8 @@
       "question": "Which hour of the day has the highest appliance consumption?",
       "category": "find_extremum",
       "expected": "groupby hour_of_day, the insight must name the peak hour",
-      "ok": true,
-      "chart_type": "bar",
-      "x_axis": "date",
-      "y_axis": "appliances",
-      "transform": {
-        "groupby": "hour_of_day(date)",
-        "agg": "mean",
-        "filter": null,
-        "sort": "value_desc",
-        "limit": null
-      },
-      "insight": "The highest value belongs to 18 (191.812); the lowest is 3 (48.236).",
-      "eval_passed": true,
-      "eval_issues": [],
-      "eval_warnings": []
+      "ok": false,
+      "error": "agent='data_analyst' error_type='invalid_llm_output' detail=\"Unknown column(s): ['hour']. Use only columns from the schema.\" recoverable=False"
     },
     {
       "dataset": "retail",
@@ -180,12 +174,13 @@
       "y_axis": null,
       "transform": {
         "groupby": null,
+        "series": null,
         "agg": null,
         "filter": null,
         "sort": null,
         "limit": null
       },
-      "insight": "The distribution of order profits has a median of 8.666 and a mean of 28.657, spanning -6599.978 to 8399.976.",
+      "insight": "The distribution of profit has a median of 8.666 and a mean of 28.657, spanning -6599.978 to 8399.976.",
       "eval_passed": true,
       "eval_issues": [],
       "eval_warnings": []
@@ -196,11 +191,34 @@
       "category": "cluster",
       "expected": "no clustering mechanism exists \u2014 a scatter of income vs spending is the honest fallback",
       "ok": true,
-      "chart_type": "scatter",
+      "chart_type": "bar",
+      "x_axis": "age",
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": "bins(age)",
+        "series": "spending_score",
+        "agg": "mean",
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "insight": "The highest value belongs to (28.4, 38.8] \u00b7 99 (99.0); the lowest is (28.4, 38.8] \u00b7 1 (1.0).",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "mall",
+      "question": "Can the customers be segmented into distinct types?",
+      "category": "cluster",
+      "expected": "same; must not invent cluster counts",
+      "ok": true,
+      "chart_type": "box",
       "x_axis": "annual_income_k_usd",
       "y_axis": "spending_score",
       "transform": {
         "groupby": null,
+        "series": null,
         "agg": null,
         "filter": null,
         "sort": null,
@@ -214,27 +232,6 @@
       ]
     },
     {
-      "dataset": "mall",
-      "question": "Can the customers be segmented into distinct types?",
-      "category": "cluster",
-      "expected": "same; must not invent cluster counts",
-      "ok": true,
-      "chart_type": "bar",
-      "x_axis": "gender",
-      "y_axis": "spending_score",
-      "transform": {
-        "groupby": "gender",
-        "agg": "mean",
-        "filter": null,
-        "sort": null,
-        "limit": null
-      },
-      "insight": "Female leads with 51.527, while Male sits lowest at 48.511.",
-      "eval_passed": true,
-      "eval_issues": [],
-      "eval_warnings": []
-    },
-    {
       "dataset": "retail",
       "question": "Compare sales and profit across regions.",
       "category": "multi_metric",
@@ -242,15 +239,16 @@
       "ok": true,
       "chart_type": "bar",
       "x_axis": "region",
-      "y_axis": "profit",
+      "y_axis": "sales",
       "transform": {
         "groupby": "region",
+        "series": "profit",
         "agg": "sum",
         "filter": null,
         "sort": "value_desc",
         "limit": null
       },
-      "insight": "Across 4 groups, West tops the ranking at 108418.449.",
+      "insight": "The highest value belongs to South \u00b7 -1811.0784 (22638.48); the lowest is Central \u00b7 -1.11 (0.444).",
       "eval_passed": true,
       "eval_issues": [],
       "eval_warnings": []
@@ -266,12 +264,13 @@
       "y_axis": "sales",
       "transform": {
         "groupby": "year(order_date)",
+        "series": "category",
         "agg": "sum",
         "filter": null,
-        "sort": "date_asc",
+        "sort": "value_desc",
         "limit": null
       },
-      "insight": "The highest value belongs to 2018-01-01 00:00:00 (733215.255); the lowest is 2016-01-01 00:00:00 (470532.509).",
+      "insight": "The highest value belongs to 2018-01-01 \u00b7 Technology (271730.811); the lowest is 2016-01-01 \u00b7 Office Supplies (137233.463).",
       "eval_passed": true,
       "eval_issues": [],
       "eval_warnings": []
@@ -287,12 +286,13 @@
       "y_axis": "profit",
       "transform": {
         "groupby": "sub_category",
+        "series": null,
         "agg": "sum",
         "filter": null,
-        "sort": "value_desc",
-        "limit": null
+        "sort": "value_asc",
+        "limit": 10
       },
-      "insight": "Across 17 groups, Copiers tops the ranking at 55617.825.",
+      "insight": "The weakest group is Tables at -17725.481, while the strongest is Appliances with 18138.005.",
       "eval_passed": true,
       "eval_issues": [],
       "eval_warnings": []
@@ -307,13 +307,14 @@
       "x_axis": "region",
       "y_axis": "sales",
       "transform": {
-        "groupby": "category",
+        "groupby": "region",
+        "series": "category",
         "agg": "sum",
         "filter": "category == 'Technology'",
         "sort": null,
         "limit": null
       },
-      "insight": "The highest value belongs to Technology (836154.033); the lowest is Technology (836154.033).",
+      "insight": "The largest share goes to East \u00b7 Technology at 31.7%, with South \u00b7 Technology the smallest.",
       "eval_passed": true,
       "eval_issues": [],
       "eval_warnings": []
@@ -329,6 +330,7 @@
       "y_axis": "sales",
       "transform": {
         "groupby": "month(order_date)",
+        "series": null,
         "agg": "sum",
         "filter": null,
         "sort": "date_asc",
@@ -350,6 +352,7 @@
       "y_axis": "profit",
       "transform": {
         "groupby": "month(order_date)",
+        "series": null,
         "agg": "sum",
         "filter": null,
         "sort": "date_asc",
@@ -366,7 +369,7 @@
       "category": "nonexistent_column",
       "expected": "no such column \u2014 must not silently substitute another one",
       "ok": false,
-      "error": "agent='data_analyst' error_type='empty_result' detail='Transform left 0 rows (filter: t1 < 0)' recoverable=True"
+      "error": "agent='data_analyst' error_type='invalid_llm_output' detail=\"Unknown column(s): ['location']. Use only columns from the schema.\" recoverable=False"
     },
     {
       "dataset": "hostile",
@@ -376,12 +379,13 @@
       "ok": true,
       "chart_type": "bar",
       "x_axis": "cat",
-      "y_axis": null,
+      "y_axis": "count",
       "transform": {
         "groupby": "cat",
+        "series": null,
         "agg": "count",
         "filter": null,
-        "sort": null,
+        "sort": "value_desc",
         "limit": null
       },
       "insight": "The highest value belongs to 5e (8.0); the lowest is 6 (6.0).",
@@ -400,6 +404,7 @@
       "y_axis": "count",
       "transform": {
         "groupby": "cat",
+        "series": null,
         "agg": "count",
         "filter": null,
         "sort": "value_desc",
@@ -421,6 +426,7 @@
       "y_axis": "count",
       "transform": {
         "groupby": "cat",
+        "series": null,
         "agg": "sum",
         "filter": null,
         "sort": "value_desc",
@@ -436,21 +442,8 @@
       "question": "How did the amount change over time?",
       "category": "non_english_column",
       "expected": "the date column is named 'tarih'",
-      "ok": true,
-      "chart_type": "line",
-      "x_axis": "tarih",
-      "y_axis": "amount",
-      "transform": {
-        "groupby": "day(tarih)",
-        "agg": "sum",
-        "filter": null,
-        "sort": "date_asc",
-        "limit": null
-      },
-      "insight": "The series fell from 41.0 at 2024-03-02 00:00:00 to 8.0 at 2024-03-21 00:00:00, a change of -80.5%.",
-      "eval_passed": true,
-      "eval_issues": [],
-      "eval_warnings": []
+      "ok": false,
+      "error": "agent='data_analyst' error_type='invalid_llm_output' detail=\"Unknown column(s): ['date']. Use only columns from the schema.\" recoverable=False"
     },
     {
       "dataset": "hostile",
@@ -463,6 +456,7 @@
       "y_axis": "score",
       "transform": {
         "groupby": null,
+        "series": null,
         "agg": null,
         "filter": null,
         "sort": null,
@@ -483,15 +477,16 @@
       "ok": true,
       "chart_type": "bar",
       "x_axis": "active",
-      "y_axis": null,
+      "y_axis": "tarih",
       "transform": {
         "groupby": "active",
+        "series": "tarih",
         "agg": "count",
         "filter": null,
-        "sort": null,
+        "sort": "value_desc",
         "limit": null
       },
-      "insight": "The highest value belongs to True (9.0); the lowest is False (5.0).",
+      "insight": "The highest value belongs to True \u00b7 2024-03-02 (2.0); the lowest is False \u00b7 2024-03-02 (1.0).",
       "eval_passed": true,
       "eval_issues": [],
       "eval_warnings": []
@@ -507,6 +502,7 @@
       "y_axis": "amount",
       "transform": {
         "groupby": "cat",
+        "series": null,
         "agg": "mean",
         "filter": null,
         "sort": "value_desc",
