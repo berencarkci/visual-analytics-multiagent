@@ -296,8 +296,9 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
         # retry with the empty result fed back, then give up.
         if feedback is None:
             retry_note = (f"Your filter `{plan.transform.filter}` matched 0 rows. "
-                          "Check the logic: a range that wraps around (nights, "
-                          "seasons) needs `or`, not `and`. Return a corrected plan.")
+                          "Keep the filter — the question asks about a subset — but fix "
+                          "its logic: a range that wraps past midnight or year-end needs "
+                          "`or`, not `and`. Return a corrected plan.")
             return run_data_analysis(client, df, profile, schema_text, question,
                                      workflow, feedback=retry_note)
         return StepError(agent="data_analyst", error_type="empty_result",
