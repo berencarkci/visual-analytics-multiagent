@@ -63,6 +63,13 @@ def _validate_plan(raw: str, profile: TableProfile) -> tuple[TransformPlan | Non
     except Exception as e:
         return None, f"Invalid plan format: {e}. {_FIELD_HINT}"
 
+    # An empty target_columns list reaches the engine as x_axis="" and fails with
+    # "column '' not found", which says nothing useful. Rejecting it here turns
+    # it into a retry with feedback the model can act on.
+    if not plan.target_columns:
+        return None, ("target_columns is empty. List the columns the answer needs: "
+                      "the axis column first, then the measure to aggregate.")
+
     valid_cols = {c.name for c in profile.columns}
     # A derived measure names the columns it needs inside the expression, so it is validated by its base columns rather than as a literal column name.
     referenced: set[str] = set()
@@ -283,6 +290,16 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
                          detail=str(e), recoverable=False), None
 
     if prepared.empty:
+        # A filter that matches nothing is recoverable and the model can often
+        # fix it when told — "at night" was written as `hour > 17 and hour < 7`,
+        # which no hour satisfies because the range wraps past midnight. One
+        # retry with the empty result fed back, then give up.
+        if feedback is None:
+            retry_note = (f"Your filter `{plan.transform.filter}` matched 0 rows. "
+                          "Check the logic: a range that wraps around (nights, "
+                          "seasons) needs `or`, not `and`. Return a corrected plan.")
+            return run_data_analysis(client, df, profile, schema_text, question,
+                                     workflow, feedback=retry_note)
         return StepError(agent="data_analyst", error_type="empty_result",
                          detail=f"Transform left 0 rows (filter: {plan.transform.filter})",
                          recoverable=True), None

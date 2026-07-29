@@ -276,7 +276,7 @@ def prepare_context(ex: dict, frames: dict, schemas: dict) -> dict | None:
     try:
         rec = ChartRecommendation(**ex["target"])
         df = frames[ex["dataset"]]
-        prepared, x_col, y_col, notes = apply_transform(df, rec)
+        prepared, x_col, y_col, _series, notes = apply_transform(df, rec)
     except Exception:
         return None
     if prepared is None or prepared.empty:

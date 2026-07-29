@@ -120,7 +120,7 @@ def check(plan: dict, expect: dict, df) -> tuple[bool, str]:
         y = cols[1] if len(cols) > 1 else None
         rec = ChartRecommendation(chart_type="bar", x_axis=x, y_axis=y,
                                   transform=Transform(**tf), reason="probe", insight="probe")
-        out, _, _, notes = apply_transform(df, rec)
+        out, _, _, _series, notes = apply_transform(df, rec)
         if out is None or out.empty:
             return False, "plan executed to an empty result"
         if any("skipped" in n for n in notes):
