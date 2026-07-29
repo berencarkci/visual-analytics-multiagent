@@ -26,6 +26,24 @@ def _resolve_grouping(df: pd.DataFrame, expr: str) -> tuple[pd.Series, str]:
     if not m:
         return df[expr], expr
     func, inner = m.group(1), m.group(2).strip()
+    if func == "threshold_flag":
+        # "compare X when Y is below 5 versus other days" is a two-group
+        # comparison, not a filter: filtering keeps only one side and silently
+        # drops the half the question asked to compare against. This splits the
+        # rows in two instead. Checked before the date parts because its
+        # argument list contains a comma.
+        parts = [p.strip() for p in inner.split(",")]
+        if len(parts) != 2:
+            raise ValueError(f"threshold_flag needs a column and a threshold: {expr}")
+        col, raw_thr = parts[0], parts[1]
+        if col not in df.columns:
+            raise ValueError(f"column not in dataset: {col}")
+        thr = float(raw_thr)
+        vals = pd.to_numeric(df[col], errors="coerce")
+        shown = f"{thr:g}"
+        labels = vals.map(lambda v: None if pd.isna(v)
+                          else (f"{col} >= {shown}" if v >= thr else f"{col} < {shown}"))
+        return labels, f"{col} split at {shown}"
     if func in ("month", "quarter", "week", "day", "year"):
         dt = pd.to_datetime(df[inner])
         period = dt.dt.to_period({"month": "M", "quarter": "Q", "week": "W", "day": "D", "year": "Y"}[func])
@@ -107,11 +125,12 @@ _FILTER_PARTS = {
     "weekend_flag": lambda s: s.dt.dayofweek >= 5,
 }
 def apply_transform(df: pd.DataFrame, rec: ChartRecommendation) -> tuple[pd.DataFrame, str, str | None, list[str]]:
-    """Apply filter/groupby/agg/sort/limit, return (df, x_col, y_col, notes)
+    """Apply filter/groupby/series/agg/sort/limit, return (df, x, y, series, notes)
     Never raises for a recoverable issue: problems are recorded in 'notes' and the step is skipped.
     """
     t = rec.transform
     notes: list[str] = []
+    series_col: str | None = None
     out = df.copy()
     # filter (pandas query, year(col) == N rewritten first)
     if t.filter:
@@ -165,14 +184,27 @@ def apply_transform(df: pd.DataFrame, rec: ChartRecommendation) -> tuple[pd.Data
                 notes.append(f"agg {agg}->count: '{target}' is not numeric")
                 agg = "count"
             agg_fn = _AGG_MAP[agg]
-            out = (out.assign(_grp=grouping)
-                      .groupby("_grp", observed=True)[target]
+            keys = ["_grp"]
+            assign = {"_grp": grouping}
+            rename = {"_grp": label, target: f"{agg}({target})"}
+            if t.series:
+                s_grouping, s_label = _resolve_grouping(out, t.series)
+                if s_label == label:
+                    notes.append("series ignored: identical to groupby")
+                else:
+                    keys.append("_ser")
+                    assign["_ser"] = s_grouping
+                    rename["_ser"] = s_label
+                    series_col = s_label
+            out = (out.assign(**assign)
+                      .groupby(keys, observed=True)[target]
                       .agg(agg_fn)
                       .reset_index()
-                      .rename(columns={"_grp": label, target: f"{agg}({target})"}))
+                      .rename(columns=rename))
             x_col, y_col = label, f"{agg}({target})"
         except Exception as e:
             notes.append(f"groupby skipped ({t.groupby}): {e}")
+            series_col = None
     # sort (check if the model referenced columns that do not exist)
     if t.sort in ("date_asc", "date_desc") and x_col in out.columns:
         out = out.sort_values(x_col, ascending=t.sort == "date_asc")
@@ -184,9 +216,11 @@ def apply_transform(df: pd.DataFrame, rec: ChartRecommendation) -> tuple[pd.Data
     if t.limit:
         out = out.head(int(t.limit))
     # final existence check: rendering needs real columns
-    missing = [c for c in (x_col, y_col) if c is not None and c not in out.columns]
+    missing = [c for c in (x_col, y_col, series_col)
+               if c is not None and c not in out.columns]
     if missing:
         notes.append(f"columns not in dataset: {missing}")
         raise ColumnNotFoundError(f"Recommended column(s) not found in the dataset: {missing}", notes)
-    return out, x_col, y_col, notes
+
+    return out, x_col, y_col, series_col, notes
 #################################

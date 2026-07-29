@@ -154,7 +154,8 @@ PLAN_SYSTEM = """You plan data preparation for an analytics question. Given a ta
 {
   "target_columns": [source column names needed to answer the question],
   "transform": {
-    "groupby": column or derived expression like "month(col)", "day(col)", "bins(col)", or null,
+    "groupby": column or derived expression (see the list below), or null,
+    "series": a SECOND column to split every group by, or null,
     "agg": "sum" | "mean" | "count" | "count_distinct" | null,
     "filter": pandas-query condition string, or null,
     "sort": "date_asc" | "date_desc" | "value_asc" | "value_desc" | null,
@@ -164,6 +165,9 @@ PLAN_SYSTEM = """You plan data preparation for an analytics question. Given a ta
 
 Rules:
 - Use ONLY column names that exist in the schema.
+- Derived groupings available: year(col), quarter(col), month(col), week(col), day(col), hour_of_day(col), day_of_week(col), weekend_flag(col), bins(col), threshold_flag(col, number).
+- threshold_flag(col, number) splits the rows into two groups at that value. Use it when the question COMPARES a condition against everything else ("on days when temperature was below 5 versus other days"). A filter would keep only one side and lose the comparison.
+- series adds a second grouping dimension: use it when the question asks for one breakdown split by another ("profit per ship mode, broken down by segment", "sales by month for each region"). groupby goes on the axis, series becomes the colour. Leave series null unless the question really names two dimensions.
 - Do NOT choose a chart type. Do NOT write insights. Data preparation only.
 - Relationship questions between two raw numeric columns need no groupby/agg.
 - Distribution questions on a numeric column need no groupby/agg.
@@ -192,9 +196,12 @@ Rules:
 
 # SFT training: short system prompt (no few shots):
 SFT_SYSTEM = """You are a visual analytics assistant. Given a table schema and a question, return ONLY a JSON object:
-{"chart_type": "bar"|"line"|"scatter"|"pie"|"histogram"|"box", "x_axis": <source column>, "y_axis": <source column or null>, "transform": {"groupby": <column, derived expression like month(col)/day_of_week(col)/bins(col), or null>, "agg": "sum"|"mean"|"count"|"count_distinct"|null, "filter": <pandas query or null>, "sort": "date_asc"|"date_desc"|"value_asc"|"value_desc"|null, "limit": <int or null>}, "reason": <one sentence>, "insight": <one sentence describing what the chart shows>}
+{"chart_type": "bar"|"line"|"scatter"|"pie"|"histogram"|"box", "x_axis": <source column>, "y_axis": <source column or null>, "transform": {"groupby": <column or derived expression, or null>, "series": <second grouping column, or null>, "agg": "sum"|"mean"|"count"|"count_distinct"|null, "filter": <pandas query or null>, "sort": "date_asc"|"date_desc"|"value_asc"|"value_desc"|null, "limit": <int or null>}, "reason": <one sentence>, "insight": <one sentence describing what the chart shows>}
 
 Rules: use only columns from the schema; x_axis is always the source column (never a derived label); the insight must not state numbers you cannot compute from the schema.
+groupby accepts: year(col), quarter(col), month(col), week(col), day(col), hour_of_day(col), day_of_week(col), weekend_flag(col), bins(col), threshold_flag(col, number).
+threshold_flag(col, number) splits rows in two at that value — use it for "when X is above/below N versus the rest", where a filter would drop the comparison group.
+series adds a second grouping dimension (grouped bars, one line per value); leave it null unless the question names two breakdowns.
 filter is a pandas query, not SQL: lower case `and`/`or`, `==` for equality, quotes around text, year(col) for the year part.
 y_axis may be days_between(a, b), ratio(a, b) or diff(a, b) when the question asks for a duration, margin or difference.
 sort: value_desc for "highest", value_asc for "lowest/worst", date_asc for a timeline, date_desc for "most recent first"."""

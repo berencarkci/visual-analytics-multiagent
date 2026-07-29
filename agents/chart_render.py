@@ -14,21 +14,32 @@ from transforms import ColumnNotFoundError, apply_transform
 # Chart dispatch:
 def render_chart(df: pd.DataFrame, rec: ChartRecommendation):
     """ChartRecommendation + raw DataFrame -> (Plotly figure, notes)"""
-    data, x, y, notes = apply_transform(df, rec)
+    data, x, y, series, notes = apply_transform(df, rec)
     title = rec.reason if len(rec.reason) < 80 else rec.reason[:77] + "..."
-    
+    has_series = bool(series and series in data.columns)
+
     if rec.chart_type == "bar":
         n_cat = data[x].nunique() if x in data.columns else 0
-        if n_cat > 15:
+        if has_series:
+            # grouped bars: the axis carries the first key, colour the second
+            fig = px.bar(data, x=x, y=y, color=series, barmode="group", title=title)
+            notes.append(f"grouped by '{series}' (colour)")
+            if n_cat > 5:
+                fig.update_xaxes(tickangle=-40, tickmode="linear")
+        elif n_cat > 15:
             # if too many categories use horizontal bars(on too many categories in plotly every other label gets dropped)
             fig = px.bar(data.sort_values(y) if y in data.columns else data, x=y, y=x, orientation="h", title=title)
             fig.update_layout(height=max(450, 26 + 18 * n_cat), yaxis=dict(dtick=1))
+            notes.append(f"drawn horizontally: {n_cat} categories (Plotly drops "
+                         "every other label on a vertical axis this crowded)")
         else:
             fig = px.bar(data, x=x, y=y, title=title)
             if n_cat > 5:
                 fig.update_xaxes(tickangle=-40, tickmode="linear")
     elif rec.chart_type == "line":
-        fig = px.line(data, x=x, y=y, title=title)
+        fig = px.line(data, x=x, y=y, color=series if has_series else None, title=title)
+        if has_series:
+            notes.append(f"one line per '{series}'")
     elif rec.chart_type == "scatter":
         fig = px.scatter(data, x=x, y=y, title=title, opacity=0.6)
     elif rec.chart_type == "pie":

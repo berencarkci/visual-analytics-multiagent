@@ -21,6 +21,11 @@ class Transform(BaseModel):
 
     model_config = ConfigDict(extra="forbid") # invented fields are errors, not silently dropped
     groupby: str | None = None
+    # Second grouping dimension: "profit by ship mode, split by segment" needs
+    # two keys, one for the axis and one for the colour. Optional, so every
+    # existing single-key plan stays valid and the benchmark targets are
+    # unaffected.
+    series: str | None = None
     agg: AggType | None = None
     filter: str | None = None
     sort: Literal["date_asc", "date_desc", "value_asc", "value_desc"] | None = None

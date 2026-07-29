@@ -148,7 +148,7 @@ def _prepare(example: dict, frames: dict) -> tuple | None:
     df = frames[ds_key]
     try:
         rec = ChartRecommendation(**t)
-        prepared, x_col, y_col, notes = apply_transform(df, rec)
+        prepared, x_col, y_col, _series, notes = apply_transform(df, rec)
     except Exception:
         return None
     if prepared is None or prepared.empty:

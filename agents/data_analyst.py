@@ -69,7 +69,7 @@ def _validate_plan(raw: str, profile: TableProfile) -> tuple[TransformPlan | Non
     for col in plan.target_columns:
         referenced |= set(measure_base_columns(col))
     t = plan.transform
-    for expr in (t.groupby, t.filter):
+    for expr in (t.groupby, t.series, t.filter):
         if expr:
             cleaned = re.sub(r"'[^']*'", "", str(expr))
             referenced |= {tok for tok in re.findall(r"[a-zA-Z_][a-zA-Z0-9_.]*", cleaned)
@@ -228,7 +228,7 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
     carrier = ChartRecommendation(chart_type="bar", x_axis=x or "", y_axis=y,
                                   transform=plan.transform, reason="-", insight="-")
     try:
-        prepared, x_col, y_col, notes = apply_transform(df, carrier)
+        prepared, x_col, y_col, series_col, notes = apply_transform(df, carrier)
     except ColumnNotFoundError as e:
         return StepError(agent="data_analyst", error_type="missing_column",
                          detail=str(e), recoverable=False), None
@@ -269,6 +269,14 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
             except Exception as e:
                 plan.notes.append(f"single-value aggregate skipped: {e}")
     plan.result_rows = int(len(prepared))
-    plan.summary_stats = _compute_stats(focus, df, prepared, x_col, y_col, plan)
+    # With a second grouping key the prepared table has one row per
+    # (group, series) pair, so the group stats need a combined label — indexing
+    # by the axis column alone would collide on duplicates.
+    stats_frame, stats_x = prepared, x_col
+    if series_col and series_col in prepared.columns:
+        stats_frame = prepared.assign(
+            _pair=prepared[x_col].astype(str) + " · " + prepared[series_col].astype(str))
+        stats_x = "_pair"
+    plan.summary_stats = _compute_stats(focus, df, stats_frame, stats_x, y_col, plan)
     return plan, prepared
 #################################
