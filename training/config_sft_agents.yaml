@@ -1,12 +1,14 @@
-# Multi-task SFT + QLoRA configuration — v3
+# Multi-task SFT + QLoRA configuration — v5
 #
-# Same machinery as config_sft.yaml, different data: this run trains one adapter on five output formats at once (single-call, Supervisor, Data Analyst, Visualization, Insight). The single call examples stay in the mix so the baseline arm of the previous models comparison keeps its trained model.
+# ONE adapter over five output formats (single-call, Supervisor, Data Analyst,
+# Visualization, Insight).
 #
-# v3 change: Supervisor joined the mix. It was excluded in v1/v2 after a clean
-# smoke test, but the dev split showed a systematic miss (filters named as
-# noun modifiers read as comparison/trend; soft anomaly wording reads as
-# trend), and DPO on supervisor pairs could not repair a behaviour SFT never
-# built. v3 also expands the diff / value_asc / soft-anomaly banks.
+# v5 adds two mechanisms to the engine and teaches them here: threshold_flag
+# (a numeric condition compared against the rest, where a filter would drop the
+# comparison group) and series (a second grouping dimension). Both banks ship
+# with contrast twins, because the diagnostic sweep showed the failure mode is
+# over-triggering — documenting a rule in the prompt taught the model to reach
+# for it everywhere, exactly as the anomaly and intent-modifier banks did.
 
 # Base model
 base_model: Qwen/Qwen2.5-3B-Instruct
@@ -58,6 +60,6 @@ greater_is_better: false
 seed: 42
 
 # Output
-output_dir: outputs/sft-agents-v4-qwen2.5-3b
-hub_model_id: berencarkci/qwen2.5-3b-va-sft-v4
+output_dir: outputs/sft-agents-v5-qwen2.5-3b
+hub_model_id: berencarkci/qwen2.5-3b-va-sft-v5
 push_to_hub: false
