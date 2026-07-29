@@ -194,24 +194,24 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
         plan.transform = t.model_copy(update={"filter": None})
         plan.notes.append(
             f"plan guardrail: filter '{t.filter}' removed — share questions need all groups")
-    # PLAN GUARDRAIL: a distribution question over a categorical, boolean
-    # or text column cannot histogram raw values — the honest answer is the count
-    # of rows per value. Observed on a user upload: histogram over a text column
-    # produced NaN statistics, and worse, silent numeric coercion produced
-    # plausible-looking but wrong ones. The Supervisor cannot make this call (it
-    # sees only the question, never the schema), so the rewrite lives here.
     focus = workflow.insight_focus
     x_target = plan.target_columns[0] if plan.target_columns else None
     col_dtypes = {c.name: c.dtype for c in profile.columns}
-    if (focus == "distribution_stats" and x_target
-            and col_dtypes.get(x_target) in ("categorical", "boolean", "text")
-            and not plan.transform.groupby):
-        plan.transform = plan.transform.model_copy(
-            update={"groupby": x_target, "agg": "count"})
-        plan.notes.append(
-            f"plan guardrail: '{x_target}' is {col_dtypes.get(x_target)} — "
-            "distribution rewritten to per-category counts")
-        focus = "group_stats"
+    if focus == "distribution_stats":
+        # categorical column, model did not group: rewrite to per-category counts
+        if (x_target and col_dtypes.get(x_target) in ("categorical", "boolean", "text")
+                and not plan.transform.groupby):
+            plan.transform = plan.transform.model_copy(
+                update={"groupby": x_target, "agg": "count"})
+            plan.notes.append(
+                f"plan guardrail: '{x_target}' is {col_dtypes.get(x_target)} — "
+                "distribution rewritten to per-category counts")
+        # aggregated data has no raw values left to describe: median/mean would
+        # describe the COUNTS while naming the source column ("distribution of
+        # age, median 100"). Group stats name the groups instead, which is what
+        # the aggregated table actually contains.
+        if plan.transform.groupby and plan.transform.agg:
+            focus = "group_stats"
     # execute through the shared engine (reusing the recommendation container)
     x = plan.target_columns[0] if plan.target_columns else None
     y = plan.target_columns[1] if len(plan.target_columns) > 1 else None
