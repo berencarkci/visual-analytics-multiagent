@@ -8,7 +8,7 @@ can be built mechanically and only the close calls reach a human.
 Why mechanical scoring at all: the preference labels matter more than the
 strength of the models that produced the candidates, so the labelling has to be
 consistent. A rule that says "the column is either in the schema or it is not"
-never drifts; a human reading 450 JSON blobs does.
+never drifts; a human reading 430 JSON blobs does.
 
 The six dimensions, and which formats they apply to:
 
