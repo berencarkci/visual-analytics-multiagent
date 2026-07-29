@@ -155,13 +155,22 @@ def apply_transform(df: pd.DataFrame, rec: ChartRecommendation) -> tuple[pd.Data
         try:
             grouping, label = _resolve_grouping(out, t.groupby)
             target = y_col if y_col else rec.x_axis
-            agg_fn = _AGG_MAP[t.agg]
+            agg = t.agg
+            # pandas .sum() on an object column CONCATENATES it: summing a text
+            # column produced "ConsumerConsumerCorporate..." as a bar value while
+            # the chain reported success. Counting is the only meaningful
+            # aggregate over a non-numeric column.
+            if (agg in ("sum", "mean") and target in out.columns
+                    and not pd.api.types.is_numeric_dtype(out[target])):
+                notes.append(f"agg {agg}->count: '{target}' is not numeric")
+                agg = "count"
+            agg_fn = _AGG_MAP[agg]
             out = (out.assign(_grp=grouping)
                       .groupby("_grp", observed=True)[target]
                       .agg(agg_fn)
                       .reset_index()
-                      .rename(columns={"_grp": label, target: f"{t.agg}({target})"}))
-            x_col, y_col = label, f"{t.agg}({target})"
+                      .rename(columns={"_grp": label, target: f"{agg}({target})"}))
+            x_col, y_col = label, f"{agg}({target})"
         except Exception as e:
             notes.append(f"groupby skipped ({t.groupby}): {e}")
     # sort (check if the model referenced columns that do not exist)
