@@ -299,8 +299,15 @@ def run_data_analysis(client: ModelClient, df: pd.DataFrame, profile: TableProfi
                           "Keep the filter — the question asks about a subset — but fix "
                           "its logic: a range that wraps past midnight or year-end needs "
                           "`or`, not `and`. Return a corrected plan.")
-            return run_data_analysis(client, df, profile, schema_text, question,
-                                     workflow, feedback=retry_note)
+            plan2, prepared2 = run_data_analysis(client, df, profile, schema_text,
+                                                 question, workflow, feedback=retry_note)
+            if not isinstance(plan2, StepError):
+                # the recursive call builds a fresh plan, so the first attempt
+                # would otherwise vanish from the trace
+                plan2.notes.append(
+                    f"empty-filter retry: `{plan.transform.filter}` matched 0 rows")
+                plan2.plan_source = "llm_retry"
+            return plan2, prepared2
         return StepError(agent="data_analyst", error_type="empty_result",
                          detail=f"Transform left 0 rows (filter: {plan.transform.filter})",
                          recoverable=True), None
