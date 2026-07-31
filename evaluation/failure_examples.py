@@ -8,10 +8,7 @@ Entry format:
      transform{groupby, agg, filter, sort, limit}, reason, insight}}
 
 Rules to respect when adding:
-- intent must be one of: trend, comparison, composition, relationship,
-  distribution, filter_aggregation, anomaly. The agent format generator feeds it
-  to the Data Analyst and Visualization prompts, so a wrong intent teaches the
-  wrong routing.
+- intent must be one of: trend, comparison, composition, relationship, distribution, filter_aggregation, anomaly. The agent format generator feeds it to the Data Analyst and Visualization prompts, so a wrong intent teaches the wrong routing.
 - x_axis is always the source column (never the derived label).
 - insight must be pointer style (describes what the chart shows), never a number the model could not compute from the schema alone.
 - Do not copy benchmark questions verbatim, rephrase the failing question if it came from the benchmark.
@@ -100,9 +97,8 @@ FAILURE_EXAMPLES = [
                 "reason": "The category and the year are restrictions, so they belong in the filter; the monthly groupby then applies to the remaining rows.",
                 "insight": "The chart shows how monthly sales developed for Technology within 2018."}},
 
-    # anomaly questions are read on a time line, never as a bar comparison
-    # (SFT dev run: two "identify days where X was abnormally high" questions
-    #  came back as bar charts, which is not even in the allowed set for anomaly)
+    # anomaly questions are read on a time line, never as a bar comparison SFT 
+    # dev run: two "identify days where X was abnormally high" questions came back as bar charts, which is not even in the allowed set for anomaly)
     {"dataset": "energy",
      "intent": "anomaly",
      "question": "Point me to the days when appliance energy use ran far above its usual level.",
