@@ -181,11 +181,10 @@ def run_one(mode: str, client, q: dict, schema_text: str, frames: dict,
         row.update(score_answer(rec, df, q["type"], q["question"], schema_text))
         row["chart_type"] = rec.chart_type
         row["x_axis"], row["y_axis"] = rec.x_axis, rec.y_axis
-
-    t = rec.transform
-    row["transform"] = {"groupby": t.groupby, "series": t.series,
-                        "agg": t.agg, "filter": t.filter, "sort": t.sort}
-    row["target_columns"] = list(getattr(rec, "target_columns", []) or [])
+        t = rec.transform
+        row["transform"] = {"groupby": t.groupby, "series": t.series,
+                            "agg": t.agg, "filter": t.filter, "sort": t.sort}
+        row["target_columns"] = list(getattr(rec, "target_columns", []) or [])
     return row
 #################################
 
