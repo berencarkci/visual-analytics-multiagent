@@ -1,38 +1,29 @@
-"""DPO preference pair generation (Task B4/T1).
+"""DPO preference pair generation.
 
-Builds (prompt, chosen, rejected) triples for the three agent formats the
-failure catalogue actually points at: Supervisor, Data Analyst, Visualization.
+Builds (prompt, chosen, rejected) triples for the three agent formats the failure catalogue actually points at: Supervisor, Data Analyst, Visualization.
 
 Where the two sides come from
 -----------------------------
-The chosen side is easy: the SFT set already carries a verified target for
-every question, and those targets were validated through the real pydantic
-schema.
+The chosen side is easy: the SFT set already carries a verified target for every question, and those targets were validated through the real pydantic schema.
 
-The rejected side is the hard part, and the dev-split scan explains why. After
-SFT the model fails on 3 of 38 dev questions — nowhere near enough real
-mistakes to build a few hundred pairs from. So the negatives come from three
-sources, in descending order of control and ascending order of realism:
+The rejected side is the hard part, and the dev-split scan explains why. 
+After SFT the model fails on 3 of 38 dev questions, nowhere near enough real mistakes to build a few hundred pairs from. 
+So the negatives come from three sources, in descending order of control and ascending order of realism:
 
-  synthetic (~60%)  the verified target, deliberately corrupted with one of the
-                    failure modes observed in this project. Full control over
-                    which error each pair teaches, no model call needed.
-  base (~30%)       the untrained model's own answer. A real model mistake, but
-                    from a different policy than the one being trained.
-  sft_temp (~10%)   the SFT model sampled at temperature. On-policy in the strict
-                    sense; the least controllable and the least diverse, since a
-                    trained model mostly repeats itself even when sampled.
+  synthetic (~60%)  the verified target, deliberately corrupted with one of the failure modes observed in this project. 
+                    Full control over which error each pair teaches, no model call needed.
+  base (~30%)       The untrained model's own answer. 
+                    A real model mistake, but from a different policy than the one being trained.
+  sft_temp (~10%)   The SFT model sampled at temperature. On policy in the strict sense, the least controllable and the least diverse, since antrained model mostly repeats itself even when sampled.
 
-Every candidate is scored with the rubric (evaluation/rubric.py) and the pair is
-only kept when the ordering is unambiguous. Ties are dropped; one-point gaps go
-to a separate file for manual review, because a weak ordering makes a noisy
-training signal.
+Every candidate is scored with the rubric (evaluation/rubric.py) and the pair is only kept when the ordering is unambiguous. 
+Ties are dropped, one point gaps go to a separate file for manual review, because a weak ordering makes a noisy training signal.
 
 Usage (from the repo root):
-    python evaluation/make_dpo_pairs.py --source synthetic          # no GPU needed
-    python evaluation/make_dpo_pairs.py --source base --adapter ""  # base model
+    python evaluation/make_dpo_pairs.py --source synthetic # no GPU needed
+    python evaluation/make_dpo_pairs.py --source base --adapter "" # base model
     python evaluation/make_dpo_pairs.py --source sft_temp --adapter <hub-id>
-    python evaluation/make_dpo_pairs.py --merge                     # combine + report
+    python evaluation/make_dpo_pairs.py --merge # combine + report
 """
 
 from __future__ import annotations
@@ -52,8 +43,7 @@ import pandas as pd
 
 from data_analyst import _build_plan_messages
 from data_ingestion import load_table, profile_table, schema_summary
-from make_sft_data import (DATASETS, build_handwritten_examples,
-                           build_template_examples)
+from make_sft_data import (DATASETS, build_handwritten_examples, build_template_examples)
 from failure_examples import FAILURE_EXAMPLES
 from model_client import HFClient
 from rubric import compare, score_candidate
@@ -66,15 +56,13 @@ from messages import TransformPlan
 random.seed(42)
 
 OUT_DIR = Path("data/dpo")
-INTENTS = ["trend", "comparison", "composition", "relationship",
-           "distribution", "filter_aggregation", "anomaly"]
+INTENTS = ["trend", "comparison", "composition", "relationship", "distribution", "filter_aggregation", "anomaly"]
 #################################
 
 
-# Synthetic corruption: each function reproduces a failure mode seen in this
-# project, so a pair teaches a specific lesson rather than a generic "be better".
+# Synthetic corruption: each function reproduces a failure mode seen in this project, so a pair teaches a specific lesson rather than a generic "be better".
 def _base_of(expr: str) -> list[str]:
-    """ratio(profit, sales) -> ["profit", "sales"]; plain columns pass through"""
+    """ratio(profit, sales) -> ["profit", "sales"], plain columns pass through"""
     m = re.match(r"^\w+\((.+)\)$", str(expr).strip())
     return [p.strip() for p in m.group(1).split(",")] if m else [str(expr).strip()]
 
@@ -102,8 +90,7 @@ def _corrupt_drop_filter(target: dict, **_) -> dict | None:
 def _corrupt_granularity(target: dict, **_) -> dict | None:
     """Change the time granularity: month -> day, day -> month, ..."""
     gb = target["transform"].get("groupby") or ""
-    swaps = {"month": "day", "day": "month", "week": "quarter",
-             "quarter": "week", "year": "month", "hour_of_day": "day_of_week"}
+    swaps = {"month": "day", "day": "month", "week": "quarter", "quarter": "week", "year": "month", "hour_of_day": "day_of_week"}
     for src, dst in swaps.items():
         if gb.startswith(f"{src}("):
             out = copy.deepcopy(target)
@@ -115,8 +102,7 @@ def _corrupt_granularity(target: dict, **_) -> dict | None:
 def _corrupt_agg(target: dict, **_) -> dict | None:
     """sum <-> count, mean <-> sum: the same groups, the wrong quantity"""
     agg = target["transform"].get("agg")
-    swaps = {"sum": "count", "mean": "sum", "count": "sum",
-             "count_distinct": "count"}
+    swaps = {"sum": "count", "mean": "sum", "count": "sum", "count_distinct": "count"}
     if agg not in swaps:
         return None
     out = copy.deepcopy(target)
@@ -127,8 +113,7 @@ def _corrupt_agg(target: dict, **_) -> dict | None:
 def _corrupt_camel_case(target: dict, **_) -> dict | None:
     """day_of_week(date) -> dayOfWeek(date): the vocabulary mismatch seen live"""
     gb = target["transform"].get("groupby") or ""
-    swaps = {"day_of_week": "dayOfWeek", "hour_of_day": "hourOfDay",
-             "weekend_flag": "weekendFlag"}
+    swaps = {"day_of_week": "dayOfWeek", "hour_of_day": "hourOfDay", "weekend_flag": "weekendFlag"}
     for src, dst in swaps.items():
         if gb.startswith(f"{src}("):
             out = copy.deepcopy(target)
@@ -150,28 +135,24 @@ def _corrupt_drop_groupby(target: dict, **_) -> dict | None:
 def _corrupt_agg_slot(target: dict, **_) -> dict | None:
     """Put the derived measure in the agg slot instead of target_columns
 
-    Observed in the capability probe: asked for profit margin, the model wrote
-    agg="ratio(profit, sales)". The Transform schema only accepts the four
-    aggregation names, so pydantic rejects the plan and the chain stops.
+    Observed in the capability probe: asked for profit margin, the model wrote agg="ratio(profit, sales)". 
+    The Transform schema only accepts the four aggregation names, so pydantic rejects the plan and the chain stops.
     """
     y = target.get("y_axis") or ""
     if "(" not in str(y):
         return None
     out = copy.deepcopy(target)
     out["y_axis"] = _base_of(y)[0]
-    out["transform"]["agg"] = y                     # the expression lands in the wrong slot
+    out["transform"]["agg"] = y # the expression lands in the wrong slot
     return out
 
 
 def _corrupt_sort_direction(target: dict, **_) -> dict | None:
     """Flip the sort direction: right ranking, wrong end of it
 
-    Observed in the probe: "which cities lose us the most money" came back with
-    value_desc, which lists the best performers when the question asked for the
-    worst.
+    Observed in the probe: "which cities lose us the most money" came back with value_desc, which lists the best performers when the question asked for the worst.
     """
-    flip = {"value_asc": "value_desc", "value_desc": "value_asc",
-            "date_asc": "date_desc", "date_desc": "date_asc"}
+    flip = {"value_asc": "value_desc", "value_desc": "value_asc", "date_asc": "date_desc", "date_desc": "date_asc"}
     sort = target["transform"].get("sort")
     if sort not in flip:
         return None
