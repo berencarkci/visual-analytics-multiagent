@@ -24,7 +24,7 @@ def _build_intent_messages(question: str) -> list[dict]:
 
 
 def _classify_with_llm(client: ModelClient, question: str) -> IntentResult | None:
-    """One small LLM call; returns None on any invalid output (fallback takes over)"""
+    """One small LLM call, returns None on any invalid output (fallback takes over)"""
     messages = _build_intent_messages(question)
     raw = client.generate(messages)
     match = re.search(r'\{[^{}]*\}', raw)

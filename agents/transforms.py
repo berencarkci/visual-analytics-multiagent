@@ -27,11 +27,9 @@ def _resolve_grouping(df: pd.DataFrame, expr: str) -> tuple[pd.Series, str]:
         return df[expr], expr
     func, inner = m.group(1), m.group(2).strip()
     if func == "threshold_flag":
-        # "compare X when Y is below 5 versus other days" is a two-group
-        # comparison, not a filter: filtering keeps only one side and silently
-        # drops the half the question asked to compare against. This splits the
-        # rows in two instead. Checked before the date parts because its
-        # argument list contains a comma.
+        # "compare X when Y is below 5 versus other days" is a two group comparison, not a filter: filtering keeps only one side and silently drops the half the question asked to compare against. 
+        # This splits the rows in two instead. 
+        # Checked before the date parts because its argument list contains a comma.
         parts = [p.strip() for p in inner.split(",")]
         if len(parts) != 2:
             raise ValueError(f"threshold_flag needs a column and a threshold: {expr}")
@@ -69,7 +67,6 @@ _DERIVED_MEASURES = ("days_between", "ratio", "diff")
 
 def _resolve_measure(df: pd.DataFrame, expr: str) -> tuple[pd.Series, str]:
     """Turn a y axis expression into a Series; plain column names pass through
-
     days_between(a, b) -> whole days from a to b (delivery time, delay)
     ratio(a, b) -> a / b, guarded against division by zero (margin, unit price)
     diff(a, b) -> a - b
@@ -111,10 +108,8 @@ def measure_base_columns(expr: str | None) -> list[str]:
 # Transform application:
 _AGG_MAP = {"sum": "sum", "mean": "mean", "count": "count", "count_distinct": "nunique"}
 
-# Date parts usable inside a filter. Only year() was handled before, so a filter
-# like "hour_of_day(date) >= 22" raised inside query() and was skipped with a
-# note — the question "how much energy do appliances use at night" then summed
-# all 24 hours and answered a different question than the one asked.
+# Date parts usable inside a filter. Only year() was handled before, so a filter like "hour_of_day(date) >= 22" raised inside query() and was skipped with a note.
+# The question "how much energy do appliances use at night" then summed all 24 hours and answered a different question than the one asked.
 _FILTER_PARTS = {
     "year": lambda s: s.dt.year,
     "month": lambda s: s.dt.month,
@@ -137,14 +132,12 @@ def apply_transform(df: pd.DataFrame, rec: ChartRecommendation) -> tuple[pd.Data
         expr = str(t.filter)
         work = out
         try:
-            # Materialise every func(col) the filter references as a real column,
-            # so pandas.query can see it. Temporary columns are dropped again
-            # afterwards; on failure `out` is left untouched.
+            # Materialise every func(col) the filter references as a real column, so pandas.query can see it. 
+            # Temporary columns are dropped again afterwards; on failure `out` is left untouched.
             for func, col in set(re.findall(r"(\w+)\((\w+)\)", expr)):
                 if func in _FILTER_PARTS and col in work.columns:
                     tmp = f"_flt_{func}_{col}"
-                    work = work.assign(
-                        **{tmp: _FILTER_PARTS[func](pd.to_datetime(work[col]))})
+                    work = work.assign(**{tmp: _FILTER_PARTS[func](pd.to_datetime(work[col]))})
                     expr = expr.replace(f"{func}({col})", tmp)
             work = work.query(expr)
             out = work.drop(columns=[c for c in work.columns if c.startswith("_flt_")])
@@ -166,7 +159,8 @@ def apply_transform(df: pd.DataFrame, rec: ChartRecommendation) -> tuple[pd.Data
 
     # groupby + agg
     if t.groupby and t.agg:
-        # histogram over an already numeric x bins the raw values itself, a groupby+agg would collapse the data first and destroy the distribution. Skip it with a note.
+        # histogram over an already numeric x bins the raw values itself, a groupby+agg would collapse the data first and destroy the distribution. 
+        # Skip it with a note.
         if (rec.chart_type == "histogram" and rec.x_axis in out.columns and pd.api.types.is_numeric_dtype(out[rec.x_axis])):
             notes.append("groupby/agg ignored: histogram bins the raw numeric values itself")
             t = t.model_copy(update={"groupby": None, "agg": None})
@@ -175,10 +169,8 @@ def apply_transform(df: pd.DataFrame, rec: ChartRecommendation) -> tuple[pd.Data
             grouping, label = _resolve_grouping(out, t.groupby)
             target = y_col if y_col else rec.x_axis
             agg = t.agg
-            # pandas .sum() on an object column CONCATENATES it: summing a text
-            # column produced "ConsumerConsumerCorporate..." as a bar value while
-            # the chain reported success. Counting is the only meaningful
-            # aggregate over a non-numeric column.
+            # pandas .sum() on an object column CONCATENATES it: summing a text column produced "ConsumerConsumerCorporate..." as a bar value while the chain reported success. 
+            # Counting is the only meaningful aggregate over a nonnumeric column.
             if (agg in ("sum", "mean") and target in out.columns
                     and not pd.api.types.is_numeric_dtype(out[target])):
                 notes.append(f"agg {agg}->count: '{target}' is not numeric")

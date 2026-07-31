@@ -111,6 +111,11 @@ def _template_insight(question: str, stats: dict) -> str:
             return (f"From {stats['first_x'][:10]} to {stats['last_x'][:10]} the value "
                     f"changed by {stats['change_pct']}%, peaking at {stats['peak_value']:,} "
                     f"({stats['peak_x'][:10]}).")
+        if f == "correlation_invalid":
+            c = stats.get("columns", ["the two columns"])
+            return (f"A correlation needs two numeric columns; "
+                    f"{c[0] if len(c) < 2 else c[0] + ' and ' + c[1]} could not be "
+                    f"read as numbers, so no correlation can be computed.")
         if f == "correlation":
             c = stats.get("columns", ["x", "y"])
             return (f"{c[0]} and {c[1]} show a {stats['strength']} {stats['direction']} "

@@ -21,8 +21,7 @@ ALLOWED_CHARTS: dict[str, list[str]] = {
     "comparison": ["bar", "box"],
     "composition": ["pie", "bar"],
     "relationship": ["scatter", "box"],
-    # bar is last on purpose: histogram stays the preferred chart for a numeric
-    # distribution, bar is valid only for the categorical case (counts per value)
+    # bar is last on purpose: histogram stays the preferred chart for a numeric distribution, bar is valid only for the categorical case (counts per value)
     "distribution": ["histogram", "box", "bar"],
     "filter_aggregation": ["bar", "line"],
     "anomaly": ["line", "box"],
@@ -31,8 +30,6 @@ ALLOWED_CHARTS: dict[str, list[str]] = {
 
 
 # Narrow LLM prompt (chart choice only. transform and insight belong to others):
-
-
 def _build_viz_messages(question: str, intent: str, data_summary: str, allowed: list[str], feedback: str | None = None) -> list[dict]:
     user = (f"Question: {question}\nIntent: {intent}\n"
             f"Prepared data: {data_summary}\nAllowed chart types: {allowed}")
@@ -58,16 +55,16 @@ def _data_facts(raw_df: pd.DataFrame, prepared_df: pd.DataFrame, plan: Transform
     numeric_cols = prepared_df.select_dtypes("number")
     has_negative = bool((numeric_cols < 0).any().any()) if not numeric_cols.empty else False
 
-    x_discrete_numeric = bool(
-        x is not None and x in raw_df.columns
-        and pd.api.types.is_numeric_dtype(raw_df[x])
-        and raw_df[x].nunique() <= 12
-    )
-    # The prepared data is per-category counts, so there are no raw values left
-    # to bin. Deliberately NOT a dtype check on raw_df: a date column read from
-    # CSV has object dtype there (data_ingestion detects datetime semantically
-    # but does not write the converted series back), which made an earlier
-    # dtype-based version rewrite a legitimate histogram.
+    # scatter -> box is an overplotting rule: it only helps when many points pile up on each x value. 
+    # Keyed on the distinct count alone it fired on an 8 row table where every x value was unique, producing eight boxes of one point each is strictly worse than the scatter it replaced. 
+    # The ratio is the real signal, and a box needs enough observations per group to have quartiles.
+    x_discrete_numeric = False
+    if x is not None and x in raw_df.columns and pd.api.types.is_numeric_dtype(raw_df[x]):
+        n_distinct = int(raw_df[x].nunique())
+        n_points = int(raw_df[x].notna().sum())
+        x_discrete_numeric = 0 < n_distinct <= 12 and n_points >= 4 * n_distinct
+    # The prepared data is per category counts, so there are no raw values left to bin. 
+    # Deliberately not a dtype check on raw_df: a date column read from CSV has object dtype there (data_ingestion detects datetime semantically but does not write the converted series back), which made an earlier dtype based version rewrite a legitimate histogram.
     is_category_counts = bool(plan.transform.groupby and plan.transform.agg == "count")
     return {"x": x, "y": y, "n_categories": n_categories,
             "has_negative": has_negative, "x_discrete_numeric": x_discrete_numeric,
@@ -95,8 +92,7 @@ def _apply_guardrails(chart: str, facts: dict, allowed: list[str]) -> tuple[str,
         applied.append(f"scatter->box: x takes few discrete values (overplotting)")
         chart = "box"
     if chart in ("histogram", "box") and facts.get("is_category_counts"):
-        applied.append(f"{chart}->bar: the data is one count per category; "
-                       "there are no raw values left to bin")
+        applied.append(f"{chart}->bar: the data is one count per category; there are no raw values left to bin")
         chart = "bar"
     return chart, applied
 #################################
@@ -106,7 +102,7 @@ def _apply_guardrails(chart: str, facts: dict, allowed: list[str]) -> tuple[str,
 def run_visualization(client: ModelClient, question: str, workflow: WorkflowPlan, plan: TransformPlan, raw_df: pd.DataFrame, prepared_df: pd.DataFrame, feedback: str | None = None) -> ChartDecision | StepError:
     """LLM picks from the allowed list -> guardrails verify against the data
 
-    Returns a ChartDecision whose recommendation is render-ready (source column convention + the Data Analyst's transform). 
+    Returns a ChartDecision whose recommendation is ready to render (source column convention + the Data Analyst's transform). 
     The insight field is left empty, the orchestrator fills it from the Insight Agent's result.
     """
     allowed = ALLOWED_CHARTS[workflow.intent]
@@ -136,7 +132,7 @@ def run_visualization(client: ModelClient, question: str, workflow: WorkflowPlan
             source = "llm_retry"
 
     applied: list[str] = []
-    if chart is None:  # both attempts failed -> safe default
+    if chart is None: # both attempts failed -> safe default
         chart = allowed[0]
         reason = "Default choice: model output was invalid twice."
         applied.append(f"invalid_llm_output->{allowed[0]}: default applied")

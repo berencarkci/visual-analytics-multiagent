@@ -219,12 +219,9 @@ REVIEW_FEEDBACK = ("A previous attempt was rejected by the reviewer for this rea
 # Rule specific corrective hints. 
 # Echoing the reviewer's complaint tells the model that something is wrong but not what to do differently, and a 3B model rarely infers the corrective move on its own, so the move is spelled out per rule.
 RETRY_HINTS = {
-    "stats_health": ("A correlation needs two NUMERIC columns. If one of them is categorical, "
-                     "do not correlate: compare the numeric column across that column's groups "
-                     "instead.\n"),
+    "stats_health": ("A correlation needs two NUMERIC columns. If one of them is categorical, do not correlate: compare the numeric column across that column's groups instead.\n"),
     "chart_intent_fit": "Choose a chart type from the allowed list for this intent.\n",
     "insight_grounded": "State only numbers that literally appear in the statistics.\n",
-    "composition_integrity": ("A share question needs every group; do not filter down to a "
-                              "single category.\n"),
+    "composition_integrity": ("A share question needs every group; do not filter down to a single category.\n"),
 }
 #################################

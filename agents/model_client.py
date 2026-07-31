@@ -21,7 +21,7 @@ class ModelClient(Protocol):
 class HFClient:
     """Local HF chat model, lazy loads on first generate call so we dont download the model on mockClient
     temperature=0.0 -> greedy decoding (deterministic, always the same answer for the same question), the default forbenchmark runs so results are reproducible. 
-    Candidate generation for preference pairs (B4) will have temperature > 0.
+    Candidate generation for preference pairs have temperature > 0.
 
     Runs the 3B model locally and on Colab for the final benchmark runs.
     """

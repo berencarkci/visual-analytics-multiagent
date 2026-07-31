@@ -70,11 +70,11 @@ class EvalVerdict(BaseModel):
     retried_step: str | None = None # which agent was rerun, if any
     retry_helped: bool | None = None # did the retry fix the failure
 #################################
+
 # Envelope:
 Payload = Union[IntentResult, WorkflowPlan, TransformPlan, ChartDecision, InsightResult, EvalVerdict, StepError]
 class AgentMessage(BaseModel):
     """Uniform envelope every agent emits, the unit the trace logger stores"""
-
     model_config = ConfigDict(extra="forbid") # invented fields are errors, not silently dropped
     agent: str # e.g. "supervisor", "data_analyst"
     step: int # phase in the workflow

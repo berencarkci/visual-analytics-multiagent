@@ -18,13 +18,10 @@ AggType = Literal["sum", "mean", "count", "count_distinct"]
 
 class Transform(BaseModel):
     """Data preparation step; mirrors the benchmark ground-truth format"""
-
     model_config = ConfigDict(extra="forbid") # invented fields are errors, not silently dropped
     groupby: str | None = None
-    # Second grouping dimension: "profit by ship mode, split by segment" needs
-    # two keys, one for the axis and one for the colour. Optional, so every
-    # existing single-key plan stays valid and the benchmark targets are
-    # unaffected.
+    # Second grouping dimension: "profit by ship mode, split by segment" needs two keys, one for the axis and one for the colour. 
+    # Optional, so every existing single key plan stays valid and the benchmark targets are unaffected.
     series: str | None = None
     agg: AggType | None = None
     filter: str | None = None

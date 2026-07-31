@@ -63,12 +63,10 @@ def run_workflow(client: ModelClient, df: pd.DataFrame, profile: TableProfile, q
     """Full multi agent pass for one question, never raises, always returns a trace
 
     use_evaluator=False stops after Insight and ships the unreviewed answer. 
-    It exists so the architecture comparison can measure what the Evaluation
-    agent actually contributes (multi-agent vs multi-agent+evaluator), the
-    shipped pipeline always runs with the reviewer on.
+    It exists so the architecture comparison can measure what the Evaluation agent actually contributes (multi-agent vs multi-agent+evaluator), the shipped pipeline always runs with the reviewer on.
     """
     logger = TraceLogger(log_dir=log_dir)
-    # accept anything: if the caller passed schema text (or None) instead of a TableProfile, build the profile here. removes a whole class of caller bugs
+    # accept anything: if the caller passed schema text(or None) instead of a TableProfile, build the profile here. removes a whole class of caller bugs
     if not isinstance(profile, TableProfile):
         profile = profile_table(df, "dataset")
     schema_text = schema_summary(profile)

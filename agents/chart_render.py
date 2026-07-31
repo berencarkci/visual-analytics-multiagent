@@ -21,21 +21,22 @@ def render_chart(df: pd.DataFrame, rec: ChartRecommendation):
     if rec.chart_type == "bar":
         n_cat = data[x].nunique() if x in data.columns else 0
         if has_series:
-            # grouped bars: the axis carries the first key, colour the second
             fig = px.bar(data, x=x, y=y, color=series, barmode="group", title=title)
             notes.append(f"grouped by '{series}' (colour)")
+            fig.update_xaxes(type="category")
             if n_cat > 5:
-                fig.update_xaxes(tickangle=-40, tickmode="linear")
+                fig.update_xaxes(tickangle=-40)
         elif n_cat > 15:
-            # if too many categories use horizontal bars(on too many categories in plotly every other label gets dropped)
+            # if too many categories use horizontal bars(on too many vertical categories plotly drops every other label)
             fig = px.bar(data.sort_values(y) if y in data.columns else data, x=y, y=x, orientation="h", title=title)
             fig.update_layout(height=max(450, 26 + 18 * n_cat), yaxis=dict(dtick=1))
-            notes.append(f"drawn horizontally: {n_cat} categories (Plotly drops "
-                         "every other label on a vertical axis this crowded)")
+            notes.append(f"drawn horizontally: {n_cat} categories (Plotly drops every other label on a vertical axis this crowded)")
         else:
             fig = px.bar(data, x=x, y=y, title=title)
+            # a bar axis is categorical, never a continuous timeline: without this a date valued groupby (day(Date) -> 2026-01-15, ...) is read as a time axis and Plotly fills in every day between the bars, burying 8 bars under hundreds of tick labels.
+            fig.update_xaxes(type="category")
             if n_cat > 5:
-                fig.update_xaxes(tickangle=-40, tickmode="linear")
+                fig.update_xaxes(tickangle=-40)
     elif rec.chart_type == "line":
         fig = px.line(data, x=x, y=y, color=series if has_series else None, title=title)
         if has_series:

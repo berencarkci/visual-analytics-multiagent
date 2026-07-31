@@ -16,8 +16,7 @@ _SUMMARIES = {
     "IntentResult": lambda p: f"intent = {p['intent']} (source: {p['source']})",
     "WorkflowPlan": lambda p: f"insight focus = {p['insight_focus']}",
     "TransformPlan": lambda p: (f"{p['result_rows']} rows after transform" + (f"; notes: {'; '.join(p['notes'])}" if p['notes'] else "")),
-    "ChartDecision": lambda p: (f"chart = {p['recommendation']['chart_type']}" + (f"; guardrails: {'; '.join(p['guardrails_applied'])}"
-                                    if p['guardrails_applied'] else "; no guardrail needed")),
+    "ChartDecision": lambda p: (f"chart = {p['recommendation']['chart_type']}" + (f"; guardrails: {'; '.join(p['guardrails_applied'])}" if p['guardrails_applied'] else "; no guardrail needed")),
     "InsightResult": lambda p: f"source = {p['source']}",
     "EvalVerdict": lambda p: (("PASSED" if p["passed"] else "FAILED") + (f"; issues: {'; '.join(p['issues'])}" if p["issues"] else "") + (f"; warnings: {'; '.join(p['warnings'])}" if p["warnings"] else "") + (f"; retried: {p['retried_step']}" if p.get("retried_step") else "")),
     "StepError": lambda p: f"{p['error_type']}: {p['detail'][:80]}",
