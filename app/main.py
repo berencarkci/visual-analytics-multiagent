@@ -1,8 +1,7 @@
 """Hugging Face Space app for the Visual Analytics Assistant.
 
-Gradio interface: the Ask Your Data tab runs either the single agent baseline or
-the multi agent workflow (mode selector) end to end. The Agent Trace tab shows
-the step by step execution of the most recent multi agent question.
+Gradio interface: the Ask Your Data tab runs either the single agent baseline or the multi agent workflow (mode selector) end to end. 
+The Agent Trace tab shows the step by step execution of the most recent multi agent question.
 
 Environment:
     APP_MODE=mock   -> MockClient, instant canned answer for UI testing
@@ -29,8 +28,7 @@ from model_client import HFClient, MockClient
 from orchestrator import run_workflow, trace_view
 from labeling import build_labeling_tab
 
-# The comparison tabs read pre-computed result files; they light up wherever
-# those files are deployed and stay a placeholder where they are not.
+# The comparison tabs read precomputed result files, they light up wherever those files are deployed and stay a placeholder where they are not.
 try:
     from comparison import build_benchmark_tab, build_comparison_tab
     _HAS_COMPARISON = True
@@ -51,9 +49,7 @@ SINGLE, MULTI = "Single agent", "Multi agent"
 
 
 # Model client (single global, loaded once and kept in memory):
-# Mock mode has to answer four different agents in order — intent, plan, chart,
-# insight — not just the single-call format, or the multi agent pipeline stops
-# at the Data Analyst with an empty plan.
+# Mock mode has to answer four different agents in order (intent, plan, chart, insight) not just the single call format, or the multi agent pipeline stops at the Data Analyst with an empty plan.
 _MOCK_SINGLE = (
     '{"chart_type": "bar", "x_axis": "category", "y_axis": "sales", '
     '"transform": {"groupby": "category", "series": null, "agg": "sum", "filter": null, '
@@ -77,14 +73,13 @@ def make_client():
 
 
 CLIENT = make_client()
-SERVING = ("mock mode" if os.environ.get("APP_MODE", "live") == "mock"
-           else (os.environ.get("VA_ADAPTER", DEFAULT_ADAPTER) or "base model (no adapter)"))
+SERVING = ("mock mode" if os.environ.get("APP_MODE", "live") == "mock" else (os.environ.get("VA_ADAPTER", DEFAULT_ADAPTER) or "base model (no adapter)"))
 _NO_TRACE = {"info": "Single agent mode does not produce a trace — switch to Multi agent."}
 #################################
 
 
-# Layout and the progress indicator. Every colour is read from the active Gradio
-# theme through a CSS variable, so nothing here pins a palette.
+# Layout and the progress indicator. 
+# Every colour is read from the active Gradio theme through a CSS variable, so nothing here pins a palette.
 CSS = """
 .gradio-container { max-width: 1240px !important; }
 
@@ -178,24 +173,20 @@ def _render_html(df: pd.DataFrame, rec) -> tuple[str, list[str]]:
     fig, notes = render_chart(df, rec)
     fig_h = int(fig.layout.height or 430)
     raw = fig.to_html(full_html=True, include_plotlyjs=True, default_height=fig_h)
-    html = ('<iframe srcdoc="' + html_lib.escape(raw)
-            + f'" style="width:100%;height:{fig_h + 35}px;border:none;"></iframe>')
+    html = ('<iframe srcdoc="' + html_lib.escape(raw) + f'" style="width:100%;height:{fig_h + 35}px;border:none;"></iframe>')
     return html, notes
 
 
 # Question handling.
 #
-# Written as a generator so the interface can report progress: Gradio pushes
-# every yield straight to the outputs. Without it the whole pipeline — up to six
-# model calls in multi agent mode — looks like a frozen page.
+# Written as a generator so the interface can report progress: Gradio pushes every yield straight to the outputs. 
+# Without it the whole pipeline (up to six model calls in multi agent mode) looks like a frozen page.
 def ask(df: pd.DataFrame | None, profile, schema_text: str, question: str, mode: str):
     if df is None:
-        yield (_idle("No dataset loaded."), "", "Please load a dataset first.",
-               "", "", "", None)
+        yield (_idle("No dataset loaded."), "", "Please load a dataset first.", "", "", "", None)
         return
     if not question.strip():
-        yield (_idle("No question typed."), "", "Please type a question.",
-               "", "", "", None)
+        yield (_idle("No question typed."), "", "Please type a question.", "", "", "", None)
         return
 
     yield (_busy("Reading the table…"), "", "", "", "", "", None)
@@ -234,6 +225,22 @@ def ask(df: pd.DataFrame | None, profile, schema_text: str, question: str, mode:
         elif result.verdict and result.verdict.warnings:
             eval_note = "\n\n*Note: " + "; ".join(result.verdict.warnings) + "*"
 
+        # Corrections and repairs live in the trace, surfacing them here is the difference between a silent rewrite and a visible one. 
+        # "skipped" notes matter most because they mean part of the plan never ran.
+        _KEYS = ("guardrail", "skipped", "agg sum->", "agg mean->", "retry")
+        _fixes: list[str] = []
+        for m in result.trace:
+            kind = m.get("payload_type")
+            payload = m.get("payload") or {}
+            if kind == "ChartDecision":
+                _fixes += payload.get("guardrails_applied") or []
+            elif kind == "TransformPlan":
+                _fixes += [n for n in (payload.get("notes") or [])
+                           if any(k in n for k in _KEYS)]
+        _fixes = list(dict.fromkeys(_fixes)) # a retry logs the same fix twice
+        if _fixes:
+            eval_note += "\n\n*Adjusted: " + "; ".join(_fixes) + "*"
+
     yield (_busy("Drawing the chart…"), "", "", "", "", "", None)
     try:
         chart_html, notes = _render_html(df, rec)
@@ -244,9 +251,8 @@ def ask(df: pd.DataFrame | None, profile, schema_text: str, question: str, mode:
         return
 
     if mode == SINGLE:
-        answer_md = ("*Insight withheld: in single agent mode the model never sees any "
-                     "computed statistics, so its insight is unverifiable and frequently "
-                     "invented. The raw model output is still in the JSON below.*"
+        answer_md = ("*Insight withheld: in single agent mode the model never sees any computed statistics, so its insight is unverifiable and frequently invented. "
+                     "The raw model output is still in the JSON below.*"
                      f"\n\n**Why this chart:** {rec.reason}")
     else:
         answer_md = f"**Insight:** {rec.insight}\n\n**Why this chart:** {rec.reason}"
@@ -255,8 +261,7 @@ def ask(df: pd.DataFrame | None, profile, schema_text: str, question: str, mode:
         answer_md += "\n\n*The first model output was invalid; this answer came from the retry.*"
 
     notes_md = ('<span class="va-sub">Render notes: ' + "; ".join(notes) + "</span>") if notes else ""
-    yield (_idle("Done."), chart_html, answer_md, rec.model_dump_json(indent=2),
-           "", notes_md, trace_data)
+    yield (_idle("Done."), chart_html, answer_md, rec.model_dump_json(indent=2), "", notes_md, trace_data)
 #################################
 
 
@@ -265,29 +270,22 @@ with gr.Blocks(title="Visual Analytics Assistant", css=CSS) as demo:
     with gr.Row(elem_id="app-header"):
         gr.Markdown(
             "# Visual Analytics Assistant\n"
-            "Upload a table, ask a question in plain language, get a chart and an insight "
-            "grounded in numbers that were actually computed.\n\n"
+            "Upload a table, ask a question in plain language, get a chart and an insight grounded in numbers that were actually computed.\n\n"
             "<span class='va-sub'>Single agent = one model call, no access to the data. "
-            "Multi agent = supervisor, data analyst, visualization and insight agents, with a "
-            "deterministic reviewer checking the result.</span><br>"
+            "Multi agent = supervisor, data analyst, visualization and insight agents, with a deterministic reviewer checking the result.</span><br>"
             f"<span class='va-tag'>serving {SERVING}</span>"
         )
 
     with gr.Tab("Ask Your Data"):
         with gr.Row():
             with gr.Column(scale=1):
-                sample_dd = gr.Dropdown(choices=list(SAMPLE_DATASETS),
-                                        value="Retail Sales (Superstore)",
-                                        label="Sample dataset")
+                sample_dd = gr.Dropdown(choices=list(SAMPLE_DATASETS), value="Retail Sales (Superstore)", label="Sample dataset")
                 upload = gr.File(label="…or upload your own (CSV / Excel / JSON / JSONL)")
                 load_btn = gr.Button("Load dataset", variant="secondary")
-                schema_box = gr.Textbox(label="Schema summary (what the model sees)",
-                                        lines=11, interactive=False)
+                schema_box = gr.Textbox(label="Schema summary (what the model sees)", lines=11, interactive=False)
             with gr.Column(scale=2):
-                preview = gr.Dataframe(label="Data preview (first 10 rows)",
-                                       interactive=False)
-                question_box = gr.Textbox(label="Your question", lines=2,
-                                          placeholder="e.g. Compare total sales across product categories.")
+                preview = gr.Dataframe(label="Data preview (first 10 rows)", interactive=False)
+                question_box = gr.Textbox(label="Your question", lines=2, placeholder="e.g. Compare total sales across product categories.")
                 with gr.Row():
                     mode_radio = gr.Radio([SINGLE, MULTI], value=MULTI, label="Mode", scale=2)
                     ask_btn = gr.Button("Ask", variant="primary", scale=1)
@@ -305,28 +303,16 @@ with gr.Blocks(title="Visual Analytics Assistant", css=CSS) as demo:
         profile_state = gr.State(value=None)
         trace_state = gr.State(value=None)
 
-        load_btn.click(load_selected, [sample_dd, upload],
-                       [df_state, profile_state, schema_box, preview, status_md])
+        load_btn.click(load_selected, [sample_dd, upload], [df_state, profile_state, schema_box, preview, status_md])
         # a freshly uploaded file is loaded without a second click
-        upload.change(load_selected, [sample_dd, upload],
-                      [df_state, profile_state, schema_box, preview, status_md])
+        upload.change(load_selected, [sample_dd, upload], [df_state, profile_state, schema_box, preview, status_md])
 
-        _ASK_IO = dict(
-            fn=ask,
+        _ASK_IO = dict(fn=ask,
             inputs=[df_state, profile_state, schema_box, question_box, mode_radio],
-            outputs=[status_md, chart_out, answer_out, json_out, raw_out,
-                     notes_out, trace_state],
+            outputs=[status_md, chart_out, answer_out, json_out, raw_out, notes_out, trace_state],
         )
-        ask_btn.click(
-            lambda: gr.update(interactive=False, value="Working…"), None, [ask_btn]
-        ).then(**_ASK_IO).then(
-            lambda: gr.update(interactive=True, value="Ask"), None, [ask_btn]
-        )
-        question_box.submit(
-            lambda: gr.update(interactive=False, value="Working…"), None, [ask_btn]
-        ).then(**_ASK_IO).then(
-            lambda: gr.update(interactive=True, value="Ask"), None, [ask_btn]
-        )
+        ask_btn.click(lambda: gr.update(interactive=False, value="Working…"), None, [ask_btn]).then(**_ASK_IO).then(lambda: gr.update(interactive=True, value="Ask"), None, [ask_btn])
+        question_box.submit(lambda: gr.update(interactive=False, value="Working…"), None, [ask_btn]).then(**_ASK_IO).then(lambda: gr.update(interactive=True, value="Ask"), None, [ask_btn])
 
     with gr.Tab("Agent Trace"):
         gr.Markdown(
@@ -336,48 +322,31 @@ with gr.Blocks(title="Visual Analytics Assistant", css=CSS) as demo:
         )
         refresh_btn = gr.Button("Show latest trace", variant="secondary")
         trace_out = gr.JSON(label="Workflow trace")
-        refresh_btn.click(lambda t: t or {"info": "Run a multi agent question first."},
-                          [trace_state], [trace_out])
+        refresh_btn.click(lambda t: t or {"info": "Run a multi agent question first."}, [trace_state], [trace_out])
 
     with gr.Tab("Model Comparison"):
         if _HAS_COMPARISON:
             build_comparison_tab()
         else:
-            gr.Markdown("*Result files are not deployed here — see the repository for the "
-                        "frozen benchmark comparison.*")
+            gr.Markdown("*Result files are not deployed here — see the repository for the frozen benchmark comparison.*")
 
     with gr.Tab("Benchmark Results"):
         if _HAS_COMPARISON:
             build_benchmark_tab()
         else:
-            gr.Markdown("*Result files are not deployed here — see the repository for the "
-                        "metric tables.*")
+            gr.Markdown("*Result files are not deployed here — see the repository for the metric tables.*")
 
     with gr.Tab("Preference Labeling"):
         build_labeling_tab(CLIENT, SAMPLE_DATASETS)
 
     with gr.Tab("Methodology"):
         gr.Markdown(
-            "**Datasets.** Three public tabular datasets ship as samples (retail sales, "
-            "customer analytics, energy consumption); provenance and cleaning steps are "
-            "documented in the repository. Any uploaded table is profiled the same way.\n\n"
-            "**Model.** Qwen2.5-3B-Instruct with a LoRA adapter trained by SFT + QLoRA over "
-            "five agent output formats. A DPO variant was trained on 430 preference pairs and "
-            "evaluated on the same frozen splits; it showed no measurable gain, and that is "
-            "reported rather than dropped.\n\n"
-            "**Modes.** Single agent answers in one call and never sees the data, which is why "
-            "its insight is withheld here. Multi agent plans the transform, executes it, "
-            "computes statistics, and writes an insight that is checked against those numbers "
-            "before it is shown.\n\n"
-            "**Guardrails.** Chart choices are verified against the prepared data — category "
-            "counts, negative values, crowded axes — and corrected where a rule is violated. "
-            "Corrections are displayed, not hidden.\n\n"
-            "**Scope.** The assistant does not forecast and does not explain causes. Asked to, "
-            "it shows the relevant history instead of inventing an answer.\n\n"
-            "**Latency.** Multi agent makes several model calls per question, so it is slower "
-            "than single agent. What that buys is an answer whose numbers were computed rather "
-            "than generated."
-        )
+            "**Datasets.** Three public tabular datasets ship as samples (retail sales, customer analytics, energy consumption), provenance and cleaning steps are documented in the repository. Any uploaded table is profiled the same way.\n\n"
+            "**Model.** Qwen2.5-3B-Instruct with a LoRA adapter trained by SFT + QLoRA over five agent output formats. A DPO variant was trained on 430 preference pairs and evaluated on the same frozen splits, it showed no measurable gain, and that is reported rather than dropped.\n\n"
+            "**Modes.** Single agent answers in one call and never sees the data, which is why its insight is withheld here. Multi agent plans the transform, executes it, computes statistics, and writes an insight that is checked against those numbers before it is shown.\n\n"
+            "**Guardrails.** Chart choices are verified against the prepared data — category counts, negative values, crowded axes — and corrected where a rule is violated. Corrections are displayed, not hidden.\n\n"
+            "**Scope.** The assistant does not forecast and does not explain causes. Asked to, it shows the relevant history instead of inventing an answer.\n\n"
+            "**Latency.** Multi agent makes several model calls per question, so it is slower than single agent. What that buys is an answer whose numbers were computed rather than generated.")
 
 if __name__ == "__main__":
     demo.launch()

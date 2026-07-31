@@ -1,23 +1,17 @@
-"""Preference labeling tab for the Space (Task B4/T2).
+"""Preference labeling tab for the Space.
 
-Generates two candidate answers to the same question, shows them side by side
-without saying which is which, and records the labeller's choice. Every label is
-also scored by the rubric, so the session doubles as a measurement: how often
-does the mechanical labelling used for the 412 auto-built pairs agree with a
-human?
+Generates two candidate answers to the same question, shows them side by side without saying which is which, and records the labeller's choice. 
+Every label is also scored by the rubric, so the session doubles as a measurement: how often does the mechanical labelling used for the 412 auto built pairs agree with a human?
 
 Two bias controls that matter more than they look:
 
-  * The two candidates are shuffled before display. Without it a labeller drifts
-    toward whichever slot the "first" answer occupies, and the agreement number
-    measures that habit instead of the rubric.
-  * The rubric's own verdict is never shown before the choice is made. Seeing it
-    first would anchor the labeller and inflate agreement.
+  * The two candidates are shuffled before display. 
+    Without it a labeller drifts toward whichever slot the "first" answer occupies, and the agreement number measures that habit instead of the rubric.
+  * The rubric's own verdict is never shown before the choice is made. 
+    Seeing it first would anchor the labeller and inflate agreement.
 
-Persistence is deliberately belt-and-braces: labels are appended to a local
-JSONL immediately, and can be pushed to a Hub dataset on demand. A Space
-restarts without warning and its disk does not survive that, so a label that
-exists only in memory is a label that will be lost.
+Persistence is deliberately belt and braces: labels are appended to a local JSONL immediately, and can be pushed to a Hub dataset on demand. 
+A Space restarts without warning and its disk does not survive that, so a label that exists only in memory is a label that will be lost.
 
 Usage from the app:
     from labeling import build_labeling_tab
@@ -27,9 +21,7 @@ Usage from the app:
 
 from __future__ import annotations
 
-# ZeroGPU needs every GPU-touching entry point marked. Outside a Space the
-# package does not exist, so the decorator degrades to a no-op and the module
-# still imports for local runs and tests.
+# ZeroGPU needs every GPU touching entry point marked. Outside a Space the package does not exist, so the decorator degrades to a no-op and the module still imports for local runs and tests.
 try:
     import spaces
     _gpu_task = spaces.GPU(duration=90)
@@ -48,12 +40,10 @@ from pathlib import Path
 import gradio as gr
 import pandas as pd
 
-# The Space flattens the layout: labeling.py, rubric.py and agents/ all sit in
-# the app root. In the repo they are app/labeling.py, evaluation/rubric.py and
-# agents/. Searching both the module's own directory and its parent covers each.
+# The Space flattens the layout: labeling.py, rubric.py and agents/ all sit in the app root. 
+# In the repo they are app/labeling.py, evaluation/rubric.py and agents/. Searching both the module's own directory and its parent covers each.
 _HERE = Path(__file__).resolve().parent
-for _dir in (_HERE, _HERE / "agents", _HERE.parent,
-             _HERE.parent / "agents", _HERE.parent / "evaluation"):
+for _dir in (_HERE, _HERE / "agents", _HERE.parent, _HERE.parent / "agents", _HERE.parent / "evaluation"):
     if _dir.is_dir():
         sys.path.insert(0, str(_dir))
 
@@ -67,13 +57,11 @@ LABELS_PATH = Path("labels/preference_labels.jsonl")
 HUB_DATASET = os.environ.get("LABEL_DATASET", "berencarkci/va-preference-labels")
 ANNOTATOR = os.environ.get("ANNOTATOR", "beren")
 
-# Sampling temperature for candidate generation. Greedy decoding would return
-# the same answer twice and there would be nothing to compare.
+# Sampling temperature for candidate generation. Greedy decoding would return the same answer twice and there would be nothing to compare.
 CANDIDATE_TEMPERATURE = 0.9
 
 FORMATS = ["data_analyst", "visualization", "supervisor"]
-INTENTS = ["trend", "comparison", "composition", "relationship",
-           "distribution", "filter_aggregation", "anomaly"]
+INTENTS = ["trend", "comparison", "composition", "relationship", "distribution", "filter_aggregation", "anomaly"]
 #################################
 
 
@@ -88,8 +76,7 @@ def _parse_json(raw: str) -> dict | None:
         return None
 
 
-def _build_prompt(fmt: str, question: str, intent: str, schema_text: str,
-                  summary: str, allowed: list[str]) -> list[dict]:
+def _build_prompt(fmt: str, question: str, intent: str, schema_text: str, summary: str, allowed: list[str]) -> list[dict]:
     if fmt == "supervisor":
         return _build_intent_messages(question)
     if fmt == "data_analyst":
@@ -99,7 +86,7 @@ def _build_prompt(fmt: str, question: str, intent: str, schema_text: str,
 
 @_gpu_task
 def _sample_two(client, prompt: list[dict]) -> list[dict]:
-    """Two independent samples; identical or unparseable ones are dropped"""
+    """Two independent samples, identical or unparseable ones are dropped"""
     original = client.temperature
     client.temperature = CANDIDATE_TEMPERATURE
     try:
@@ -110,7 +97,7 @@ def _sample_two(client, prompt: list[dict]) -> list[dict]:
     parsed = [p for p in (_parse_json(r) for r in raws) if p]
     if len(parsed) == 2 and json.dumps(parsed[0], sort_keys=True) == \
                             json.dumps(parsed[1], sort_keys=True):
-        return []                                   # sampled the same answer twice
+        return [] # sampled the same answer twice
     return parsed
 #################################
 
@@ -120,11 +107,8 @@ def _score_pair(cand_a: dict, cand_b: dict, fmt: str, df: pd.DataFrame,
                 intent: str) -> tuple[dict, dict, str]:
     """Score both candidates against each other's context, not a reference
 
-    There is no verified target for a freely typed question, so the rubric runs
-    in reference-free mode: the dimensions that need a reference (column match,
-    transform match) fall back to their neutral grade, and the hard gates —
-    schema validity, allowed chart list, groundedness — still fire. That is
-    enough to catch the answers the system itself would reject.
+    There is no verified target for a freely typed question, so the rubric runs in reference free mode: the dimensions that need a reference (column match, transform match) fall back to their neutral grade, and the hard gates (schema validity, allowed chart list, groundedness) still fire. 
+    That is enough to catch the answers the system itself would reject.
     """
     ref: dict = {"intent": intent}
     kwargs = dict(df=df, intent=intent)
@@ -135,8 +119,7 @@ def _score_pair(cand_a: dict, cand_b: dict, fmt: str, df: pd.DataFrame,
 
 
 # State handling. Gradio state carries a dict so the click handlers stay pure.
-def generate_candidates(df, schema_text: str, question: str, fmt: str,
-                        intent: str, client) -> tuple:
+def generate_candidates(df, schema_text: str, question: str, fmt: str, intent: str, client) -> tuple:
     if df is None:
         return ("Load a dataset first.", "", "", None, _stats_markdown())
     if not question.strip():
@@ -150,11 +133,10 @@ def generate_candidates(df, schema_text: str, question: str, fmt: str,
     prompt = _build_prompt(fmt, question.strip(), intent, schema_text, summary, allowed)
     parsed = _sample_two(client, prompt)
     if len(parsed) < 2:
-        return ("The model produced identical or unparseable answers — try again "
-                "or rephrase the question.", "", "", None, _stats_markdown())
+        return ("The model produced identical or unparseable answers. Try again or rephrase the question.", "", "", None, _stats_markdown())
 
     order = [0, 1]
-    random.shuffle(order)                           # position bias control
+    random.shuffle(order) # position bias control
     cand_a, cand_b = parsed[order[0]], parsed[order[1]]
 
     state = {
@@ -165,8 +147,7 @@ def generate_candidates(df, schema_text: str, question: str, fmt: str,
     }
     header = (f"**Format:** `{fmt}`  ·  **Intent:** `{intent}`  ·  "
               f"Pick the better answer, or mark them equal.")
-    return (header, json.dumps(cand_a, indent=2), json.dumps(cand_b, indent=2),
-            state, _stats_markdown())
+    return (header, json.dumps(cand_a, indent=2), json.dumps(cand_b, indent=2), state, _stats_markdown())
 #################################
 
 
@@ -183,8 +164,7 @@ def _stats_markdown() -> str:
     if not labels:
         return "*No labels yet.*"
 
-    decisive = [l for l in labels if l["meta"]["human_choice"] in ("a", "b")
-                and l["meta"]["rubric_choice"] in ("a", "b")]
+    decisive = [l for l in labels if l["meta"]["human_choice"] in ("a", "b") and l["meta"]["rubric_choice"] in ("a", "b")]
     agreed = sum(1 for l in decisive if
                  l["meta"]["human_choice"] == l["meta"]["rubric_choice"])
     by_choice: dict[str, int] = {}
@@ -206,14 +186,13 @@ def save_label(choice: str, state: dict | None, df) -> tuple[str, str]:
         return "Generate a pair first.", _stats_markdown()
 
     fmt, intent = state["format"], state["intent"]
-    sa, sb, rubric_choice = _score_pair(state["cand_a"], state["cand_b"], fmt,
-                                        df, intent)
+    sa, sb, rubric_choice = _score_pair(state["cand_a"], state["cand_b"], fmt, df, intent)
 
     if choice in ("a", "b"):
         chosen = state["cand_a"] if choice == "a" else state["cand_b"]
         rejected = state["cand_b"] if choice == "a" else state["cand_a"]
-    else:                                           # tie / both_bad: kept for the
-        chosen = rejected = None                    # agreement stats, not for training
+    else: # tie / both_bad: kept for the
+        chosen = rejected = None  # agreement stats, not for training
 
     row = {
         "prompt": state["prompt"],
@@ -237,8 +216,7 @@ def save_label(choice: str, state: dict | None, df) -> tuple[str, str]:
     with open(LABELS_PATH, "a", encoding="utf-8") as f:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
-    note = {"a": "Labelled: A preferred.", "b": "Labelled: B preferred.",
-            "tie": "Labelled: equal.", "both_bad": "Labelled: both poor."}[choice]
+    note = {"a": "Labelled: A preferred.", "b": "Labelled: B preferred.", "tie": "Labelled: equal.", "both_bad": "Labelled: both poor."}[choice]
     if rubric_choice in ("a", "b") and choice in ("a", "b"):
         note += "  (rubric agreed)" if rubric_choice == choice else "  (rubric disagreed)"
     return note, _stats_markdown()
@@ -258,37 +236,28 @@ def push_to_hub() -> str:
         from huggingface_hub import HfApi
         api = HfApi()
         api.create_repo(HUB_DATASET, repo_type="dataset", exist_ok=True)
-        api.upload_file(path_or_fileobj=str(LABELS_PATH),
-                        path_in_repo="preference_labels.jsonl",
-                        repo_id=HUB_DATASET, repo_type="dataset")
+        api.upload_file(path_or_fileobj=str(LABELS_PATH), path_in_repo="preference_labels.jsonl", repo_id=HUB_DATASET, repo_type="dataset")
         return f"Pushed {len(_load_labels())} labels to {HUB_DATASET}"
-    except Exception as exc:                        # token missing, offline, quota...
-        return (f"Push failed ({type(exc).__name__}: {exc}). "
-                "Use the download button instead — the local file is intact.")
+    except Exception as exc: # token missing, offline, quota...
+        return (f"Push failed ({type(exc).__name__}: {exc}). Use the download button instead, the local file is intact.")
 #################################
 
 
 # Tab construction:
 def build_labeling_tab(client, sample_datasets: dict) -> None:
     gr.Markdown(
-        "Two candidate answers to the same question, generated by sampling the "
-        "model twice. Pick the better one. The order is shuffled and the rubric's "
-        "own verdict is hidden until after the choice, so the agreement number "
-        "measures the rubric rather than the interface."
+        "Two candidate answers to the same question, generated by sampling the model twice. "
+        "Pick the better one. "
+        "The order is shuffled and the rubric's own verdict is hidden until after the choice, so the agreement number measures the rubric rather than the interface."
     )
 
     with gr.Row():
         with gr.Column(scale=1):
-            sample_dd = gr.Dropdown(choices=list(sample_datasets),
-                                    value=list(sample_datasets)[0],
-                                    label="Dataset")
+            sample_dd = gr.Dropdown(choices=list(sample_datasets), value=list(sample_datasets)[0], label="Dataset")
             load_btn = gr.Button("Load dataset", variant="secondary")
-            fmt_dd = gr.Dropdown(choices=["auto"] + FORMATS, value="auto",
-                                 label="Agent format")
-            intent_dd = gr.Dropdown(choices=["auto"] + INTENTS, value="auto",
-                                    label="Question intent")
-            question_box = gr.Textbox(label="Question", lines=2,
-                                      placeholder="e.g. Which weekdays use the most energy?")
+            fmt_dd = gr.Dropdown(choices=["auto"] + FORMATS, value="auto", label="Agent format")
+            intent_dd = gr.Dropdown(choices=["auto"] + INTENTS, value="auto", label="Question intent")
+            question_box = gr.Textbox(label="Question", lines=2, placeholder="e.g. Which weekdays use the most energy?")
             gen_btn = gr.Button("Generate two candidates", variant="primary")
             stats_md = gr.Markdown(_stats_markdown())
 
@@ -318,15 +287,13 @@ def build_labeling_tab(client, sample_datasets: dict) -> None:
     schema_state = gr.State(value="")
     load_btn.click(_load, [sample_dd], [df_state, schema_state])
 
-    gen_btn.click(
-        lambda df, schema, q, f, i: generate_candidates(df, schema, q, f, i, client),
+    gen_btn.click(lambda df, schema, q, f, i: generate_candidates(df, schema, q, f, i, client),
         [df_state, schema_state, question_box, fmt_dd, intent_dd],
         [header_md, cand_a_box, cand_b_box, pair_state, stats_md],
     )
 
     for btn, choice in [(a_btn, "a"), (b_btn, "b"), (tie_btn, "tie"), (bad_btn, "both_bad")]:
-        btn.click(lambda s, d, c=choice: save_label(c, s, d),
-                  [pair_state, df_state], [result_md, stats_md])
+        btn.click(lambda s, d, c=choice: save_label(c, s, d), [pair_state, df_state], [result_md, stats_md])
 
     dl_btn.click(export_labels, None, dl_file)
     push_btn.click(push_to_hub, None, result_md)
