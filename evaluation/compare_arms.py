@@ -61,6 +61,7 @@ BASE_MODEL = "Qwen/Qwen2.5-3B-Instruct"
 
 SFT_V2 = "berencarkci/qwen2.5-3b-va-sft-v2"
 SFT_V3 = "berencarkci/qwen2.5-3b-va-sft-v3"
+SFT_V5 = "berencarkci/qwen2.5-3b-va-sft-v5"
 DPO_ALL = "berencarkci/qwen2.5-3b-va-dpo"
 DPO_REAL = "berencarkci/qwen2.5-3b-va-dpo-real"
 
@@ -99,6 +100,8 @@ ARMS: list[dict] = [
      "label": "SFT-v3 single", "axis": "training"},
     {"id": "sft_v3_multi", "adapter": SFT_V3, "mode": "multi",
      "label": "SFT-v3 multi-agent", "axis": "both"},
+    {"id": "sft_v5_multi", "adapter": SFT_V5, "mode": "multi",
+     "label": "SFT-v5 multi-agent", "axis": "training"},
     {"id": "sft_v3_multi_noeval", "adapter": SFT_V3, "mode": "multi_noeval",
      "label": "SFT-v3 multi, no reviewer", "axis": "architecture"},
 
@@ -178,6 +181,11 @@ def run_one(mode: str, client, q: dict, schema_text: str, frames: dict,
         row.update(score_answer(rec, df, q["type"], q["question"], schema_text))
         row["chart_type"] = rec.chart_type
         row["x_axis"], row["y_axis"] = rec.x_axis, rec.y_axis
+
+    t = rec.transform
+    row["transform"] = {"groupby": t.groupby, "series": t.series,
+                        "agg": t.agg, "filter": t.filter, "sort": t.sort}
+    row["target_columns"] = list(getattr(rec, "target_columns", []) or [])
     return row
 #################################
 
@@ -293,6 +301,10 @@ def build_cache(payloads: list[dict]) -> dict:
                 "chart_type": r.get("chart_type"),
                 "x_axis": r.get("x_axis"),
                 "y_axis": r.get("y_axis"),
+                "transform": r.get("transform"),
+                "target_columns": r.get("target_columns"),
+                "columns_exist": r.get("columns_exist"),
+                "chart_fits_type": r.get("chart_fits_type"),
                 "insight": r.get("insight"),
                 "predicted_intent": r.get("predicted_intent"),
                 "seconds": r.get("seconds"),
