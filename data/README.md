@@ -1,6 +1,6 @@
 # Veri Setleri
 
-Üç açık veri seti, üç farklı analitik alanı temsil eder. Tam sürümler bu klasörde, 500 satırlık örnekler `samples/` altındadır. Benchmark soruları (B1) bu setler üzerine yazılır.
+Üç açık veri seti, üç farklı analitik alanı temsil eder. Tam sürümler bu klasörde, 500 satırlık örnekler `samples/` altındadır. Benchmark soruları bu setler üzerine yazılır.
 
 | Dosya | Tema | Boyut | Orijinal kaynak |
 |---|---|---|---|
