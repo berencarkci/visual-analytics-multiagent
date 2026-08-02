@@ -1,0 +1,1394 @@
+{
+  "split": "dev",
+  "n": 38,
+  "arms": [
+    "base_multi",
+    "sft_v2_multi",
+    "sft_v3_multi",
+    "sft_v5_multi"
+  ],
+  "pct": {
+    "base_multi": {
+      "executable": 92.1,
+      "intent_structure": 78.9,
+      "has_grouping": 63.2,
+      "has_aggregation": 81.6,
+      "plan_complete": 76.3
+    },
+    "sft_v2_multi": {
+      "executable": 97.4,
+      "intent_structure": 100.0,
+      "has_grouping": 65.8,
+      "has_aggregation": 65.8,
+      "plan_complete": 97.4
+    },
+    "sft_v3_multi": {
+      "executable": 100.0,
+      "intent_structure": 100.0,
+      "has_grouping": 65.8,
+      "has_aggregation": 65.8,
+      "plan_complete": 100.0
+    },
+    "sft_v5_multi": {
+      "executable": 100.0,
+      "intent_structure": 97.4,
+      "has_grouping": 68.4,
+      "has_aggregation": 68.4,
+      "plan_complete": 97.4
+    }
+  },
+  "counted": {
+    "base_multi": {
+      "executable": 38,
+      "intent_structure": 38,
+      "has_grouping": 38,
+      "has_aggregation": 38,
+      "plan_complete": 38
+    },
+    "sft_v2_multi": {
+      "executable": 38,
+      "intent_structure": 38,
+      "has_grouping": 38,
+      "has_aggregation": 38,
+      "plan_complete": 38
+    },
+    "sft_v3_multi": {
+      "executable": 38,
+      "intent_structure": 38,
+      "has_grouping": 38,
+      "has_aggregation": 38,
+      "plan_complete": 38
+    },
+    "sft_v5_multi": {
+      "executable": 38,
+      "intent_structure": 38,
+      "has_grouping": 38,
+      "has_aggregation": 38,
+      "plan_complete": 38
+    }
+  },
+  "totals": {
+    "base_multi": {
+      "executable": 35,
+      "intent_structure": 30,
+      "has_grouping": 24,
+      "has_aggregation": 31,
+      "plan_complete": 29
+    },
+    "sft_v2_multi": {
+      "executable": 37,
+      "intent_structure": 38,
+      "has_grouping": 25,
+      "has_aggregation": 25,
+      "plan_complete": 37
+    },
+    "sft_v3_multi": {
+      "executable": 38,
+      "intent_structure": 38,
+      "has_grouping": 25,
+      "has_aggregation": 25,
+      "plan_complete": 38
+    },
+    "sft_v5_multi": {
+      "executable": 38,
+      "intent_structure": 37,
+      "has_grouping": 26,
+      "has_aggregation": 26,
+      "plan_complete": 37
+    }
+  },
+  "per_question": [
+    {
+      "id": "retail_001",
+      "type": "trend",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "retail_002",
+      "type": "trend",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "retail_003",
+      "type": "trend",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": false,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": false
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "retail_005",
+      "type": "comparison",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "retail_007",
+      "type": "comparison",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "retail_009",
+      "type": "comparison",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "retail_010",
+      "type": "composition",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "retail_012",
+      "type": "composition",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "retail_013",
+      "type": "relationship",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "retail_014",
+      "type": "relationship",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "retail_017",
+      "type": "distribution",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "retail_018",
+      "type": "filter_aggregation",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "retail_019",
+      "type": "filter_aggregation",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "retail_021",
+      "type": "filter_aggregation",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "mall_001",
+      "type": "comparison",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "mall_003",
+      "type": "comparison",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "mall_004",
+      "type": "composition",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "mall_006",
+      "type": "relationship",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "mall_008",
+      "type": "relationship",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": false,
+          "has_grouping": true,
+          "has_aggregation": false,
+          "plan_complete": false
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "mall_010",
+      "type": "relationship",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": false,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": false
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "mall_011",
+      "type": "distribution",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "mall_012",
+      "type": "distribution",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "mall_013",
+      "type": "distribution",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "mall_015",
+      "type": "filter_aggregation",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "energy_001",
+      "type": "trend",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "energy_002",
+      "type": "trend",
+      "arms": {
+        "base_multi": {
+          "executable": false,
+          "intent_structure": false,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": false
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "energy_003",
+      "type": "trend",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "energy_006",
+      "type": "comparison",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "energy_008",
+      "type": "relationship",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "energy_009",
+      "type": "relationship",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "energy_011",
+      "type": "distribution",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": false,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": false
+        },
+        "sft_v2_multi": {
+          "executable": false,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": false
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": false,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": false
+        }
+      }
+    },
+    {
+      "id": "energy_013",
+      "type": "distribution",
+      "arms": {
+        "base_multi": {
+          "executable": false,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": false
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "energy_015",
+      "type": "filter_aggregation",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "energy_016",
+      "type": "filter_aggregation",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "energy_017",
+      "type": "anomaly",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": false,
+          "has_grouping": false,
+          "has_aggregation": true,
+          "plan_complete": false
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "energy_019",
+      "type": "anomaly",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": false,
+          "has_grouping": false,
+          "has_aggregation": true,
+          "plan_complete": false
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "energy_021",
+      "type": "anomaly",
+      "arms": {
+        "base_multi": {
+          "executable": false,
+          "intent_structure": false,
+          "has_grouping": false,
+          "has_aggregation": false,
+          "plan_complete": false
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    },
+    {
+      "id": "energy_022",
+      "type": "anomaly",
+      "arms": {
+        "base_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v2_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v3_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        },
+        "sft_v5_multi": {
+          "executable": true,
+          "intent_structure": true,
+          "has_grouping": true,
+          "has_aggregation": true,
+          "plan_complete": true
+        }
+      }
+    }
+  ]
+}

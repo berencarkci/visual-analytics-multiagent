@@ -24,7 +24,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 7.4,
+      "seconds": 18.9,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -37,7 +37,15 @@
       "has_transform": true,
       "chart_type": "line",
       "x_axis": "order_date",
-      "y_axis": "sales"
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "month(order_date)",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "date_asc"
+      },
+      "target_columns": []
     },
     {
       "id": "retail_002",
@@ -53,7 +61,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 7.2,
+      "seconds": 8.0,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -67,7 +75,15 @@
       "has_transform": true,
       "chart_type": "line",
       "x_axis": "order_date",
-      "y_axis": "profit"
+      "y_axis": "profit",
+      "transform": {
+        "groupby": "quarter(order_date)",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "date_asc"
+      },
+      "target_columns": []
     },
     {
       "id": "retail_003",
@@ -83,20 +99,29 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 7.3,
+      "seconds": 7.2,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
       "invented": [
-        "6242.525",
-        "31407.467",
-        "403.1"
+        "11",
+        "37056.715",
+        "02",
+        "1839.658"
       ],
-      "insight": "The series rose from 6242.525 at 2015-01-01 00:00:00 to 31407.467 at 2018-12-01 00:00:00, a change of 403.1%.",
+      "insight": "The highest value belongs to 2018-11-01 \u00b7 Furniture (37056.715); the lowest is 2015-02-01 \u00b7 Furniture (1839.658).",
       "has_transform": true,
       "chart_type": "line",
       "x_axis": "order_date",
-      "y_axis": "sales"
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "month(order_date)",
+        "series": "category",
+        "agg": "sum",
+        "filter": "category == 'Furniture'",
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "retail_005",
@@ -112,7 +137,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.5,
+      "seconds": 6.3,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -124,7 +149,15 @@
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "category",
-      "y_axis": "sales"
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "category",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "value_desc"
+      },
+      "target_columns": []
     },
     {
       "id": "retail_007",
@@ -140,7 +173,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 4.4,
+      "seconds": 5.1,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -151,7 +184,15 @@
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "segment",
-      "y_axis": "discount"
+      "y_axis": "discount",
+      "transform": {
+        "groupby": "segment",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": "value_desc"
+      },
+      "target_columns": []
     },
     {
       "id": "retail_009",
@@ -167,7 +208,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.4,
+      "seconds": 6.0,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -179,7 +220,15 @@
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "ship_mode",
-      "y_axis": "quantity"
+      "y_axis": "quantity",
+      "transform": {
+        "groupby": "ship_mode",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "value_desc"
+      },
+      "target_columns": []
     },
     {
       "id": "retail_010",
@@ -195,7 +244,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.1,
+      "seconds": 5.6,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -206,7 +255,15 @@
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "region",
-      "y_axis": "sales"
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "region",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "value_desc"
+      },
+      "target_columns": []
     },
     {
       "id": "retail_012",
@@ -222,7 +279,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.0,
+      "seconds": 5.6,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -233,7 +290,15 @@
       "has_transform": true,
       "chart_type": "pie",
       "x_axis": "category",
-      "y_axis": "order_id"
+      "y_axis": "order_id",
+      "transform": {
+        "groupby": "category",
+        "series": null,
+        "agg": "count",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "retail_013",
@@ -249,7 +314,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 4.7,
+      "seconds": 5.2,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -260,7 +325,15 @@
       "has_transform": false,
       "chart_type": "box",
       "x_axis": "discount",
-      "y_axis": "profit"
+      "y_axis": "profit",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "retail_014",
@@ -276,7 +349,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 4.9,
+      "seconds": 5.3,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -287,7 +360,15 @@
       "has_transform": false,
       "chart_type": "scatter",
       "x_axis": "quantity",
-      "y_axis": "sales"
+      "y_axis": "sales",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "retail_017",
@@ -303,7 +384,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.7,
+      "seconds": 6.1,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -316,7 +397,15 @@
       "has_transform": false,
       "chart_type": "histogram",
       "x_axis": "sales",
-      "y_axis": null
+      "y_axis": null,
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "retail_018",
@@ -332,7 +421,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 8.3,
+      "seconds": 8.8,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -346,7 +435,15 @@
       "has_transform": true,
       "chart_type": "line",
       "x_axis": "order_date",
-      "y_axis": "sales"
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "month(order_date)",
+        "series": null,
+        "agg": "sum",
+        "filter": "category == 'Technology' and year(order_date) == 2018",
+        "sort": "date_asc"
+      },
+      "target_columns": []
     },
     {
       "id": "retail_019",
@@ -362,7 +459,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.5,
+      "seconds": 6.3,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -370,11 +467,19 @@
         "19327.235",
         "1646.512"
       ],
-      "insight": "The highest value belongs to Copiers (19327.235); the lowest is Bookcases (-1646.512).",
+      "insight": "The highest value belongs to Copiers \u00b7 West (19327.235); the lowest is Bookcases \u00b7 West (-1646.512).",
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "sub_category",
-      "y_axis": "profit"
+      "y_axis": "profit",
+      "transform": {
+        "groupby": "sub_category",
+        "series": "region",
+        "agg": "sum",
+        "filter": "region == 'West'",
+        "sort": "value_desc"
+      },
+      "target_columns": []
     },
     {
       "id": "retail_021",
@@ -390,7 +495,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 7.2,
+      "seconds": 7.9,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -403,7 +508,15 @@
       "has_transform": true,
       "chart_type": "line",
       "x_axis": "order_date",
-      "y_axis": "sales"
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "month(order_date)",
+        "series": null,
+        "agg": "sum",
+        "filter": "segment == 'Corporate'",
+        "sort": "date_desc"
+      },
+      "target_columns": []
     },
     {
       "id": "mall_001",
@@ -419,7 +532,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 4.8,
+      "seconds": 5.3,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -431,7 +544,15 @@
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "gender",
-      "y_axis": "spending_score"
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": "gender",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_003",
@@ -447,7 +568,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.6,
+      "seconds": 6.5,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -463,7 +584,15 @@
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "age",
-      "y_axis": "spending_score"
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": "bins(age)",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_004",
@@ -479,18 +608,27 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 4.6,
+      "seconds": 5.3,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
       "invented": [
-        "56.0"
+        "56.0",
+        "44.0"
       ],
-      "insight": "Female makes up 56.0% of the whole; the total across groups is 200.0.",
+      "insight": "Female makes up 56.0% of the whole; Male accounts for the rest at 44.0%.",
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "gender",
-      "y_axis": "customer_id"
+      "y_axis": "customer_id",
+      "transform": {
+        "groupby": "gender",
+        "series": null,
+        "agg": "count",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_006",
@@ -506,7 +644,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 4.9,
+      "seconds": 5.5,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -517,7 +655,15 @@
       "has_transform": false,
       "chart_type": "scatter",
       "x_axis": "annual_income_k_usd",
-      "y_axis": "spending_score"
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_008",
@@ -533,7 +679,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 4.7,
+      "seconds": 5.3,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -544,7 +690,15 @@
       "has_transform": false,
       "chart_type": "scatter",
       "x_axis": "age",
-      "y_axis": "spending_score"
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_010",
@@ -560,7 +714,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.0,
+      "seconds": 5.6,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -572,7 +726,15 @@
       "has_transform": false,
       "chart_type": "scatter",
       "x_axis": "age",
-      "y_axis": "spending_score"
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": "gender == 'Female'",
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_011",
@@ -588,7 +750,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.2,
+      "seconds": 5.8,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -601,7 +763,15 @@
       "has_transform": false,
       "chart_type": "histogram",
       "x_axis": "age",
-      "y_axis": null
+      "y_axis": null,
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_012",
@@ -617,7 +787,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.2,
+      "seconds": 5.7,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -629,7 +799,15 @@
       "has_transform": false,
       "chart_type": "histogram",
       "x_axis": "annual_income_k_usd",
-      "y_axis": null
+      "y_axis": null,
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_013",
@@ -645,7 +823,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.1,
+      "seconds": 5.6,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -657,7 +835,15 @@
       "has_transform": false,
       "chart_type": "histogram",
       "x_axis": "spending_score",
-      "y_axis": null
+      "y_axis": null,
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_015",
@@ -673,7 +859,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.0,
+      "seconds": 5.4,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -684,7 +870,15 @@
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "gender",
-      "y_axis": "spending_score"
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": "gender",
+        "series": null,
+        "agg": "mean",
+        "filter": "age > 50",
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_001",
@@ -700,7 +894,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 7.0,
+      "seconds": 7.7,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -713,7 +907,15 @@
       "has_transform": true,
       "chart_type": "line",
       "x_axis": "date",
-      "y_axis": "appliances"
+      "y_axis": "appliances",
+      "transform": {
+        "groupby": "day(date)",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "date_asc"
+      },
+      "target_columns": []
     },
     {
       "id": "energy_002",
@@ -729,7 +931,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 7.1,
+      "seconds": 7.7,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -743,7 +945,15 @@
       "has_transform": true,
       "chart_type": "line",
       "x_axis": "date",
-      "y_axis": "t_out"
+      "y_axis": "t_out",
+      "transform": {
+        "groupby": "week(date)",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": "date_asc"
+      },
+      "target_columns": []
     },
     {
       "id": "energy_003",
@@ -759,7 +969,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.2,
+      "seconds": 5.8,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -772,7 +982,15 @@
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "date",
-      "y_axis": "appliances"
+      "y_axis": "appliances",
+      "transform": {
+        "groupby": "hour_of_day(date)",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_006",
@@ -788,7 +1006,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 4.7,
+      "seconds": 5.2,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -799,7 +1017,15 @@
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "date",
-      "y_axis": "appliances"
+      "y_axis": "appliances",
+      "transform": {
+        "groupby": "day_of_week(date)",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_008",
@@ -815,7 +1041,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.0,
+      "seconds": 5.5,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -826,7 +1052,15 @@
       "has_transform": false,
       "chart_type": "scatter",
       "x_axis": "t_out",
-      "y_axis": "appliances"
+      "y_axis": "appliances",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_009",
@@ -842,7 +1076,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.1,
+      "seconds": 5.5,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -853,7 +1087,15 @@
       "has_transform": false,
       "chart_type": "scatter",
       "x_axis": "rh_out",
-      "y_axis": "appliances"
+      "y_axis": "appliances",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_011",
@@ -869,7 +1111,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 8.0,
+      "seconds": 6.5,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -881,7 +1123,15 @@
       "has_transform": false,
       "chart_type": "histogram",
       "x_axis": "date",
-      "y_axis": "appliances"
+      "y_axis": "appliances",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_013",
@@ -897,7 +1147,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.2,
+      "seconds": 5.8,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -908,7 +1158,15 @@
       "has_transform": false,
       "chart_type": "histogram",
       "x_axis": "lights",
-      "y_axis": null
+      "y_axis": null,
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_015",
@@ -924,7 +1182,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 7.1,
+      "seconds": 7.8,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -936,7 +1194,15 @@
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "date",
-      "y_axis": "appliances"
+      "y_axis": "appliances",
+      "transform": {
+        "groupby": "day(date)",
+        "series": null,
+        "agg": "mean",
+        "filter": "t_out < 5",
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_016",
@@ -952,7 +1218,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.3,
+      "seconds": 5.8,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -965,7 +1231,15 @@
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "date",
-      "y_axis": "appliances"
+      "y_axis": "appliances",
+      "transform": {
+        "groupby": "hour_of_day(date)",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_017",
@@ -981,7 +1255,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 7.0,
+      "seconds": 7.6,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -994,7 +1268,15 @@
       "has_transform": true,
       "chart_type": "line",
       "x_axis": "date",
-      "y_axis": "appliances"
+      "y_axis": "appliances",
+      "transform": {
+        "groupby": "day(date)",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "date_asc"
+      },
+      "target_columns": []
     },
     {
       "id": "energy_019",
@@ -1010,7 +1292,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 6.8,
+      "seconds": 7.5,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -1023,7 +1305,15 @@
       "has_transform": true,
       "chart_type": "line",
       "x_axis": "date",
-      "y_axis": "appliances"
+      "y_axis": "appliances",
+      "transform": {
+        "groupby": "day(date)",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "date_asc"
+      },
+      "target_columns": []
     },
     {
       "id": "energy_021",
@@ -1039,7 +1329,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 6.8,
+      "seconds": 7.7,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -1052,7 +1342,15 @@
       "has_transform": true,
       "chart_type": "line",
       "x_axis": "date",
-      "y_axis": "lights"
+      "y_axis": "lights",
+      "transform": {
+        "groupby": "day(date)",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "date_asc"
+      },
+      "target_columns": []
     },
     {
       "id": "energy_022",
@@ -1068,7 +1366,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 7.3,
+      "seconds": 8.3,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -1081,7 +1379,15 @@
       "has_transform": true,
       "chart_type": "line",
       "x_axis": "date",
-      "y_axis": "press_mm_hg"
+      "y_axis": "press_mm_hg",
+      "transform": {
+        "groupby": "day(date)",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": "date_asc"
+      },
+      "target_columns": []
     }
   ]
 }

@@ -24,7 +24,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 6.6,
+      "seconds": 24.2,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -38,8 +38,16 @@
       "insight": "Monthly total sales increased from an average of 14,236.895 in 2015 to 83,829.319 in 2018, showing a growth rate of 488.8%.",
       "has_transform": true,
       "chart_type": "line",
-      "x_axis": "sales",
-      "y_axis": null
+      "x_axis": "order_date",
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "month(order_date)",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "retail_002",
@@ -55,7 +63,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 9.6,
+      "seconds": 10.6,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -68,7 +76,15 @@
       "has_transform": true,
       "chart_type": "line",
       "x_axis": "order_date",
-      "y_axis": "profit"
+      "y_axis": "profit",
+      "transform": {
+        "groupby": "month(order_date)",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "date_desc"
+      },
+      "target_columns": []
     },
     {
       "id": "retail_003",
@@ -76,15 +92,15 @@
       "dataset": "retail_sales_superstore",
       "question": "How have furniture sales developed?",
       "valid": true,
-      "used_retry": true,
+      "used_retry": false,
       "chain_stopped": false,
       "predicted_intent": "trend",
       "intent_correct": true,
       "eval_passed": true,
-      "retry_helped": true,
+      "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 16.0,
+      "seconds": 6.2,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -96,7 +112,15 @@
       "has_transform": true,
       "chart_type": "line",
       "x_axis": "category",
-      "y_axis": "sales"
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "category",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": "date_desc"
+      },
+      "target_columns": []
     },
     {
       "id": "retail_005",
@@ -112,7 +136,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.6,
+      "seconds": 6.2,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -124,7 +148,15 @@
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "category",
-      "y_axis": "sales"
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "category",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "retail_007",
@@ -140,7 +172,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.8,
+      "seconds": 6.3,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -149,11 +181,19 @@
         "0.158",
         "0.147"
       ],
-      "insight": "The Corporate segment has an average discount of 0.158 compared to the Consumer segment's 0.158 and the Home Office segment's 0.147.",
+      "insight": "The Corporate segment has an average discount of 0.158 compared to the Consumer segment at 0.158 and the Home Office segment at 0.147.",
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "segment",
-      "y_axis": "discount"
+      "y_axis": "discount",
+      "transform": {
+        "groupby": "segment",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "retail_009",
@@ -169,7 +209,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.5,
+      "seconds": 6.1,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -177,11 +217,19 @@
         "22797",
         "1960"
       ],
-      "insight": "The total quantity sold by ship mode Standard Class is 22797, while Same Day has 1960 sales.",
+      "insight": "Total quantity sold is highest for Standard Class with 22797 units and lowest for Same Day with 1960 units.",
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "ship_mode",
-      "y_axis": "quantity"
+      "y_axis": "quantity",
+      "transform": {
+        "groupby": "ship_mode",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "retail_010",
@@ -197,7 +245,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 6.1,
+      "seconds": 6.8,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -209,7 +257,15 @@
       "has_transform": true,
       "chart_type": "pie",
       "x_axis": "region",
-      "y_axis": "sales"
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "region",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "retail_012",
@@ -225,7 +281,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.4,
+      "seconds": 6.4,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -233,11 +289,19 @@
         "6026",
         "1847"
       ],
-      "insight": "The Office Supplies category has the highest order count with 6026 orders compared to Technology with 1847 orders.",
+      "insight": "The category mix shows that Office Supplies have the highest order count with 6026 orders compared to Technology with 1847 orders.",
       "has_transform": true,
       "chart_type": "pie",
       "x_axis": "category",
-      "y_axis": null
+      "y_axis": "order_id",
+      "transform": {
+        "groupby": "category",
+        "series": null,
+        "agg": "count",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "retail_013",
@@ -245,24 +309,32 @@
       "dataset": "retail_sales_superstore",
       "question": "Is there a relationship between discount and profit at the order-line level?",
       "valid": true,
-      "used_retry": true,
+      "used_retry": false,
       "chain_stopped": false,
       "predicted_intent": "relationship",
       "intent_correct": true,
-      "eval_passed": false,
+      "eval_passed": true,
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 10.9,
+      "seconds": 6.5,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": false,
       "invented": [],
-      "insight": "There is a weak negative correlation between discount and profit at the order-line level.",
-      "has_transform": true,
+      "insight": "Only 0 usable rows remain after attempting to calculate the correlation between 'order_id' and 'discount'.",
+      "has_transform": false,
       "chart_type": "scatter",
       "x_axis": "order_id",
-      "y_axis": "discount"
+      "y_axis": "discount",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "retail_014",
@@ -278,7 +350,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.0,
+      "seconds": 5.4,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": false,
@@ -287,7 +359,15 @@
       "has_transform": false,
       "chart_type": "scatter",
       "x_axis": "quantity",
-      "y_axis": "sales"
+      "y_axis": "sales",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "retail_017",
@@ -303,7 +383,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.9,
+      "seconds": 6.6,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -315,7 +395,15 @@
       "has_transform": true,
       "chart_type": "histogram",
       "x_axis": "sales",
-      "y_axis": null
+      "y_axis": null,
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": "value_asc"
+      },
+      "target_columns": []
     },
     {
       "id": "retail_018",
@@ -331,19 +419,27 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 7.1,
+      "seconds": 7.9,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
       "invented": [
-        "49918.773",
-        "6027.024"
+        "118447.825",
+        "20301.133"
       ],
-      "insight": "The Technology category had the highest monthly total sales in November 2018 at 49918.773 compared to 6027.024 in February 2018.",
+      "insight": "The Technology category's monthly total sales were highest in November 2018 at 118447.825 compared to 20301.133 in February 2018.",
       "has_transform": true,
-      "chart_type": "bar",
-      "x_axis": "sales",
-      "y_axis": null
+      "chart_type": "line",
+      "x_axis": "order_date",
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "month(order_date)",
+        "series": null,
+        "agg": "sum",
+        "filter": "year(order_date) == 2018",
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "retail_019",
@@ -359,7 +455,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 6.2,
+      "seconds": 7.2,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -367,11 +463,19 @@
         "108418.449",
         "19327.235"
       ],
-      "insight": "The total profit for the West region is 108418.449, with Copiers contributing 19327.235.",
+      "insight": "The total profit for the West region is 108418.449, with Copiers \u00b7 West contributing 19327.235.",
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "sub_category",
-      "y_axis": "profit"
+      "y_axis": "profit",
+      "transform": {
+        "groupby": "sub_category",
+        "series": "region",
+        "agg": "sum",
+        "filter": "region == 'West'",
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "retail_021",
@@ -387,19 +491,29 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 6.9,
+      "seconds": 8.7,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
       "invented": [
         "217.786",
-        "473.672"
+        "473.672",
+        "217.786",
+        "217.786"
       ],
-      "insight": "Sales for Same Day group increased from 217.786 to 473.672.",
+      "insight": "Sales for Same Day \u00b7 Corporate increased from 217.786 to 473.672, while First Class \u00b7 Corporate decreased from 217.786 to 217.786.",
       "has_transform": true,
       "chart_type": "line",
-      "x_axis": "customer_name",
-      "y_axis": "sales"
+      "x_axis": "order_date",
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "ship_mode",
+        "series": "segment",
+        "agg": "mean",
+        "filter": "segment == 'Corporate' and order_date >= '2018-01-01'",
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_001",
@@ -415,7 +529,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.6,
+      "seconds": 6.3,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -427,7 +541,15 @@
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "gender",
-      "y_axis": "spending_score"
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": "gender",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_003",
@@ -443,7 +565,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.3,
+      "seconds": 5.8,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -454,7 +576,15 @@
       "has_transform": true,
       "chart_type": "box",
       "x_axis": "age",
-      "y_axis": "spending_score"
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": "bins(age, 2)",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_004",
@@ -470,16 +600,27 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 4.6,
+      "seconds": 5.5,
       "columns_exist": true,
       "chart_fits_type": true,
-      "insight_invented_numbers": false,
-      "invented": [],
-      "insight": "The analysis produced 200 result rows.",
+      "insight_invented_numbers": true,
+      "invented": [
+        "56",
+        "44"
+      ],
+      "insight": "56% of customers are Female and 44% are Male.",
       "has_transform": true,
       "chart_type": "pie",
       "x_axis": "gender",
-      "y_axis": null
+      "y_axis": null,
+      "transform": {
+        "groupby": "gender",
+        "series": null,
+        "agg": "count",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_006",
@@ -495,7 +636,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.2,
+      "seconds": 5.8,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": false,
@@ -504,7 +645,15 @@
       "has_transform": false,
       "chart_type": "scatter",
       "x_axis": "annual_income_k_usd",
-      "y_axis": "spending_score"
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_008",
@@ -520,16 +669,24 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 4.7,
+      "seconds": 5.7,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": false,
       "invented": [],
       "insight": "There is a moderate negative association between customer age and spending score.",
-      "has_transform": false,
+      "has_transform": true,
       "chart_type": "scatter",
       "x_axis": "age",
-      "y_axis": "spending_score"
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": "age",
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_010",
@@ -537,24 +694,32 @@
       "dataset": "customer_analytics_mall",
       "question": "Show the relationship between age and spending score for female customers only.",
       "valid": true,
-      "used_retry": false,
+      "used_retry": true,
       "chain_stopped": false,
       "predicted_intent": "relationship",
       "intent_correct": true,
       "eval_passed": true,
-      "retry_helped": false,
+      "retry_helped": true,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.3,
+      "seconds": 11.7,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": false,
       "invented": [],
-      "insight": "For female customers only, there is a moderate negative relationship between age and spending score.",
+      "insight": "For female customers only, there is a moderate negative correlation between age and spending score.",
       "has_transform": true,
       "chart_type": "scatter",
       "x_axis": "age",
-      "y_axis": "spending_score"
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": "gender",
+        "series": "gender",
+        "agg": "mean",
+        "filter": "gender == 'Female'",
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "mall_011",
@@ -570,7 +735,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 6.1,
+      "seconds": 6.8,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -581,10 +746,18 @@
         "49.0"
       ],
       "insight": "The age distribution has a median of 36.0 years and a mean of 38.85 years, indicating that half of the customers are between 28.75 and 49.0 years old.",
-      "has_transform": false,
+      "has_transform": true,
       "chart_type": "histogram",
       "x_axis": "age",
-      "y_axis": null
+      "y_axis": null,
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": "count",
+        "filter": null,
+        "sort": "date_asc"
+      },
+      "target_columns": []
     },
     {
       "id": "mall_012",
@@ -600,7 +773,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 8.1,
+      "seconds": 6.3,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -612,7 +785,15 @@
       "has_transform": true,
       "chart_type": "histogram",
       "x_axis": "annual_income_k_usd",
-      "y_axis": null
+      "y_axis": null,
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": "count",
+        "filter": null,
+        "sort": "value_desc"
+      },
+      "target_columns": []
     },
     {
       "id": "mall_013",
@@ -628,7 +809,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 7.6,
+      "seconds": 8.4,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -640,10 +821,18 @@
         "73.0"
       ],
       "insight": "The spending score distribution has a median of 50.0 and a mean of 50.2, with most scores falling between the first quartile (Q1) at 34.75 and the third quartile (Q3) at 73.0, with a minimum score of 1.0 and a maximum score of 99.0.",
-      "has_transform": false,
+      "has_transform": true,
       "chart_type": "histogram",
       "x_axis": "spending_score",
-      "y_axis": null
+      "y_axis": null,
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": "count",
+        "filter": null,
+        "sort": "value_asc"
+      },
+      "target_columns": []
     },
     {
       "id": "mall_015",
@@ -659,7 +848,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 6.4,
+      "seconds": 7.1,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -671,7 +860,15 @@
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "gender",
-      "y_axis": "spending_score"
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": "gender",
+        "series": null,
+        "agg": "mean",
+        "filter": "age > 50",
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_001",
@@ -687,7 +884,7 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 6.8,
+      "seconds": 7.5,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
@@ -699,35 +896,28 @@
       "has_transform": true,
       "chart_type": "line",
       "x_axis": "date",
-      "y_axis": "appliances"
+      "y_axis": "appliances",
+      "transform": {
+        "groupby": "date",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "date_asc"
+      },
+      "target_columns": []
     },
     {
       "id": "energy_002",
       "type": "trend",
       "dataset": "energy_consumption_hourly",
       "question": "Show the weekly average outdoor temperature trend.",
-      "valid": true,
+      "valid": false,
       "used_retry": false,
-      "chain_stopped": false,
+      "chain_stopped": true,
+      "error": "agent='data_analyst' error_type='invalid_llm_output' detail=\"Unknown column(s): ['weekday']. Use only columns from the schema.\" recoverable=False",
       "predicted_intent": "trend",
       "intent_correct": true,
-      "eval_passed": true,
-      "retry_helped": false,
-      "insight_grounded": true,
-      "chart_intent_fit_check": true,
-      "seconds": 9.6,
-      "columns_exist": true,
-      "chart_fits_type": true,
-      "insight_invented_numbers": true,
-      "invented": [
-        "23",
-        "75.4"
-      ],
-      "insight": "From 2016-05-23 to 2016-01-11 the value changed by -75.4%, peaking at 14.898 (2016-05-09).",
-      "has_transform": true,
-      "chart_type": "line",
-      "x_axis": "date",
-      "y_axis": "t_out"
+      "seconds": 6.6
     },
     {
       "id": "energy_003",
@@ -743,19 +933,28 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 7.1,
+      "seconds": 6.6,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
       "invented": [
-        "681.8",
-        "24"
+        "23",
+        "191.812",
+        "18"
       ],
-      "insight": "From 2016-01-11 to 2016-05-27 the value changed by 681.8%, peaking at 608.333 (2016-01-24).",
+      "insight": "From 0 to 23 the value changed by 8.0%, peaking at 191.812 (18).",
       "has_transform": true,
       "chart_type": "line",
-      "x_axis": "date",
-      "y_axis": "appliances"
+      "x_axis": "appliances",
+      "y_axis": null,
+      "transform": {
+        "groupby": "hour_of_day(date)",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": "date_asc"
+      },
+      "target_columns": []
     },
     {
       "id": "energy_006",
@@ -771,16 +970,27 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.1,
+      "seconds": 6.7,
       "columns_exist": true,
       "chart_fits_type": true,
-      "insight_invented_numbers": false,
-      "invented": [],
-      "insight": "Monday has the highest average appliance consumption compared to other days.",
+      "insight_invented_numbers": true,
+      "invented": [
+        "105.193",
+        "87.125"
+      ],
+      "insight": "Friday has the highest average appliance consumption at 105.193 compared to Tuesday with the lowest at 87.125.",
       "has_transform": true,
       "chart_type": "bar",
       "x_axis": "appliances",
-      "y_axis": null
+      "y_axis": null,
+      "transform": {
+        "groupby": "day_of_week(date)",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_008",
@@ -796,16 +1006,24 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.6,
+      "seconds": 6.6,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": false,
       "invented": [],
       "insight": "There is a weak positive association between outdoor temperature (t_out) and appliance energy consumption (appliances).",
-      "has_transform": false,
+      "has_transform": true,
       "chart_type": "scatter",
       "x_axis": "t_out",
-      "y_axis": "appliances"
+      "y_axis": "appliances",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": "value_desc"
+      },
+      "target_columns": []
     },
     {
       "id": "energy_009",
@@ -821,16 +1039,24 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.4,
+      "seconds": 6.1,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": false,
       "invented": [],
       "insight": "Outdoor humidity (rh_out) has a weak negative correlation with appliance consumption.",
-      "has_transform": false,
+      "has_transform": true,
       "chart_type": "scatter",
       "x_axis": "rh_out",
-      "y_axis": "appliances"
+      "y_axis": "appliances",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_011",
@@ -846,18 +1072,28 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.9,
+      "seconds": 6.7,
       "columns_exist": true,
       "chart_fits_type": true,
       "insight_invented_numbers": true,
       "invented": [
-        "63.333"
+        "18",
+        "191.812",
+        "48.236"
       ],
-      "insight": "The distribution of hourly appliance energy consumption has a median of 63.333 kWh, indicating that half of the hours had consumption below this value and half above.",
-      "has_transform": false,
+      "insight": "In group 18, the hourly appliance energy consumption is 191.812, while in group 3 it is 48.236.",
+      "has_transform": true,
       "chart_type": "histogram",
       "x_axis": "appliances",
-      "y_axis": null
+      "y_axis": null,
+      "transform": {
+        "groupby": "hour_of_day(date)",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_013",
@@ -870,7 +1106,7 @@
       "error": "agent='data_analyst' error_type='invalid_llm_output' detail=\"Invalid plan format: 1 validation error for Transform\\nagg\\n  Input should be 'sum', 'mean', 'count' or 'count_distinct' [type=literal_erro",
       "predicted_intent": "distribution",
       "intent_correct": true,
-      "seconds": 5.3
+      "seconds": 6.1
     },
     {
       "id": "energy_015",
@@ -886,42 +1122,100 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.4,
+      "seconds": 7.2,
       "columns_exist": true,
-      "chart_fits_type": false,
-      "insight_invented_numbers": false,
-      "invented": [],
-      "insight": "The analysis produced 3290 result rows.",
+      "chart_fits_type": true,
+      "insight_invented_numbers": true,
+      "invented": [
+        "85.776"
+      ],
+      "insight": "On days when the outdoor temperature was below 5 degrees, the average appliance consumption was 85.776% of the total.",
       "has_transform": true,
-      "chart_type": "box",
+      "chart_type": "bar",
       "x_axis": "appliances",
-      "y_axis": null
+      "y_axis": null,
+      "transform": {
+        "groupby": "threshold_flag(t_out, 5)",
+        "series": null,
+        "agg": "mean",
+        "filter": "t_out < 5",
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_016",
       "type": "filter_aggregation",
       "dataset": "energy_consumption_hourly",
       "question": "How much energy do appliances use at night?",
-      "valid": false,
+      "valid": true,
       "used_retry": false,
-      "chain_stopped": true,
-      "error": "agent='data_analyst' error_type='invalid_llm_output' detail=\"Unknown column(s): ['date_time.hour']. Use only columns from the schema.\" recoverable=False",
+      "chain_stopped": false,
       "predicted_intent": "filter_aggregation",
       "intent_correct": true,
-      "seconds": 6.5
+      "eval_passed": true,
+      "retry_helped": false,
+      "insight_grounded": true,
+      "chart_intent_fit_check": true,
+      "seconds": 6.7,
+      "columns_exist": true,
+      "chart_fits_type": true,
+      "insight_invented_numbers": true,
+      "invented": [
+        "7806.666"
+      ],
+      "insight": "Appliances used 7806.666 units of energy in the group labeled '23'.",
+      "has_transform": true,
+      "chart_type": "line",
+      "x_axis": "appliances",
+      "y_axis": null,
+      "transform": {
+        "groupby": "hour_of_day(date)",
+        "series": null,
+        "agg": "sum",
+        "filter": "hour_of_day(date) == 23",
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_017",
       "type": "anomaly",
       "dataset": "energy_consumption_hourly",
       "question": "Identify days with unusually high total appliance consumption.",
-      "valid": false,
+      "valid": true,
       "used_retry": false,
-      "chain_stopped": true,
-      "error": "agent='data_analyst' error_type='invalid_llm_output' detail=\"Unknown column(s): ['table_name']. Use only columns from the schema.\" recoverable=False",
+      "chain_stopped": false,
       "predicted_intent": "anomaly",
       "intent_correct": true,
-      "seconds": 7.0
+      "eval_passed": true,
+      "retry_helped": false,
+      "insight_grounded": true,
+      "chart_intent_fit_check": true,
+      "seconds": 12.4,
+      "columns_exist": true,
+      "chart_fits_type": true,
+      "insight_invented_numbers": true,
+      "invented": [
+        "24",
+        "30",
+        "17",
+        "16",
+        "18"
+      ],
+      "insight": "Appliance consumption was unusually high on 2016-01-24 08:00:00, 2016-01-30 17:00:00, and 2016-03-16 18:00:00.",
+      "has_transform": true,
+      "chart_type": "box",
+      "x_axis": "date",
+      "y_axis": "appliances",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": "mean",
+        "filter": "appliances > appliances * 0.99",
+        "sort": "date_asc"
+      },
+      "target_columns": []
     },
     {
       "id": "energy_019",
@@ -937,20 +1231,24 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 11.3,
+      "seconds": 6.0,
       "columns_exist": true,
       "chart_fits_type": true,
-      "insight_invented_numbers": true,
-      "invented": [
-        "176.667",
-        "34.168",
-        "40.832"
-      ],
-      "insight": "There was one outlier at 176.667 units with a value of 51.667, which is outside the IQR range of 34.168 to 40.832.",
+      "insight_invented_numbers": false,
+      "invented": [],
+      "insight": "No outliers were detected in the energy data as all 3290 rows remained unchanged in the outlier detection process.",
       "has_transform": true,
       "chart_type": "box",
       "x_axis": "appliances",
-      "y_axis": "lights"
+      "y_axis": null,
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": null
+      },
+      "target_columns": []
     },
     {
       "id": "energy_021",
@@ -960,10 +1258,10 @@
       "valid": false,
       "used_retry": false,
       "chain_stopped": true,
-      "error": "agent='data_analyst' error_type='invalid_llm_output' detail='Invalid plan format: Expecting property name enclosed in double quotes: line 6 column 44 (char 132). Field reminder: agg must be sum/mean/c",
+      "error": "agent='data_analyst' error_type='invalid_llm_output' detail=\"Unknown column(s): ['lights.mean']. Use only columns from the schema.\" recoverable=False",
       "predicted_intent": "anomaly",
       "intent_correct": true,
-      "seconds": 6.2
+      "seconds": 7.0
     },
     {
       "id": "energy_022",
@@ -979,16 +1277,26 @@
       "retry_helped": false,
       "insight_grounded": true,
       "chart_intent_fit_check": true,
-      "seconds": 5.3,
+      "seconds": 6.7,
       "columns_exist": true,
       "chart_fits_type": true,
-      "insight_invented_numbers": false,
-      "invented": [],
-      "insight": "Pressure readings show an upward trend over time as indicated by the last 50 entries.",
+      "insight_invented_numbers": true,
+      "invented": [
+        "2.9"
+      ],
+      "insight": "The pressure readings increased by 2.9% over the period from 2016-01-11 to 2016-05-27.",
       "has_transform": true,
       "chart_type": "line",
       "x_axis": "press_mm_hg",
-      "y_axis": null
+      "y_axis": null,
+      "transform": {
+        "groupby": "date",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": "date_asc"
+      },
+      "target_columns": []
     }
   ]
 }
