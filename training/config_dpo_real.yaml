@@ -1,4 +1,4 @@
-# DPO on observed model errors only (Task B4/T3, second run)
+# DPO on observed model errors only (second run)
 #
 # The first run used all 430 pairs, 270 of them synthetic corruptions, and moved
 # nothing: reward accuracy reached 0.975 but intent accuracy went 33/38 -> 32/38

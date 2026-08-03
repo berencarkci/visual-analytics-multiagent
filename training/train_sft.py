@@ -1,4 +1,4 @@
-"""SFT + QLoRA training for the visual analytics assistant (Task B3/T4).
+"""SFT + QLoRA training for the visual analytics assistant.
 
 Trains a LoRA adapter on data/sft_train.jsonl so the model produces valid
 chart recommendations from a short prompt, instead of needing the 1260-token
@@ -122,7 +122,7 @@ def load_quantized_model(cfg: dict):
 #################################
 
 
-# Run report (checklist item: time / compute note):
+# Run report (time / compute note):
 def write_run_report(cfg: dict, out_dir: Path, elapsed_s: float,
                      n_train: int, n_val: int, history: list[dict]) -> dict:
     gpu = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu"

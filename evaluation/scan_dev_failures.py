@@ -1,4 +1,4 @@
-"""Failure scan over the dev split (Task B4/T1, preparation).
+"""Failure scan over the dev split.
 
 Runs every dev-split question through the full multi-agent chain and records
 where the chain had to correct the model. DPO needs real mistakes, and the

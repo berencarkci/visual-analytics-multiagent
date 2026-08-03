@@ -1,4 +1,4 @@
-"""DPO training on top of the SFT adapter (Task B4/T3).
+"""DPO training on top of the SFT adapter.
 
 Direct Preference Optimisation nudges the model toward the chosen answer and
 away from the rejected one in each pair, while a KL term keeps it from drifting
