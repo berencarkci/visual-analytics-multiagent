@@ -12,4 +12,4 @@
 -
 
 ## Notlar / Riskler
-<!-- Mentörün bilmesi gerekenler, açık sorular -->
+<!-- İnceleyenin bilmesi gerekenler, açık sorular -->

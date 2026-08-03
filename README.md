@@ -15,7 +15,7 @@ agents/      Supervisor, Data Analyst, Visualization, Insight, Evaluation ajanla
 training/    SFT ve DPO eğitim scriptleri, config'ler
 evaluation/  Benchmark, metrik scriptleri, sonuçlar
 data/        Veri setleri (örneklem), SFT ve tercih verileri
-docs/        charter, risks, datasets_and_models, frontend, backend, training, data, evaluation
+docs/        charter, risks, datasets_and_models, architecture, backend, frontend, training, data, evaluation, error_analysis
 notebooks/   Colab/Kaggle eğitim ve keşif defterleri
 ```
 
@@ -87,9 +87,12 @@ Sonuçlar `evaluation/results/` altına JSON olarak yazılır.
   eğitildiği izlenebilir
 
 ## Durum
-SFT tamamlandı (tek-çağrı + çok görevli ajan formatları). Multi-agent duman testi
-8/8 geçiyor. Sıradaki adım DPO ile tercih optimizasyonu, ardından final
-değerlendirme: base / SFT / DPO × tek-ajan / multi-agent matrisi.
+Hat tamamlandı: SFT (tek-çağrı + çok görevli ajan formatları, v1→v5) ve DPO
+(tüm çiftler + yalnız-gözlenen-hatalar varyantı). Final değerlendirme
+base / SFT / DPO × tek-ajan / multi-agent matrisinde koşuldu; donuk test split
+sonuçları `evaluation/results/test_split_results.md`, kol özetleri
+`evaluation/results/arm_comparison.json`. Canlı Space v5 adaptörünü servis eder.
+Ayrıntı: [Değerlendirme](docs/evaluation.md).
 
 ## Dokümanlar
 - [Proje Charter](docs/charter.md)
@@ -97,5 +100,8 @@ değerlendirme: base / SFT / DPO × tek-ajan / multi-agent matrisi.
 - [Veri Seti ve Model Araştırması](docs/datasets_and_models.md)
 - [Mimari](docs/architecture.md) — akış şeması ve sıralı diyagram
 - [Backend](docs/backend.md) — orkestrasyon kararları, ajan sözleşmeleri, evaluator, retry/blame
+- [Frontend](docs/frontend.md) — Gradio Space, sekmeler, çalışma modu
 - [Eğitim](docs/training.md) — SFT verisi, hiperparametreler, compute, sonuçlar
 - [Veri Kartı](docs/data.md) — kaynaklar, dağılımlar, üretim kuralları
+- [Değerlendirme](docs/evaluation.md) — benchmark, dev/test split, kollar, rubrik, problar
+- [Hata Analizi](docs/error_analysis.md) — gözlenen hata modları ve kök nedenleri
