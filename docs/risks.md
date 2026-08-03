@@ -13,6 +13,6 @@ Durum kodları: 🟢 kontrol altında · 🟡 izleniyor · 🔴 gerçekleşti/ak
 | R7 | Gün kaybı (İSG ve gezi planda; ek beklenmedik kesintiler) | Orta | Orta | Eğitim aşamalarında esnek tampon; eğitim koşuları geceye/paralele alınır | Herhangi bir blokta 1+ gün kayıp | 🟡 (Gün 2–3 biliniyor) |
 | R8 | Ücretsiz HF Space kısıtları (CPU, cold start, bellek) | Orta | Düşük | Önceden hesaplanmış sonuçlar + hafif inference; eğitim Space dışında; büyük dosyalar repoda değil | Space yanıt süresi > ~30 sn | 🟢 |
 | R9 | Küçük modelin JSON şema uyumu düşük | Orta | Orta | Katı şema + pydantic doğrulama + yeniden deneme; SFT verisinde şemaya sıkı bağlılık; gerekirse constrained decoding | Prompt-only şema geçerliliği < ~%70 | 🟢 |
-| R10 | Mentörden etiketleme desteği alınamaması | Düşük | Düşük | Gün 13'te önceden haber; tek etiketleyiciyle de proje geçerli, anlaşma analizi stretch'e düşer | Gün 14 sonunda ikinci etiketleyici yok | 🟢 |
+| R10 | İkinci etiketleyici desteği alınamaması | Düşük | Düşük | Gün 13'te önceden haber; tek etiketleyiciyle de proje geçerli, anlaşma analizi stretch'e düşer | Gün 14 sonunda ikinci etiketleyici yok | 🟢 |
 
-**Gözden geçirme ritmi:** Her blok kapanışında (Gün 6, 9, 12, 15, 18) durum kolonu güncellenir; 🔴 olan riskler mentör raporuna eklenir.
+**Gözden geçirme ritmi:** Her blok kapanışında (Gün 6, 9, 12, 15, 18) durum kolonu güncellenir; 🔴 olan riskler ilerleme raporuna eklenir.
