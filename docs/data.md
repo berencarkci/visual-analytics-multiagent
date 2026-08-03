@@ -88,7 +88,7 @@ Set üç kez, canlı koşum bulgularıyla genişletildi.
 gerekiyor. `diff` ölçüsü 2 örnekle eğitildi ve yetenek testinde hiç
 kullanılmadı.
 
-## Tercih verisi (B4)
+## Tercih verisi
 
 DPO çiftleri `data/dpo/` altında. Üretim `evaluation/make_dpo_pairs.py`,
 puanlama `evaluation/rubric.py`. Dağılımlar ve gerekçeler için
@@ -105,7 +105,7 @@ bulunursa üretim durur.
 (`pairs_*_unclear.jsonl`) eğitime girmez: zayıf sıralama gürültülü eğitim
 sinyali demek. Dosyalar repoda durur, karar geri alınabilir.
 
-## Etiketleme verisi (B4/T2)
+## Etiketleme verisi
 
 Space'in Preference Labeling sekmesi canlı tercih etiketi toplar
 (`labels/preference_labels.jsonl`, HF Dataset'e push edilebilir). Amaç
