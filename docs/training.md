@@ -5,14 +5,14 @@ Veri setinin içeriği için [data.md](data.md), sistemin çalışma mantığı 
 
 ## Model Seçimi
 
-Qwen2.5-3B-Instruct seçildi. Baseline testlerinde (Task 1.3) grafik ve kolon
+Qwen2.5-3B-Instruct seçildi. Baseline testlerinde grafik ve kolon
 seçiminde ilk denemede geçerli JSON üretti, muğlak soruları da doğru çözdü
 (ör. "split across segments" → pie + count_distinct). Bu yüzden daha küçük
 varyantlara (1.5B) inme ihtiyacı görülmedi. Cihaz: yerelde MacBook (MPS),
 final koşumlarda Colab/Kaggle (CUDA).
 
 > Not: `HFClient` varsayılanı bir süre yanlışlıkla 1.5B'de kalmıştı ve Space ile
-> tüm multi-agent koşumları 1.5B ile çalışıyordu (B3/T4'te fark edilip
+> tüm multi-agent koşumları 1.5B ile çalışıyordu (sonradan fark edilip
 > düzeltildi). Bundan önce kataloglanan hata modları 1.5B'nin hatalarıdır.
 
 ## Neden eğitim
@@ -21,7 +21,7 @@ Baseline, dondurulmuş 1260 token'lık few-shot prompt kullanıyor. Hedef, forma
 bilgisini prompt'tan **ağırlıklara taşımak**: kısa prompt, daha az token, daha
 hızlı çıkarım ve prompt mühendisliğine bağımlı olmayan davranış.
 
-## SFT (Task 3.2–3.4)
+## SFT
 
 İki aşamada yapıldı.
 
@@ -118,6 +118,26 @@ doğru mekanizmayı hem motorda çalışabilirliği istiyor. Sonuç: **5/8**.
 Regresyon yok: multi-agent duman testi 8/8 PASSED, dev split taramasında
 Evaluation başarısızlığı 1 → 0.
 
+### Aşama 4 — v3, v4, v5
+
+v2'den sonra set üç tur daha genişledi; her tur bir gözlem bankasıyla adreslendi.
+Sürüm başına adaptör HF'te ayrı tutulur (bkz. [Adaptörler](#adaptörler)), **canlı
+Space/app v5'i kullanır** (`app/main.py`, `DEFAULT_ADAPTER`).
+
+| sürüm | eklenen | ölçüm |
+|---|---|---|
+| **v3** | supervisor formatı (5. ajan formatı) + `filter_aggregation` tuzak bankası + `diff`/anomali genişletmesi | yetenek testi 5/8 → **8/8** (`capability_probe.json`); donuk test split'inde yapısal metriklerde %100'e ulaşan tek kol, niyet 21/22 |
+| **v4** | kategorik dağılım + olumsuzlama + nested share bankaları + istatistik sağlamlık düzeltmeleri | sağlamlık probu **22/25** (`robustness_probe.json`) |
+| **v5** | alan-dışı genelleme turu (eğitimde görülmeyen şemalar) | alan-dışı prob **16/16** (`cross_domain_probe.json`) |
+
+Donuk test split ölçümü (`evaluation/results/test_split_results.md`, 22 soru) base /
+v2 / v3'ü karşılaştırır ve **v4'ten önce** alınmıştır — v4/v5 ayrı problarla
+(sağlamlık, alan-dışı) değerlendirildi. v3 held-out'ta niyet doğruluğunu
+monoton yükseltti: base 18/22 → v2 20/22 → v3 21/22.
+
+Veri büyümesi: tek çağrı seti v2'de 471, v5'te **671**; ajan formatlı set v2'de
+1884 (4 format), v5'te **3375** (5 format — supervisor eklendi).
+
 ### Hiperparametreler
 
 Tüm ayarlar config dosyalarında; bir koşum "config + seed" ile tam tanımlıdır.
@@ -125,7 +145,7 @@ Tüm ayarlar config dosyalarında; bir koşum "config + seed" ile tam tanımlıd
 | | tek-çağrı | çok görevli |
 |---|---|---|
 | config | `training/config_sft.yaml` | `training/config_sft_agents.yaml` |
-| veri | `sft_train.jsonl` (471) | `sft_agents_train.jsonl` (1884) |
+| veri | `sft_train.jsonl` (güncel 671) | `sft_agents_train.jsonl` (güncel 3375) |
 | epoch | 4 | 3 |
 | max_seq_length | 1024 | 1536 |
 
@@ -265,14 +285,18 @@ olarak transform'suzdur; bu metrik soru tipine koşullanmalı ya da kaldırılma
 
 | repo | ne |
 |---|---|
-| `berencarkci/qwen2.5-3b-va-sft-v2` | çok görevli, şema genişletmesi sonrası (1884 örnek) — Space bunu kullanır |
+| `berencarkci/qwen2.5-3b-va-sft-v5` | çok görevli, alan-dışı sağlamlık turu (3375 örnek) — **Space/app bunu kullanır** (`app/main.py`, `DEFAULT_ADAPTER`) |
+| `berencarkci/qwen2.5-3b-va-sft-v4` | kategorik dağılım + olumsuzlama + nested share + istatistik sağlamlık düzeltmeleri |
+| `berencarkci/qwen2.5-3b-va-sft-v3` | supervisor formatı + filter_aggregation tuzak bankası + diff/anomali genişletmesi |
+| `berencarkci/qwen2.5-3b-va-sft-v2` | çok görevli, şema genişletmesi sonrası (1884 örnek) — DPO'nun tabanı |
 | `berencarkci/qwen2.5-3b-va-sft` | çok görevli v1 (1524 örnek) |
 | `berencarkci/qwen2.5-3b-va-sft-singlecall` | tek-çağrı (381 örnek) |
-| `berencarkci/qwen2.5-3b-va-dpo` | v2 üzerine DPO |
+| `berencarkci/qwen2.5-3b-va-dpo` | v2 üzerine DPO (tüm çiftler) |
+| `berencarkci/qwen2.5-3b-va-dpo-real` | v2 üzerine DPO (yalnız gözlenen hatalar) |
 
-Hepsi ayrı tutulur; final değerlendirmede base / SFT / DPO yan yana koşturulacak.
+Hepsi ayrı tutulur; final değerlendirmede base / SFT / DPO yan yana koşturulur.
 
-## DPO (Task 4.3)
+## DPO
 
 ### Tercih çiftleri
 

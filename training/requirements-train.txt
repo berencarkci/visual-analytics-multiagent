@@ -1,4 +1,4 @@
-# Pinned training stack (B3/T4). TRL and PEFT APIs churn between minor
+# Pinned training stack. TRL and PEFT APIs churn between minor
 # versions, so the training run pins them explicitly rather than relying on
 # whatever Colab preinstalls. Verified combination for the QLoRA + TRL
 # SFTTrainer + DataCollatorForCompletionOnlyLM path.

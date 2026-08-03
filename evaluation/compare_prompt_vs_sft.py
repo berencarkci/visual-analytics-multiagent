@@ -1,4 +1,4 @@
-"""Prompt-only vs SFT preliminary comparison (Task B3/T4, checklist item 4).
+"""Prompt-only vs SFT preliminary comparison on the dev split.
 
 Three configurations on the dev split (Decision C2), so the effect of training
 can be separated from the effect of the prompt:

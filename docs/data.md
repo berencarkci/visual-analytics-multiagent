@@ -4,8 +4,8 @@
 
 | | |
 |---|---|
-| Tek çağrı örneği | 471 (`data/sft_train.jsonl`) |
-| Ajan formatlı örnek | 1884 (`data/sft_agents_train.jsonl`) |
+| Tek çağrı örneği | 671 (`data/sft_train.jsonl`) |
+| Ajan formatlı örnek | 3375 (`data/sft_agents_train.jsonl`, 5 format) |
 | Tercih çifti | 430 (`data/dpo/dpo_train.jsonl`) |
 | Format | chat-JSONL (system / user / assistant) + meta |
 | Üretici | `evaluation/make_sft_data.py`, `make_agent_sft_data.py`, `make_dpo_pairs.py` (seed=42, deterministik) |
@@ -15,13 +15,13 @@
 
 | Kaynak | Adet | Açıklama |
 |---|---|---|
-| template | 434 | Soru, cevap şablonundan türetildi — hedef kurgu gereği doğru |
+| template | 634 | Soru, cevap şablonundan türetildi — hedef kurgu gereği doğru |
 | handwritten | 27 | Muğlak / serbest ifadeli sorular, elle seçilmiş hedefler |
 | failure_targeted | 10 | Gözlemlenen model hatalarının doğru cevapları (`failure_examples.py`, elle genişletilebilir) |
 
-Sıralama dağılımı: `value_desc` 137, `date_asc` 135, `value_asc` 36,
-`date_desc` 20, sıralamasız 143.
-Türetilmiş ölçü içeren örnek: 46 (`days_between` 24, `ratio` 20, `diff` 2).
+Sıralama dağılımı: `date_asc` 189, `value_desc` 181, `value_asc` 55,
+`date_desc` 20, sıralamasız 226.
+Türetilmiş ölçü içeren örnek: 71 (`days_between` 24, `ratio` 24, `diff` 23).
 
 ## Tasarım kuralları
 
@@ -61,9 +61,9 @@ kayıt ekle → `python evaluation/make_sft_data.py` koş → kesişim kontrolü
 otomatik tekrar çalışır → temizse dosya yeniden yazılır → ajan formatlı set için
 `make_agent_sft_data.py` koşulur.
 
-## Gözlemden veriye: üç tur
+## Gözlemden veriye: beş tur
 
-Set üç kez, canlı koşum bulgularıyla genişletildi.
+Set beş kez, canlı koşum bulgularıyla genişletildi.
 
 1. **Filtre kaybı.** SFT sonrası dev koşumunda "Technology kategorisinin 2018'deki
    aylık satışları" sorusu `filter=None` ile geldi, ama insight kısıtı yine de
@@ -82,13 +82,23 @@ Set üç kez, canlı koşum bulgularıyla genişletildi.
    [backend.md](backend.md), Bölüm 6). Yeni mekanizmalar için bankalar eklendi:
    artan/azalan sıralama ve türetilmiş ölçüler. **Prompt'a kural yazmak tek
    başına yetmedi** — ilk denemede model yeni mekanizmaları hiç üretmedi, örnek
-   bankaları eklendikten sonra üretmeye başladı. Set 381 → 471 örneğe çıktı.
+   bankaları eklendikten sonra üretmeye başladı. Set 381 → 471 örneğe çıktı (v2).
 
-Üç turun ortak dersi: yapısal bir davranışın öğrenilmesi için ~20+ örnek
-gerekiyor. `diff` ölçüsü 2 örnekle eğitildi ve yetenek testinde hiç
-kullanılmadı.
+4. **Supervisor formatı ve tuzak bankaları (v3).** Ajan formatlı sete beşinci
+   format olarak `supervisor` (niyet sınıflandırma) eklendi; `filter_aggregation`
+   tuzak bankası ve `diff`/anomali örnekleri genişletildi. `diff` 2 → 23'e
+   çıkınca yetenek testi 5/8 → 8/8 oldu.
 
-## Tercih verisi (B4)
+5. **Kategorik dağılım, olumsuzlama, alan-dışı sağlamlık (v4–v5).** Kategorik
+   dağılım, olumsuzlama ("... hariç") ve iç içe pay (nested share) bankaları ve
+   istatistik sağlamlık düzeltmeleri eklendi. Tek çağrı seti 671, ajan formatlı
+   set 3375 örneğe (671 × 5 format, + 20 intent-only supervisor sorusu) çıktı.
+
+Turların ortak dersi: yapısal bir davranışın öğrenilmesi için ~20+ örnek
+gerekiyor. `diff` ölçüsü v2'de 2 örnekle eğitilip yetenek testinde hiç
+kullanılmamıştı; v3'te 23 örneğe çıkarılınca öğrenildi.
+
+## Tercih verisi
 
 DPO çiftleri `data/dpo/` altında. Üretim `evaluation/make_dpo_pairs.py`,
 puanlama `evaluation/rubric.py`. Dağılımlar ve gerekçeler için
@@ -105,7 +115,7 @@ bulunursa üretim durur.
 (`pairs_*_unclear.jsonl`) eğitime girmez: zayıf sıralama gürültülü eğitim
 sinyali demek. Dosyalar repoda durur, karar geri alınabilir.
 
-## Etiketleme verisi (B4/T2)
+## Etiketleme verisi
 
 Space'in Preference Labeling sekmesi canlı tercih etiketi toplar
 (`labels/preference_labels.jsonl`, HF Dataset'e push edilebilir). Amaç

@@ -1,4 +1,4 @@
-# SFT + QLoRA Eğitimi (B3/T4)
+# SFT + QLoRA Eğitimi
 
 `data/sft_train.jsonl` üzerinde LoRA adaptörü eğitir. Amaç: modelin kısa
 prompt'la geçerli grafik önerisi üretmesi (baseline'ın 1260 token'lık few-shot

@@ -39,7 +39,7 @@ python app/main.py   # Gradio arayüzü (yerel)
 ```bash
 python test_baseline.py                                             # tek-ajan baseline
 python test_multiagent.py                                           # multi-agent, base model
-python test_multiagent.py --adapter berencarkci/qwen2.5-3b-va-sft    # multi-agent, SFT adaptörü
+python test_multiagent.py --adapter berencarkci/qwen2.5-3b-va-sft-v5    # multi-agent, SFT adaptörü
 python test_eval_injection.py                                       # Evaluation birim testleri
 ```
 
@@ -73,8 +73,8 @@ Her koşum `run_report.json` yazar: GPU, süre, loss eğrisi, hangi epoch kayded
 
 ### Değerlendirme
 ```bash
-python evaluation/sanity_check_sft.py --adapter berencarkci/qwen2.5-3b-va-sft      # 10 soru, gözle kontrol
-python evaluation/compare_prompt_vs_sft.py --adapter berencarkci/qwen2.5-3b-va-sft  # 3 konfigürasyon, dev split
+python evaluation/sanity_check_sft.py --adapter berencarkci/qwen2.5-3b-va-sft-v5      # 10 soru, gözle kontrol
+python evaluation/compare_prompt_vs_sft.py --adapter berencarkci/qwen2.5-3b-va-sft-v5  # 3 konfigürasyon, dev split
 ```
 
 Sonuçlar `evaluation/results/` altına JSON olarak yazılır.

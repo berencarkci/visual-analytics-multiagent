@@ -1,4 +1,4 @@
-# DPO configuration (Task B4/T3)
+# DPO configuration
 #
 # Trains on top of the multi-task SFT adapter, not the base model: DPO is a
 # correction to what SFT established, and the reference distribution it stays
