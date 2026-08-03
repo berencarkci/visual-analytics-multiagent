@@ -1,4 +1,4 @@
-"""Prompt-only single-agent baseline runner.
+"""Prompt only single agent baseline runner.
 
 Builds the few-shot messages (from prompts.py), calls the model through the client interface,
 validates against the schema and retries only once with error feedback (only once because we don't want to build the whole response with our feedbacks)
@@ -24,7 +24,7 @@ class BaselineResult:
 #################################
 
 
-# Runner with the single-retry policy:
+# Runner with the single retry policy:
 def recommend(client: ModelClient, schema_summary: str, question: str) -> BaselineResult:
     """question + schema summary -> validated recommendation (or recorded failure)
 

@@ -1,0 +1,517 @@
+{
+  "adapter": "berencarkci/qwen2.5-3b-va-sft-v4",
+  "rows": [
+    {
+      "dataset": "retail",
+      "question": "What is the distribution of the category values?",
+      "category": "categorical_distribution",
+      "expected": "bar with groupby=category, agg=count \u2014 NOT a histogram on a text column",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "category",
+      "y_axis": "order_id",
+      "transform": {
+        "groupby": "category",
+        "series": "order_id",
+        "agg": "count",
+        "filter": null,
+        "sort": "value_desc",
+        "limit": null
+      },
+      "insight": "The highest value belongs to Office Supplies \u00b7 CA-2017-165330 (8.0); the lowest is Office Supplies \u00b7 CA-2018-148929 (1.0).",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "retail",
+      "question": "How many rows fall into each shipping mode?",
+      "category": "categorical_distribution",
+      "expected": "bar, groupby=ship_mode, agg=count",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "ship_mode",
+      "y_axis": "order_id",
+      "transform": {
+        "groupby": "ship_mode",
+        "series": null,
+        "agg": "count",
+        "filter": null,
+        "sort": "value_desc",
+        "limit": null
+      },
+      "insight": "The highest value belongs to Standard Class (5968.0); the lowest is Same Day (543.0).",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "mall",
+      "question": "What is the distribution of gender in the customer base?",
+      "category": "categorical_distribution",
+      "expected": "bar or pie, groupby=gender, agg=count",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "gender",
+      "y_axis": "age",
+      "transform": {
+        "groupby": "gender",
+        "series": "age",
+        "agg": "count",
+        "filter": null,
+        "sort": "value_desc",
+        "limit": null
+      },
+      "insight": "The highest value belongs to Female \u00b7 31 (7.0); the lowest is Male \u00b7 54 (1.0).",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "mall",
+      "question": "What is the distribution of ages?",
+      "category": "numeric_distribution_control",
+      "expected": "histogram on age \u2014 control case, must stay correct",
+      "ok": true,
+      "chart_type": "histogram",
+      "x_axis": "age",
+      "y_axis": null,
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "insight": "The distribution of age has a median of 36.0 and a mean of 38.85, spanning 18.0 to 70.0.",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "retail",
+      "question": "What were the total sales in the West region during 2017?",
+      "category": "retrieve_value",
+      "expected": "filter + single aggregate; a one-bar chart is acceptable, an invented number is not",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "order_date",
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "year(order_date)",
+        "series": "region",
+        "agg": "sum",
+        "filter": "year(order_date) == 2017 and region == 'West'",
+        "sort": null,
+        "limit": null
+      },
+      "insight": "The highest value belongs to 2017-01-01 \u00b7 West (187480.177); the lowest is 2017-01-01 \u00b7 West (187480.177).",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "mall",
+      "question": "What is the average spending score across all customers?",
+      "category": "retrieve_value",
+      "expected": "single aggregate over the whole table",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "customer_id",
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": "customer_id",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "insight": "The highest value belongs to 12 (99.0); the lowest is 157 (1.0).",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "retail",
+      "question": "Which single sub-category is the most profitable?",
+      "category": "find_extremum",
+      "expected": "sort value_desc with limit 1, or a full ranking whose insight names the top",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "sub_category",
+      "y_axis": "profit",
+      "transform": {
+        "groupby": "sub_category",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "value_desc",
+        "limit": null
+      },
+      "insight": "Across 17 groups, Copiers tops the ranking at 55617.825.",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "energy",
+      "question": "Which hour of the day has the highest appliance consumption?",
+      "category": "find_extremum",
+      "expected": "groupby hour_of_day, the insight must name the peak hour",
+      "ok": false,
+      "error": "agent='data_analyst' error_type='invalid_llm_output' detail=\"Unknown column(s): ['hour']. Use only columns from the schema.\" recoverable=False"
+    },
+    {
+      "dataset": "retail",
+      "question": "What is the range of order profits?",
+      "category": "determine_range",
+      "expected": "min/max must appear in the insight; histogram or box both fine",
+      "ok": true,
+      "chart_type": "histogram",
+      "x_axis": "profit",
+      "y_axis": null,
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "insight": "The distribution of profit has a median of 8.666 and a mean of 28.657, spanning -6599.978 to 8399.976.",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "mall",
+      "question": "Are there natural groups of customers in this data?",
+      "category": "cluster",
+      "expected": "no clustering mechanism exists \u2014 a scatter of income vs spending is the honest fallback",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "age",
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": "bins(age)",
+        "series": "spending_score",
+        "agg": "mean",
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "insight": "The highest value belongs to (28.4, 38.8] \u00b7 99 (99.0); the lowest is (28.4, 38.8] \u00b7 1 (1.0).",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "mall",
+      "question": "Can the customers be segmented into distinct types?",
+      "category": "cluster",
+      "expected": "same; must not invent cluster counts",
+      "ok": true,
+      "chart_type": "box",
+      "x_axis": "annual_income_k_usd",
+      "y_axis": "spending_score",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "insight": "The relationship between annual income and spending score is weak and positive, with r=0.01 over 200 rows.",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": [
+        "|r|=0.01 is negligible, wording may overstate the relationship"
+      ]
+    },
+    {
+      "dataset": "retail",
+      "question": "Compare sales and profit across regions.",
+      "category": "multi_metric",
+      "expected": "only one y-axis exists; picking one and saying so beats silently dropping the other",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "region",
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "region",
+        "series": "profit",
+        "agg": "sum",
+        "filter": null,
+        "sort": "value_desc",
+        "limit": null
+      },
+      "insight": "The highest value belongs to South \u00b7 -1811.0784 (22638.48); the lowest is Central \u00b7 -1.11 (0.444).",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "retail",
+      "question": "How did 2018 sales compare with 2017?",
+      "category": "period_comparison",
+      "expected": "needs two periods; a yearly groupby is an acceptable answer",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "order_date",
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "year(order_date)",
+        "series": "category",
+        "agg": "sum",
+        "filter": null,
+        "sort": "value_desc",
+        "limit": null
+      },
+      "insight": "The highest value belongs to 2018-01-01 \u00b7 Technology (271730.811); the lowest is 2016-01-01 \u00b7 Office Supplies (137233.463).",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "retail",
+      "question": "Which sub-categories are not profitable?",
+      "category": "negation",
+      "expected": "sort value_asc, or a filter on profit < 0 \u2014 value_desc would be the wrong end",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "sub_category",
+      "y_axis": "profit",
+      "transform": {
+        "groupby": "sub_category",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "value_asc",
+        "limit": 10
+      },
+      "insight": "The weakest group is Tables at -17725.481, while the strongest is Appliances with 18138.005.",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "retail",
+      "question": "What share of Technology sales came from the West region?",
+      "category": "nested_share",
+      "expected": "filter to Technology, then compose by region \u2014 must not filter to West as well",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "region",
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "region",
+        "series": "category",
+        "agg": "sum",
+        "filter": "category == 'Technology'",
+        "sort": null,
+        "limit": null
+      },
+      "insight": "The largest share goes to East \u00b7 Technology at 31.7%, with South \u00b7 Technology the smallest.",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "retail",
+      "question": "Predict next month's sales.",
+      "category": "out_of_scope_forecast",
+      "expected": "no forecasting exists \u2014 showing the historical trend is fine, inventing a forecast is not",
+      "ok": true,
+      "chart_type": "line",
+      "x_axis": "order_date",
+      "y_axis": "sales",
+      "transform": {
+        "groupby": "month(order_date)",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "date_asc",
+        "limit": null
+      },
+      "insight": "The series rose from 14236.895 at 2015-01-01 00:00:00 to 83829.319 at 2018-12-01 00:00:00, a change of 488.8%.",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "retail",
+      "question": "Why did profit drop in March?",
+      "category": "out_of_scope_causal",
+      "expected": "no causal analysis \u2014 showing the series is fine, asserting a cause is not",
+      "ok": true,
+      "chart_type": "line",
+      "x_axis": "order_date",
+      "y_axis": "profit",
+      "transform": {
+        "groupby": "month(order_date)",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "date_asc",
+        "limit": null
+      },
+      "insight": "The series rose from 2450.191 at 2015-01-01 00:00:00 to 8483.347 at 2018-12-01 00:00:00, a change of 246.2%.",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "energy",
+      "question": "Show me the humidity in the basement.",
+      "category": "nonexistent_column",
+      "expected": "no such column \u2014 must not silently substitute another one",
+      "ok": false,
+      "error": "agent='data_analyst' error_type='invalid_llm_output' detail=\"Unknown column(s): ['location']. Use only columns from the schema.\" recoverable=False"
+    },
+    {
+      "dataset": "hostile",
+      "question": "What is the distribution of the cat values?",
+      "category": "categorical_distribution",
+      "expected": "bar, groupby=cat, agg=count",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "cat",
+      "y_axis": "count",
+      "transform": {
+        "groupby": "cat",
+        "series": null,
+        "agg": "count",
+        "filter": null,
+        "sort": "value_desc",
+        "limit": null
+      },
+      "insight": "The highest value belongs to 5e (8.0); the lowest is 6 (6.0).",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "hostile",
+      "question": "How many records are there for each cat?",
+      "category": "categorical_distribution",
+      "expected": "same, phrased as a count",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "cat",
+      "y_axis": "count",
+      "transform": {
+        "groupby": "cat",
+        "series": null,
+        "agg": "count",
+        "filter": null,
+        "sort": "value_desc",
+        "limit": null
+      },
+      "insight": "The highest value belongs to 5e (8.0); the lowest is 6 (6.0).",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "hostile",
+      "question": "Compare the total count by cat.",
+      "category": "reserved_word_column",
+      "expected": "the column is literally named 'count' \u2014 must not be confused with the count aggregation",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "cat",
+      "y_axis": "count",
+      "transform": {
+        "groupby": "cat",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "value_desc",
+        "limit": null
+      },
+      "insight": "The highest value belongs to 5e (68.0); the lowest is 6 (54.0).",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "hostile",
+      "question": "How did the amount change over time?",
+      "category": "non_english_column",
+      "expected": "the date column is named 'tarih'",
+      "ok": false,
+      "error": "agent='data_analyst' error_type='invalid_llm_output' detail=\"Unknown column(s): ['date']. Use only columns from the schema.\" recoverable=False"
+    },
+    {
+      "dataset": "hostile",
+      "question": "Is there a relationship between amount and score?",
+      "category": "missing_values",
+      "expected": "score has NaNs \u2014 correlation must handle them, not crash",
+      "ok": true,
+      "chart_type": "scatter",
+      "x_axis": "amount",
+      "y_axis": "score",
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "insight": "The relationship between amount and score is strong and positive, with r=0.836 over 10 rows.",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": [
+        "4 row(s) dropped for missing values; only 10 rows remain after dropping missing values; the correlation is unreliable"
+      ]
+    },
+    {
+      "dataset": "hostile",
+      "question": "What is the distribution of the active flag?",
+      "category": "boolean_column",
+      "expected": "boolean column, two groups",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "active",
+      "y_axis": "tarih",
+      "transform": {
+        "groupby": "active",
+        "series": "tarih",
+        "agg": "count",
+        "filter": null,
+        "sort": "value_desc",
+        "limit": null
+      },
+      "insight": "The highest value belongs to True \u00b7 2024-03-02 (2.0); the lowest is False \u00b7 2024-03-02 (1.0).",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    },
+    {
+      "dataset": "hostile",
+      "question": "What is the average amount per cat?",
+      "category": "tiny_table",
+      "expected": "very few rows \u2014 statistics are fragile, must not overstate",
+      "ok": true,
+      "chart_type": "bar",
+      "x_axis": "cat",
+      "y_axis": "amount",
+      "transform": {
+        "groupby": "cat",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": "value_desc",
+        "limit": null
+      },
+      "insight": "The highest value belongs to 6 (15.667); the lowest is 5e (12.344).",
+      "eval_passed": true,
+      "eval_issues": [],
+      "eval_warnings": []
+    }
+  ]
+}

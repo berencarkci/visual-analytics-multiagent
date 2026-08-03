@@ -1,7 +1,7 @@
-"""Prompt templates for the prompt-only baseline.
+"""Prompt templates for the prompt only baseline.
 
-This file is the prompt-only experimental arm. 
-It may be iterated on the dev split, but must be frozen before the final test-split runs and must not change afterwards. 
+This file is the prompt only experimental arm. 
+It may be iterated on the dev split, but must be frozen before the final test split runs and must not change afterwards. 
 Few shot examples use fictional schemas so no model configuration gets prior exposure to the project datasets.
 """
 
@@ -38,7 +38,7 @@ Chart selection rules:
 Return ONLY the JSON object. No explanations, no markdown fences."""
 #################################
 
-# Few shot examples (fictional schemas, one per chart type, 6 total):
+# Few shot examples (fictional schemas, one per chart type):
 FEW_SHOT_EXAMPLES = [
     {
         "schema": (
@@ -117,4 +117,111 @@ def build_messages(schema_summary: str, question: str) -> list[dict]:
         messages.append({"role": "assistant", "content": ex["answer"]})
     messages.append({"role": "user", "content": f"{schema_summary}\n\nQuestion: {question}"})
     return messages
+#################################
+
+
+# MULTI-AGENT PROMPTS
+#
+# Every prompt any agent sends to the model lives in this file (single source of truth). 
+# Unlike the frozen baseline prompt above, these may still be iterated during development, they freeze before the final test split runs.
+
+# Supervisor: intent classification:
+INTENT_SYSTEM = """Classify a data analytics question into exactly one intent label.
+Return ONLY a JSON object: {"intent": "<label>"}
+
+Labels:
+- trend: change over time
+- comparison: compare a metric across categories
+- composition: part-to-whole share / mix
+- relationship: association between two numeric variables
+- distribution: how values of one variable are spread
+- filter_aggregation: aggregate over a filtered subset (e.g. one year, one region, one category or segment, an age or time-of-day window, top/bottom N)
+- anomaly: unusual values, outliers, spikes
+
+A subset named as a modifier is still a filter: "of the Furniture category", "for corporate customers", "older than 40", "at night" all mean filter_aggregation, even when the verb says compare, evolve or how much.
+
+Examples:
+Q: "How did monthly sales change?" -> {"intent": "trend"}
+Q: "Which region has the highest profit?" -> {"intent": "comparison"}
+Q: "Compare the monthly profit of the Furniture category." -> {"intent": "filter_aggregation"}
+Q: "How did orders for corporate customers evolve?" -> {"intent": "filter_aggregation"}
+Q: "Were there any strange spikes in usage?" -> {"intent": "anomaly"}"""
+
+
+# Data Analyst: transform planning (data preparation only):
+PLAN_SYSTEM = """You plan data preparation for an analytics question. Given a table schema and a question, return ONLY a JSON object:
+
+{
+  "target_columns": [source column names needed to answer the question],
+  "transform": {
+    "groupby": column or derived expression like "month(col)", "day(col)", "bins(col)", "hour_of_day(col)", "weekend_flag(col)", "threshold_flag(col, number)", or null,
+    "series": a SECOND grouping column, or null,
+    "agg": "sum" | "mean" | "count" | "count_distinct" | null,
+    "filter": pandas-query condition string, or null,
+    "sort": "date_asc" | "date_desc" | "value_asc" | "value_desc" | null,
+    "limit": integer or null
+  }
+}
+
+Rules:
+- Use ONLY column names that exist in the schema.
+- threshold_flag(col, number) splits the rows in two at that value. Use it when the question compares a condition AGAINST the rest ("on days when temperature was below 5 versus other days") — a filter would keep one side and lose the comparison.
+- series adds a second grouping dimension ("profit per ship mode, broken down by segment"): groupby goes on the axis, series becomes the colour. target_columns still lists the axis column and the MEASURE being aggregated — never put the series column there. For that example: target_columns ["ship_mode", "profit"], groupby "ship_mode", series "segment".
+- Leave series null unless the question genuinely names two breakdowns. One breakdown plus a filter is not two dimensions, and neither is a single ranking: "share of sales by region", "distribution of categories" and "relationship between A and B" all take series null.
+- Do NOT choose a chart type. Do NOT write insights. Data preparation only.
+- Relationship questions between two raw numeric columns need no groupby/agg.
+- Distribution questions on a numeric column need no groupby/agg.
+- Share/composition questions about ONE specific category (e.g. "share of X"): do NOT filter to that category. Group by the category column over the WHOLE data; the share is computed from all groups.
+- filter is a pandas query string, not SQL: use `and` / `or` / `not` in lower case, `==` for equality, quotes around text values, and year(col) for the year part of a date. Example: category == 'Furniture' and year(order_date) == 2018
+- When the question asks for a quantity that is not a column, put a derived measure in target_columns as the SECOND entry: days_between(start_col, end_col) for durations, ratio(a, b) for margins or per-unit values, diff(a, b) for differences. Example for average delivery time by category: "target_columns": ["category", "days_between(order_date, ship_date)"], with agg "mean".
+- sort direction follows the question: value_desc for "highest / top", value_asc for "lowest / worst / losing money", date_asc for a timeline, date_desc for "most recent first"."""
+
+
+# Visualization Agent: chart choice only:
+VIZ_SYSTEM = """You choose the best chart for an analytics question. You are given the question, its intent, a short summary of the ALREADY PREPARED data, and the list of allowed chart types for this intent.
+
+Return ONLY a JSON object: {"chart_type": "<one of the allowed types>", "reason": "<one short sentence>"}
+
+Do NOT plan data transformations. Do NOT write insights. Chart choice only."""
+
+
+# Insight Agent: grounded statement from computed statistics:
+INSIGHT_SYSTEM = """You write ONE short data insight (1-2 sentences) answering the question, using ONLY the numbers and labels in the provided statistics. 
+
+Rules:
+- Every number you mention MUST appear in the statistics. Do not compute new numbers, do not round differently, do not invent values.
+- No speculation ("might", "suggests a potential"), no claims beyond the statistics.
+- Return ONLY a JSON object: {"insight": "<your sentence(s)>"}"""
+
+
+# SFT training: short system prompt (no few shots):
+SFT_SYSTEM = """You are a visual analytics assistant. Given a table schema and a question, return ONLY a JSON object:
+{"chart_type": "bar"|"line"|"scatter"|"pie"|"histogram"|"box", "x_axis": <source column>, "y_axis": <source column or null>, "transform": {"groupby": <column, derived expression like month(col)/day_of_week(col)/bins(col)/hour_of_day(col)/weekend_flag(col)/threshold_flag(col, number), or null>, "series": <second grouping column, or null>, "agg": "sum"|"mean"|"count"|"count_distinct"|null, "filter": <pandas query or null>, "sort": "date_asc"|"date_desc"|"value_asc"|"value_desc"|null, "limit": <int or null>}, "reason": <one sentence>, "insight": <one sentence describing what the chart shows>}
+
+Rules: use only columns from the schema; x_axis is always the source column (never a derived label); the insight must not state numbers you cannot compute from the schema.
+filter is a pandas query, not SQL: lower case `and`/`or`, `==` for equality, quotes around text, year(col) for the year part.
+y_axis may be days_between(a, b), ratio(a, b) or diff(a, b) when the question asks for a duration, margin or difference.
+sort: value_desc for "highest", value_asc for "lowest/worst", date_asc for a timeline, date_desc for "most recent first".
+threshold_flag(col, number) splits rows in two at that value — use it for "when X is above/below N versus the rest", where a filter would drop the comparison group.
+series adds a second grouping dimension (grouped bars, one line per value): the y_axis still names the measure, never the series column. Leave series null unless the question names two breakdowns — a filter, a share question or a relationship is one dimension, not two."""
+
+#################################
+
+
+# Retry feedback (Evaluation Agent -> the blamed agent):
+#
+# Inference runs greedy, so a retry that resends the identical prompt is guaranteed to reproduce the rejected answer. 
+# The reviewer's reason is the only thing that can change the outcome, so it is fed back into the prompt.
+REVIEW_FEEDBACK = ("A previous attempt was rejected by the reviewer for this reason: {issues}\n"
+                   "{hint}"
+                   "Produce a corrected answer that specifically fixes it.")
+
+# Rule specific corrective hints. 
+# Echoing the reviewer's complaint tells the model that something is wrong but not what to do differently, and a 3B model rarely infers the corrective move on its own, so the move is spelled out per rule.
+RETRY_HINTS = {
+    "stats_health": ("A correlation needs two NUMERIC columns. If one of them is categorical, do not correlate: compare the numeric column across that column's groups instead.\n"),
+    "chart_intent_fit": "Choose a chart type from the allowed list for this intent.\n",
+    "insight_grounded": "State only numbers that literally appear in the statistics.\n",
+    "composition_integrity": ("A share question needs every group; do not filter down to a single category.\n"),
+}
 #################################

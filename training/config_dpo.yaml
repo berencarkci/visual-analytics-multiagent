@@ -1,0 +1,54 @@
+# DPO configuration (Task B4/T3)
+#
+# Trains on top of the multi-task SFT adapter, not the base model: DPO is a
+# correction to what SFT established, and the reference distribution it stays
+# close to has to be that same starting point.
+
+# --- Model ---
+base_model: Qwen/Qwen2.5-3B-Instruct
+sft_adapter: berencarkci/qwen2.5-3b-va-sft-v2
+
+# --- Data ---
+train_file: data/dpo/dpo_train.jsonl
+val_ratio: 0.10                 # stratified by output format
+max_length: 1536                # prompt + completion
+max_prompt_length: 1280         # the plan prompts carry the full table schema
+
+# --- Quantisation (same as SFT: free T4 has no bf16) ---
+load_in_4bit: true
+bnb_4bit_quant_type: nf4
+bnb_4bit_compute_dtype: float16
+bnb_4bit_use_double_quant: true
+
+# --- DPO ---
+# beta controls how far the policy may move from the reference. 0.1 is the
+# common default: lower lets the model change more but risks drifting off the
+# behaviour SFT taught, higher makes the run almost a no-op.
+beta: 0.1
+
+# --- Training ---
+# Forty times smaller than the SFT learning rate. Preference data is a
+# correction, not a curriculum: 430 pairs at 2e-4 would overwrite what 1884 SFT
+# examples established. Two epochs on a set this small; more invites memorising.
+num_train_epochs: 2
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 4  # effective batch 8
+learning_rate: 5.0e-6
+lr_scheduler_type: cosine
+warmup_ratio: 0.1
+max_grad_norm: 0.3
+optim: paged_adamw_8bit
+gradient_checkpointing: true
+logging_steps: 5
+eval_strategy: epoch
+save_strategy: epoch
+save_total_limit: 2
+load_best_model_at_end: true
+metric_for_best_model: eval_loss
+greater_is_better: false
+seed: 42
+
+# --- Output ---
+output_dir: outputs/dpo-qwen2.5-3b
+hub_model_id: berencarkci/qwen2.5-3b-va-dpo
+push_to_hub: false

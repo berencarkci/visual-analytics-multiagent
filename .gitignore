@@ -14,7 +14,7 @@ checkpoints/
 wandb/
 mlruns/
 docs/project_journal.md
-docs/training.md
+logs/
 
 # Ortam / IDE
 .env

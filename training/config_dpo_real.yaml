@@ -1,0 +1,59 @@
+# DPO on observed model errors only (Task B4/T3, second run)
+#
+# The first run used all 430 pairs, 270 of them synthetic corruptions, and moved
+# nothing: reward accuracy reached 0.975 but intent accuracy went 33/38 -> 32/38
+# and the capability probe stayed at 5/8. One explanation is that a synthetic
+# negative teaches "correct answer vs obvious nonsense", a distinction the model
+# already makes, so the gradient carries little information.
+#
+# This run keeps only the negatives the models actually produced (base and
+# SFT-at-temperature) and drops every synthetic pair. Everything else is held
+# fixed — same beta, same learning rate, same reference adapter — so the
+# comparison isolates one variable: does a real mistake make a better negative
+# than a manufactured one?
+#
+# Only the epoch count changes, to keep the number of optimiser steps in the
+# same range as the first run (97) despite the smaller set.
+
+# --- Model ---
+base_model: Qwen/Qwen2.5-3B-Instruct
+sft_adapter: berencarkci/qwen2.5-3b-va-sft-v2
+
+# --- Data ---
+train_file: data/dpo/dpo_train_real.jsonl     # synthetic pairs removed
+val_ratio: 0.10
+max_length: 1536
+max_prompt_length: 1280
+
+# --- Quantisation ---
+load_in_4bit: true
+bnb_4bit_quant_type: nf4
+bnb_4bit_compute_dtype: float16
+bnb_4bit_use_double_quant: true
+
+# --- DPO (unchanged from the first run, on purpose) ---
+beta: 0.1
+learning_rate: 5.0e-6
+
+# --- Training ---
+num_train_epochs: 4             # 160 pairs -> ~72 steps, close to the first run
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 4
+lr_scheduler_type: cosine
+warmup_ratio: 0.1
+max_grad_norm: 0.3
+optim: paged_adamw_8bit
+gradient_checkpointing: true
+logging_steps: 5
+eval_strategy: epoch
+save_strategy: epoch
+save_total_limit: 2
+load_best_model_at_end: true
+metric_for_best_model: eval_loss
+greater_is_better: false
+seed: 42
+
+# --- Output ---
+output_dir: outputs/dpo-real-qwen2.5-3b
+hub_model_id: berencarkci/qwen2.5-3b-va-dpo-real
+push_to_hub: false

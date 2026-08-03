@@ -1,0 +1,302 @@
+{
+  "adapter": "berencarkci/qwen2.5-3b-va-sft-v4",
+  "rows": [
+    {
+      "group": "B",
+      "dataset": "retail",
+      "question": "Show profit per ship mode, broken down by segment.",
+      "expected": "groupby=ship_mode, series=segment",
+      "ok": true,
+      "chart": "bar",
+      "x": "ship_mode",
+      "y": null,
+      "transform": {
+        "groupby": "ship_mode",
+        "series": "segment",
+        "agg": "sum",
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "insight": "The largest share goes to Standard Class \u00b7 Consumer at 30.9%, with Same Day \u00b7 Consumer the smallest.",
+      "intent": "composition",
+      "notes": [
+        "plan guardrail: 'segment' removed from target_columns \u2014 it is the series dimension, not a measure",
+        "agg sum->count: 'ship_mode' is not numeric"
+      ],
+      "eval_passed": true,
+      "eval_issues": []
+    },
+    {
+      "group": "B",
+      "dataset": "retail",
+      "question": "What is the average profit of each ship mode divided by segment?",
+      "expected": "same; this phrasing failed on the NLV corpus",
+      "ok": false,
+      "error": "missing_column: cannot compute y axis 'ratio(profit, segment)': operation 'rtruediv' not supported for dtype 'str' with dtype 'float64'",
+      "intent": "comparison",
+      "notes": null
+    },
+    {
+      "group": "B",
+      "dataset": "retail",
+      "question": "Compare sales by region for each product category.",
+      "expected": "groupby=region, series=category (or the reverse)",
+      "ok": true,
+      "chart": "bar",
+      "x": "region",
+      "y": "sales",
+      "transform": {
+        "groupby": "region",
+        "series": "category",
+        "agg": "sum",
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "insight": "The highest value belongs to East \u00b7 Technology (264973.981); the lowest is South \u00b7 Furniture (117298.684).",
+      "intent": "comparison",
+      "notes": [
+        "plan guardrail: 'category' removed from target_columns \u2014 it is the series dimension, not a measure"
+      ],
+      "eval_passed": true,
+      "eval_issues": []
+    },
+    {
+      "group": "B",
+      "dataset": "retail",
+      "question": "Show the monthly sales for each region.",
+      "expected": "groupby=month(order_date), series=region",
+      "ok": true,
+      "chart": "bar",
+      "x": "region",
+      "y": "sales",
+      "transform": {
+        "groupby": "month(region)",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "date_asc",
+        "limit": null
+      },
+      "insight": "South leads with 22,638.48; Central is lowest at 0.444.",
+      "intent": "comparison",
+      "notes": [
+        "groupby skipped (month(region)): Unknown datetime string format, unable to parse: South"
+      ],
+      "eval_passed": true,
+      "eval_issues": []
+    },
+    {
+      "group": "B",
+      "dataset": "retail",
+      "question": "Break the order counts down by segment and ship mode.",
+      "expected": "two dimensions, agg=count",
+      "ok": true,
+      "chart": "bar",
+      "x": "segment",
+      "y": null,
+      "transform": {
+        "groupby": "segment",
+        "series": "ship_mode",
+        "agg": "count",
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "insight": "The largest share goes to Consumer \u00b7 Standard Class at 30.9%, with Home Office \u00b7 Same Day the smallest.",
+      "intent": "composition",
+      "notes": [
+        "plan guardrail: 'ship_mode' removed from target_columns \u2014 it is the series dimension, not a measure"
+      ],
+      "eval_passed": true,
+      "eval_issues": []
+    },
+    {
+      "group": "B",
+      "dataset": "mall",
+      "question": "How does spending score differ by gender across age groups?",
+      "expected": "groupby=bins(age), series=gender",
+      "ok": true,
+      "chart": "bar",
+      "x": "gender",
+      "y": "spending_score",
+      "transform": {
+        "groupby": "bins(age)",
+        "series": null,
+        "agg": "mean",
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "insight": "Across 5 groups, (28.4, 38.8] tops the ranking at 61.206.",
+      "intent": "comparison",
+      "notes": [],
+      "eval_passed": true,
+      "eval_issues": []
+    },
+    {
+      "group": "B",
+      "dataset": "energy",
+      "question": "Show the appliance use by day of week, split by weekend versus weekday.",
+      "expected": "groupby=day_of_week(date), series=weekend_flag(date)",
+      "ok": true,
+      "chart": "bar",
+      "x": "date",
+      "y": "appliances",
+      "transform": {
+        "groupby": "day_of_week(date)",
+        "series": "weekend_flag(date)",
+        "agg": "mean",
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "insight": "Across 7 groups, Monday \u00b7 weekday tops the ranking at 111.451.",
+      "intent": "comparison",
+      "notes": [],
+      "eval_passed": true,
+      "eval_issues": []
+    },
+    {
+      "group": "E",
+      "dataset": "mall",
+      "question": "What is the distribution of ages?",
+      "expected": "histogram, no groupby",
+      "ok": true,
+      "chart": "histogram",
+      "x": "age",
+      "y": null,
+      "transform": {
+        "groupby": null,
+        "series": null,
+        "agg": null,
+        "filter": null,
+        "sort": null,
+        "limit": null
+      },
+      "insight": "The distribution of age has a median of 36.0 and a mean of 38.85, spanning 18.0 to 70.0.",
+      "intent": "distribution",
+      "notes": [],
+      "eval_passed": true,
+      "eval_issues": []
+    },
+    {
+      "group": "E",
+      "dataset": "retail",
+      "question": "What is the distribution of the category values?",
+      "expected": "bar, groupby=category, agg=count",
+      "ok": true,
+      "chart": "bar",
+      "x": "category",
+      "y": null,
+      "transform": {
+        "groupby": "category",
+        "series": "order_id",
+        "agg": "count",
+        "filter": null,
+        "sort": "value_desc",
+        "limit": null
+      },
+      "insight": "The highest value belongs to Office Supplies \u00b7 CA-2017-165330 (8.0); the lowest is Office Supplies \u00b7 CA-2018-148929 (1.0).",
+      "intent": "distribution",
+      "notes": [
+        "plan guardrail: 'order_id' removed from target_columns \u2014 it is the series dimension, not a measure"
+      ],
+      "eval_passed": true,
+      "eval_issues": []
+    },
+    {
+      "group": "E",
+      "dataset": "retail",
+      "question": "Which sub-categories are not profitable?",
+      "expected": "sort=value_asc",
+      "ok": true,
+      "chart": "bar",
+      "x": "sub_category",
+      "y": "profit",
+      "transform": {
+        "groupby": "sub_category",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "value_asc",
+        "limit": 10
+      },
+      "insight": "The weakest group is Tables at -17725.481, while the strongest is Appliances with 18138.005.",
+      "intent": "filter_aggregation",
+      "notes": [],
+      "eval_passed": true,
+      "eval_issues": []
+    },
+    {
+      "group": "E",
+      "dataset": "retail",
+      "question": "What share of Technology sales comes from each region?",
+      "expected": "filter=Technology, groupby=region",
+      "ok": true,
+      "chart": "pie",
+      "x": "region",
+      "y": "sales",
+      "transform": {
+        "groupby": "region",
+        "series": "category",
+        "agg": "sum",
+        "filter": "category == 'Technology'",
+        "sort": null,
+        "limit": null
+      },
+      "insight": "The largest share goes to East \u00b7 Technology at 31.7%, with South \u00b7 Technology the smallest.",
+      "intent": "composition",
+      "notes": [],
+      "eval_passed": true,
+      "eval_issues": []
+    },
+    {
+      "group": "E",
+      "dataset": "retail",
+      "question": "Compare total sales across product categories.",
+      "expected": "plain comparison",
+      "ok": true,
+      "chart": "bar",
+      "x": "category",
+      "y": "sales",
+      "transform": {
+        "groupby": "category",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "value_desc",
+        "limit": null
+      },
+      "insight": "The highest value belongs to Technology (836154.033); the lowest is Office Supplies (719047.032).",
+      "intent": "comparison",
+      "notes": [],
+      "eval_passed": true,
+      "eval_issues": []
+    },
+    {
+      "group": "E",
+      "dataset": "energy",
+      "question": "Identify days with unusually high total appliance consumption.",
+      "expected": "anomaly",
+      "ok": true,
+      "chart": "line",
+      "x": "date",
+      "y": "appliances",
+      "transform": {
+        "groupby": "day(date)",
+        "series": null,
+        "agg": "sum",
+        "filter": null,
+        "sort": "date_asc",
+        "limit": null
+      },
+      "insight": "The IQR bounds are 473.333 and 4016.664; 4 values break them, led by 2016-04-04 00:00:00 (4524.999).",
+      "intent": "anomaly",
+      "notes": [],
+      "eval_passed": true,
+      "eval_issues": []
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+# Multi-task SFT + QLoRA configuration — v5
+#
+# ONE adapter over five output formats (single-call, Supervisor, Data Analyst,
+# Visualization, Insight).
+#
+# v5 adds two mechanisms to the engine and teaches them here: threshold_flag
+# (a numeric condition compared against the rest, where a filter would drop the
+# comparison group) and series (a second grouping dimension). Both banks ship
+# with contrast twins, because the diagnostic sweep showed the failure mode is
+# over-triggering — documenting a rule in the prompt taught the model to reach
+# for it everywhere, exactly as the anomaly and intent-modifier banks did.
+
+# Base model
+base_model: Qwen/Qwen2.5-3B-Instruct
+
+# Data
+train_file: data/sft_agents_train.jsonl
+val_ratio: 0.10 # stratified by output format, not just source
+max_seq_length: 1536
+
+# QLoRA (4-bit base)
+load_in_4bit: true
+bnb_4bit_quant_type: nf4
+bnb_4bit_compute_dtype: float16
+bnb_4bit_use_double_quant: true
+
+# LoRA
+# Same rank as the single task run so the two adapters stay comparable, four formats in one adapter is exactly the capacity question this run answers.
+lora_r: 16
+lora_alpha: 32
+lora_dropout: 0.05
+lora_target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+
+# Training
+# Three epochs rather than four: the set is 4x larger, so each epoch already sees far more gradient steps than the single task run did.
+num_train_epochs: 3
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 4
+learning_rate: 2.0e-4
+lr_scheduler_type: cosine
+warmup_ratio: 0.03
+weight_decay: 0.0
+max_grad_norm: 0.3
+optim: paged_adamw_8bit
+gradient_checkpointing: true
+logging_steps: 10
+eval_strategy: epoch
+save_strategy: epoch
+save_total_limit: 2
+load_best_model_at_end: true
+metric_for_best_model: eval_loss
+greater_is_better: false
+seed: 42
+
+# Output
+output_dir: outputs/sft-agents-v5-qwen2.5-3b
+hub_model_id: berencarkci/qwen2.5-3b-va-sft-v5
+push_to_hub: false

@@ -1,0 +1,57 @@
+# SFT + QLoRA training configuration
+# Every knob lives here so a run is fully described by this file + the seed.
+# The run report written next to the checkpoint records which config produced it.
+
+# Base model
+base_model: Qwen/Qwen2.5-3B-Instruct
+
+# Data
+train_file: data/sft_train.jsonl
+val_ratio: 0.10 # held out from the SFT set only, the 60 question benchmark is never touched here
+max_seq_length: 1024 # longest training example measured ~620 tokens
+
+# QLoRA (4-bit base)
+# T4 / P100 GPUs do not support bf16, so compute dtype is float16 and the base model is quantized to 4-bit NF4: ~2 GB instead of ~6 GB, leaving headroom for activations. 
+# The adapter itself stays in fp16 and is merged into an fp16 base after training, so inference quality is unaffected by quantization.
+load_in_4bit: true
+bnb_4bit_quant_type: nf4
+bnb_4bit_compute_dtype: float16
+bnb_4bit_use_double_quant: true
+
+# LoRA
+lora_r: 16
+lora_alpha: 32
+lora_dropout: 0.05
+lora_target_modules: # all linear projections (attention + MLP)
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+
+# Training
+num_train_epochs: 4
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 4  # effective batch size 8
+learning_rate: 2.0e-4
+lr_scheduler_type: cosine
+warmup_ratio: 0.03
+weight_decay: 0.0
+max_grad_norm: 0.3
+optim: paged_adamw_8bit
+gradient_checkpointing: true
+logging_steps: 5
+eval_strategy: epoch
+save_strategy: epoch
+save_total_limit: 2
+load_best_model_at_end: true
+metric_for_best_model: eval_loss
+greater_is_better: false
+seed: 42
+
+# --- Output ---
+output_dir: outputs/sft-qwen2.5-3b
+hub_model_id: berencarkci/qwen2.5-3b-va-sft
+push_to_hub: false              # --push overrides this on the command line
